@@ -1,110 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
 
-<!DOCTYPE html>
-<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
-<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
-<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
-<head>
-  <meta charset="utf-8">
-  <title>Chris Eldredge</title>
-  <meta name="author" content="Chris Eldredge">
-
-  
-  <meta name="description" content="(Get the source code at https://github.com/themotleyfool/NuGet) Last time I wrote about creating a LINQ provider for Lucene.Net, and today I&#8217;ll &hellip;">
-  
-
-  <!-- http://t.co/dKP3o1e -->
-  <meta name="HandheldFriendly" content="True">
-  <meta name="MobileOptimized" content="320">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-
-  
-  <link rel="canonical" href="http://chriseldredge.github.com/">
-  <link href="/favicon.png" rel="icon">
-  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
-  <script src="/javascripts/modernizr-2.0.js"></script>
-  <script src="/javascripts/ender.js"></script>
-  <script src="/javascripts/octopress.js" type="text/javascript"></script>
-  <link href="/atom.xml" rel="alternate" title="Chris Eldredge" type="application/atom+xml">
-  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
-<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
-<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
-
-  
-  <script type="text/javascript">
-    var _gaq = _gaq || [];
-    _gaq.push(['_setAccount', 'UA-30472598-1']);
-    _gaq.push(['_trackPageview']);
-
-    (function() {
-      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-    })();
-  </script>
-
-
-</head>
-
-<body   >
-  <header role="banner"><hgroup>
-  <h1><a href="/">Chris Eldredge</a></h1>
-  
-</hgroup>
-
-</header>
-  <nav role="navigation"><ul class="subscription" data-subscription="rss">
-  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
-  
-</ul>
-  
-<form action="http://google.com/search" method="get">
-  <fieldset role="search">
-    <input type="hidden" name="q" value="site:chriseldredge.github.com" />
-    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
-  </fieldset>
-</form>
-  
-<ul class="main-navigation">
-  <li><a href="/">Blog</a></li>
-  <li><a href="/about/">About</a></li>
-  <li><a href="/blog/archives">Archives</a></li>
-</ul>
-
-</nav>
-  <div id="main">
-    <div id="content">
-      <div class="blog-index">
-  
-  
-  
-    <article>
-      
-  <header>
+  <title><![CDATA[Chris Eldredge]]></title>
+  <link href="http://chriseldredge.github.com/atom.xml" rel="self"/>
+  <link href="http://chriseldredge.github.com/"/>
+  <updated>2012-07-13T13:31:16-07:00</updated>
+  <id>http://chriseldredge.github.com/</id>
+  <author>
+    <name><![CDATA[Chris Eldredge]]></name>
     
-      <h1 class="entry-title"><a href="/blog/2012/07/03/Speeding-Up-NuGet-Server/">Speeding Up NuGet.Server</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
 
   
-
-
-<time datetime="2012-07-03T00:00:00-07:00" pubdate data-updated="true">Jul 3<span>rd</span>, 2012</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p><em>(Get the source code at <a href="https://github.com/themotleyfool/NuGet">https://github.com/themotleyfool/NuGet</a>)</em></p>
+  <entry>
+    <title type="html"><![CDATA[Speeding Up NuGet.Server]]></title>
+    <link href="http://chriseldredge.github.com/blog/2012/07/03/Speeding-Up-NuGet-Server/"/>
+    <updated>2012-07-03T00:00:00-07:00</updated>
+    <id>http://chriseldredge.github.com/blog/2012/07/03/Speeding-Up-NuGet-Server</id>
+    <content type="html"><![CDATA[<p><em>(Get the source code at <a href="https://github.com/themotleyfool/NuGet">https://github.com/themotleyfool/NuGet</a>)</em></p>
 
 <p>Last time I wrote about creating a LINQ provider for Lucene.Net, and today I&#8217;ll talk about integrating that provider
 with NuGet. The existing server part of the NuGet codebase is a drop-in replacement for using local file-system based
@@ -186,42 +100,15 @@ have proven to be worth the investment.</p>
 OSS projects that attempt to do what it does, but I think it is already one of the best.</p>
 
 <p>Binaries of NuGet.Server + Lucene can be downloaded from <a href="https://github.com/themotleyfool/NuGet/downloads">https://github.com/themotleyfool/NuGet/downloads</a>.</p>
-</div>
+]]></content>
+  </entry>
   
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2012/05/08/Introducing-Linq-to-Lucene/">Introducing LINQ to Lucene</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-05-08T00:00:00-07:00" pubdate data-updated="true">May 8<span>th</span>, 2012</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p><em>(Get the source code at <a href="https://github.com/themotleyfool/Lucene.Net.Linq">https://github.com/themotleyfool/Lucene.Net.Linq</a>)</em></p>
+  <entry>
+    <title type="html"><![CDATA[Introducing LINQ to Lucene]]></title>
+    <link href="http://chriseldredge.github.com/blog/2012/05/08/Introducing-Linq-to-Lucene/"/>
+    <updated>2012-05-08T00:00:00-07:00</updated>
+    <id>http://chriseldredge.github.com/blog/2012/05/08/Introducing-Linq-to-Lucene</id>
+    <content type="html"><![CDATA[<p><em>(Get the source code at <a href="https://github.com/themotleyfool/Lucene.Net.Linq">https://github.com/themotleyfool/Lucene.Net.Linq</a>)</em></p>
 
 <p>For the last several weeks I&#8217;ve been working with <a href="http://octopusdeploy.com/">OctopusDeploy</a>, a new one-click deployment
 system for .net applications and websites. The way you get your software into Octopus is by publishing packages to
@@ -344,42 +231,15 @@ and <a href="http://www.apache.org/licenses/LICENSE-2.0">Apache License</a>.</p>
 <p>Get the source code at <a href="https://github.com/themotleyfool/Lucene.Net.Linq">https://github.com/themotleyfool/Lucene.Net.Linq</a>.</p>
 
 <p>Up next: releasing a blazingly fast NuGet feed.</p>
-</div>
+]]></content>
+  </entry>
   
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2012/04/19/Lucene-NumericField-Gotcha/">Lucene NumericField Gotcha</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-04-19T00:00:00-07:00" pubdate data-updated="true">Apr 19<span>th</span>, 2012</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>Today I ran into an interesting problem using
+  <entry>
+    <title type="html"><![CDATA[Lucene NumericField Gotcha]]></title>
+    <link href="http://chriseldredge.github.com/blog/2012/04/19/Lucene-NumericField-Gotcha/"/>
+    <updated>2012-04-19T00:00:00-07:00</updated>
+    <id>http://chriseldredge.github.com/blog/2012/04/19/Lucene-NumericField-Gotcha</id>
+    <content type="html"><![CDATA[<p>Today I ran into an interesting problem using
 <a href="https://svn.apache.org/repos/asf/incubator/lucene.net/trunk/src/core/Document/NumericField.cs">NumericField</a>.</p>
 
 <p>The issue is that when a document is retrieved, fields encoded using NumericField come back as plain old
@@ -393,42 +253,15 @@ others alone, any unmodified field that was previously a NumericField reverts to
 
 <p>Long story short, if your documents are going to take round trips and get re-indexed, you must re-encode
 any NumericFields before adding the document back to the index, even if they did not change.</p>
-</div>
+]]></content>
+  </entry>
   
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2012/03/29/Getting-Started-With-Relinq/">Getting Started With Re-linq</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-03-29T00:00:00-07:00" pubdate data-updated="true">Mar 29<span>th</span>, 2012</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h2>The IQueryable Conundrum</h2>
+  <entry>
+    <title type="html"><![CDATA[Getting Started with Re-linq]]></title>
+    <link href="http://chriseldredge.github.com/blog/2012/03/29/Getting-Started-With-Relinq/"/>
+    <updated>2012-03-29T00:00:00-07:00</updated>
+    <id>http://chriseldredge.github.com/blog/2012/03/29/Getting-Started-With-Relinq</id>
+    <content type="html"><![CDATA[<h2>The IQueryable Conundrum</h2>
 
 <p>So, you have a datasource you can access from .net and you thought, hey wouldn&#8217;t it be
 cool if I could wire this up with LINQ?</p>
@@ -479,97 +312,7 @@ at a provider that generates SQL queries is probably a little too complex of a s
 name besides &#8220;select&#8221;.  It just returns the entire collection of items in the data source.</p>
 
 <p>Up next, translating the where clause.</p>
-</div>
+]]></content>
+  </entry>
   
-  
-
-
-    </article>
-  
-  <div class="pagination">
-    
-    <a href="/blog/archives">Blog Archives</a>
-    
-  </div>
-</div>
-<aside class="sidebar">
-  
-    <section>
-  <h1>Recent Posts</h1>
-  <ul id="recent_posts">
-    
-      <li class="post">
-        <a href="/blog/2012/07/03/Speeding-Up-NuGet-Server/">Speeding Up NuGet.Server</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2012/05/08/Introducing-Linq-to-Lucene/">Introducing LINQ to Lucene</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2012/04/19/Lucene-NumericField-Gotcha/">Lucene NumericField Gotcha</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2012/03/29/Getting-Started-With-Relinq/">Getting Started with Re-linq</a>
-      </li>
-    
-  </ul>
-</section>
-
-
-<section>
-  <h1>Latest Tweets</h1>
-  <ul id="tweets">
-    <li class="loading">Status updating&#8230;</li>
-  </ul>
-  <script type="text/javascript">
-    $.domReady(function(){
-      getTwitterFeed("creldredge", 4, false);
-    });
-  </script>
-  <script src="/javascripts/twitter.js" type="text/javascript"> </script>
-  
-    <a href="http://twitter.com/creldredge" class="twitter-follow-button" data-show-count="false">Follow @creldredge</a>
-  
-</section>
-
-
-
-
-
-  
-</aside>
-
-    </div>
-  </div>
-  <footer role="contentinfo"><p>
-  Copyright &copy; 2012 - Chris Eldredge -
-  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
-</p>
-
-</footer>
-  
-
-
-
-
-
-
-
-  <script type="text/javascript">
-    (function(){
-      var twitterWidgets = document.createElement('script');
-      twitterWidgets.type = 'text/javascript';
-      twitterWidgets.async = true;
-      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
-      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
-    })();
-  </script>
-
-
-
-
-
-</body>
-</html>
+</feed>

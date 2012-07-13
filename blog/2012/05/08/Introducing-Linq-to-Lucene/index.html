@@ -5,11 +5,11 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>Chris Eldredge</title>
+  <title>Introducing LINQ to Lucene - Chris Eldredge</title>
   <meta name="author" content="Chris Eldredge">
 
   
-  <meta name="description" content="(Get the source code at https://github.com/themotleyfool/NuGet) Last time I wrote about creating a LINQ provider for Lucene.Net, and today I&#8217;ll &hellip;">
+  <meta name="description" content="(Get the source code at https://github.com/themotleyfool/Lucene.Net.Linq) For the last several weeks I&#8217;ve been working with OctopusDeploy, a &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -18,7 +18,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://chriseldredge.github.com/">
+  <link rel="canonical" href="http://chriseldredge.github.com/blog/2012/05/08/Introducing-Linq-to-Lucene/">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <script src="/javascripts/modernizr-2.0.js"></script>
@@ -73,132 +73,12 @@
 </nav>
   <div id="main">
     <div id="content">
-      <div class="blog-index">
+      <div>
+<article class="hentry" role="article">
   
-  
-  
-    <article>
-      
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2012/07/03/Speeding-Up-NuGet-Server/">Speeding Up NuGet.Server</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-07-03T00:00:00-07:00" pubdate data-updated="true">Jul 3<span>rd</span>, 2012</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p><em>(Get the source code at <a href="https://github.com/themotleyfool/NuGet">https://github.com/themotleyfool/NuGet</a>)</em></p>
-
-<p>Last time I wrote about creating a LINQ provider for Lucene.Net, and today I&#8217;ll talk about integrating that provider
-with NuGet. The existing server part of the NuGet codebase is a drop-in replacement for using local file-system based
-feeds. I wanted to try to preserve that turnkey advantage but improve the performance of various queries.</p>
-
-<p>In order to make sure that my improvements were up to snuff, I set up a private mirror of all packages on <a href="http://nuget.org/">nuget.org</a>,
-which turned out to be 44,193 packages at the time, for a total size of over 20 gigs.</p>
-
-<p>If you try hitting ~/api/v2/Packages on stock NuGet.Server, you&#8217;ll find that your request just spins and spins. And spins. In fact
-it took so long that I gave up waiting for the application to initialize. In the background, the server is finding all <code>*.nupkg</code>
-files in ~/Packages and calculating a hash of the contents. Needless to say, it can take a while to run a checksum algorithm on 20gb
-of data.</p>
-
-<p>Switching over to my custom lucene branch, the first time the site is started, it scans the Packages folder and finds all packages
-that haven&#8217;t been indexed by Lucene. The site homepage helpfully tells you the current status, such as &#8220;Indexing 2113 of 44193 new packages.&#8221;
-An ajax timer refreshes the info every few seconds so progress can be easily tracked.</p>
-
-<p>The packages don&#8217;t begin to appear in the feed until they&#8217;ve all been indexed. So this isn&#8217;t much better than stock NuGet.Server.</p>
-
-<h2>Incremental Indexing</h2>
-
-<p>The real improvements are appreciated after the initial index is built.</p>
-
-<pre><code>[celdredge@localhost]$ appcmd recycle apppool nuget
-"nuget" successfully recycled
-
-[celdredge@localhost]$ time wget -O /dev/null http://localhost/api/v2/Packages
-
-(snip)
-
-real    0m3.230s
-user    0m0.062s
-sys     0m0.125s
-</code></pre>
-
-<p>This means that you don&#8217;t have to worry much about IIS shutting down the application during idle times. The index gets loaded and ready to go
-in a matter of seconds. Vast improvement over stock NuGet.Server.</p>
-
-<p>While that happens, a background thread scans the Packages folder to see what might have changed while the application was stopped. New, modified
-and deleted packages are synchronized with the Lucene index. The sycnhronization process takes about 25 seconds to scan 44,193 package files
-split into 6,180 folders and calculate the differences with the Lucene index. That&#8217;s pretty fast.</p>
-
-<p>After the application finishes this initial scan, a FileSystemWatcher monitors the Packages folder to synchronize any changes in real time.
-This allows the index to stay in sync when new packages appear, even if they are copied into the folder instead of using <code>nuget push</code>.</p>
-
-<h2>Superfast Search</h2>
-
-<p>All sorts of complex queries are possible, and they execute in very reasonable time. I used <a href="http://www.linqpad.net/">LINQPad</a> to
-construct various test queries, like this one that finds packages whose id contain lucene but do not start with lucene:</p>
-
-<pre><code>from p in Packages
-where p.Id.Contains("Lucene")
-where !p.Id.StartsWith("Lucene")
-where p.IsLatestVersion
-orderby p.Id descending
-select p
-
-Query successful (00:00.136)
-</code></pre>
-
-<p>136ms is pretty respectable, IMO.</p>
-
-<p>Another advantage to using Lucene is how queries are analyzed. Term queries will match various word forms, so a query like <tt>build</tt> will
-match packages that use any words like build, builds, building, built, etc. It is also possible to search for phrase queries, such as
-<tt>&#8220;glue them back together&#8221;</tt>. That query matches only one package that contains the exact phrase, whereas on nuget.org you&#8217;ll get
-all kinds of results.</p>
-
-<h2>Other Features</h2>
-
-<p>The <a href="https://github.com/NuGet/NuGetGallery/wiki/Tab-Completion-API-Endpoints">Tab Completion API Endpoints</a> introduced in NuGet 2.0 have
-been implemented, bringing fast results to users of the Package Manager Console.</p>
-
-<h2>Conclusion</h2>
-
-<p>It has taken a substantial amount of time and effort to implement Lucene.Net.Linq and integrate it with NuGet.Server, but the results
-have proven to be worth the investment.</p>
-
-<p>Lucene.Net.Linq has become a fairly mature, though still nascent, project now available on <a href="http://nuget.org/packages/Lucene.Net.Linq">nuget.org</a>. There are a few other
-OSS projects that attempt to do what it does, but I think it is already one of the best.</p>
-
-<p>Binaries of NuGet.Server + Lucene can be downloaded from <a href="https://github.com/themotleyfool/NuGet/downloads">https://github.com/themotleyfool/NuGet/downloads</a>.</p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2012/05/08/Introducing-Linq-to-Lucene/">Introducing LINQ to Lucene</a></h1>
+      <h1 class="entry-title">Introducing LINQ to Lucene</h1>
     
     
       <p class="meta">
@@ -221,7 +101,7 @@ OSS projects that attempt to do what it does, but I think it is already one of t
   </header>
 
 
-  <div class="entry-content"><p><em>(Get the source code at <a href="https://github.com/themotleyfool/Lucene.Net.Linq">https://github.com/themotleyfool/Lucene.Net.Linq</a>)</em></p>
+<div class="entry-content"><p><em>(Get the source code at <a href="https://github.com/themotleyfool/Lucene.Net.Linq">https://github.com/themotleyfool/Lucene.Net.Linq</a>)</em></p>
 
 <p>For the last several weeks I&#8217;ve been working with <a href="http://octopusdeploy.com/">OctopusDeploy</a>, a new one-click deployment
 system for .net applications and websites. The way you get your software into Octopus is by publishing packages to
@@ -345,71 +225,16 @@ and <a href="http://www.apache.org/licenses/LICENSE-2.0">Apache License</a>.</p>
 
 <p>Up next: releasing a blazingly fast NuGet feed.</p>
 </div>
-  
-  
 
 
-    </article>
-  
-  
-    <article>
+  <footer>
+    <p class="meta">
       
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2012/04/19/Lucene-NumericField-Gotcha/">Lucene NumericField Gotcha</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
   
 
+<span class="byline author vcard">Posted by <span class="fn">Chris Eldredge</span></span>
 
-<time datetime="2012-04-19T00:00:00-07:00" pubdate data-updated="true">Apr 19<span>th</span>, 2012</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>Today I ran into an interesting problem using
-<a href="https://svn.apache.org/repos/asf/incubator/lucene.net/trunk/src/core/Document/NumericField.cs">NumericField</a>.</p>
-
-<p>The issue is that when a document is retrieved, fields encoded using NumericField come back as plain old
-strings.  This isn&#8217;t a problem by itself, but if you retrieve a document, modify some fields and leave
-others alone, any unmodified field that was previously a NumericField reverts to a basic string value.</p>
-
-<p>The issue is demonstrated by this sample NUnit test fixture:</p>
-
-<script src="https://gist.github.com/2425347.js"> </script>
-
-
-<p>Long story short, if your documents are going to take round trips and get re-indexed, you must re-encode
-any NumericFields before adding the document back to the index, even if they did not change.</p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
       
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2012/03/29/Getting-Started-With-Relinq/">Getting Started With Re-linq</a></h1>
-    
-    
-      <p class="meta">
-        
 
 
 
@@ -421,77 +246,34 @@ any NumericFields before adding the document back to the index, even if they did
   
 
 
-<time datetime="2012-03-29T00:00:00-07:00" pubdate data-updated="true">Mar 29<span>th</span>, 2012</time>
-        
-      </p>
+<time datetime="2012-05-08T00:00:00-07:00" pubdate data-updated="true">May 8<span>th</span>, 2012</time>
+      
+
+
+    </p>
     
-  </header>
-
-
-  <div class="entry-content"><h2>The IQueryable Conundrum</h2>
-
-<p>So, you have a datasource you can access from .net and you thought, hey wouldn&#8217;t it be
-cool if I could wire this up with LINQ?</p>
-
-<p>Maybe you&#8217;ve read about how <a href="http://blog.ploeh.dk/2012/03/26/IQueryableIsTightCoupling.aspx">IQueryable is Tight Coupling</a>,
-but you figure that you&#8217;re connecting up a low-level datasource and you&#8217;ll probably encapsulate the messy IQueryable stuff
-in your domain. So you forge ahead.</p>
-
-<p>You create a class that implements IQueryable, maybe using
-<a href="http://msdn.microsoft.com/en-us/library/bb546158.aspx">Walkthrough: Creating an IQueryable LINQ Provider</a>
-as a starting point.</p>
-
-<p>Now you&#8217;re left with an Expression object and you get to figure out what to do with it. Sure, you
-can use reflection like the MSDN example demonstrates, but some lingering doubt enters in when you
-realize how complex even the most basic statements will be to parse.</p>
-
-<p>Then maybe you find a new resource: <a href="http://blogs.msdn.com/b/mattwar/archive/2008/11/18/linq-links.aspx">LINQ: Building an IQueryable provider series</a>
-and you think, hey, only 17 massive posts to trudge through.</p>
-
-<p>Ok, so this is no work for the weary. No wonder we don&#8217;t have scads of LINQ providers floating around on codeplex.com and codeproject.com.</p>
-
-<h2>Enter re-linq</h2>
-
-<p><a href="http://relinq.codeplex.com/">re-linq</a> is an open source project that attempts to ease the burden of implementing IQueryable.</p>
-
-<p>It seems like a great project that should help you write less code, but there&#8217;s just one problem: re-linq has zero documentation.</p>
-
-<p>Their project page links to the tantalizingly friendly example <a href="http://www.codeproject.com/Articles/42059/re-linq-ishing-the-Pain-Using-re-linq-to-Implement">re-linq|ishing the Pain: Using re-linq to Implement a Powerful LINQ Provider on the Example of NHibernate</a>,
-but after you download the code you realize soon enough that the project is outdated and doesn&#8217;t even compile against re-linq 1.13.</p>
-
-<p>Alas, you have one demo project to go on as supplied in the re-linq source bundle: Linq.LinqToSqlAppender. Needlesstosay,
-this project is arguably more complex than the actual support library it builds on. For someone trying to get started, looking
-at a provider that generates SQL queries is probably a little too complex of a starting point.</p>
-
-<h2>The Bare Bones</h2>
-
-<p>Submitted for your entertainment, here lies the recipe for the most basic shell you can use to build upon re-linq.</p>
-
-<p>First, create a new c# project.  Then using Nuget or going on your own, grab a copy of Remotion.Linq
-(In the Package Manager Coneole, type <tt>Install-Package Remotion.Linq</tt>)</p>
-
-<p>One you have your project ready, here&#8217;s your code:</p>
-
-<script src="https://gist.github.com/2246429.js"> </script>
-
-
-<p>This implementation completely ignores the &#8220;where&#8221; clause, &#8220;order&#8221; clause, and any other clause you can
-name besides &#8220;select&#8221;.  It just returns the entire collection of items in the data source.</p>
-
-<p>Up next, translating the where clause.</p>
+      <div class="sharing">
+  
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://chriseldredge.github.com/blog/2012/05/08/Introducing-Linq-to-Lucene/" data-via="creldredge" data-counturl="http://chriseldredge.github.com/blog/2012/05/08/Introducing-Linq-to-Lucene/" >Tweet</a>
+  
+  
+  
 </div>
-  
-  
 
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2012/04/19/Lucene-NumericField-Gotcha/" title="Previous Post: Lucene NumericField Gotcha">&laquo; Lucene NumericField Gotcha</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2012/07/03/Speeding-Up-NuGet-Server/" title="Next Post: Speeding Up NuGet.Server">Speeding Up NuGet.Server &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
 
-    </article>
-  
-  <div class="pagination">
-    
-    <a href="/blog/archives">Blog Archives</a>
-    
-  </div>
 </div>
+
 <aside class="sidebar">
   
     <section>
@@ -521,7 +303,7 @@ name besides &#8220;select&#8221;.  It just returns the entire collection of ite
 <section>
   <h1>Latest Tweets</h1>
   <ul id="tweets">
-    <li class="loading">Status updating&#8230;</li>
+    <li class="loading">Status updating...</li>
   </ul>
   <script type="text/javascript">
     $.domReady(function(){
@@ -540,6 +322,7 @@ name besides &#8220;select&#8221;.  It just returns the entire collection of ite
 
   
 </aside>
+
 
     </div>
   </div>

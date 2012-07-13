@@ -1,0 +1,285 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Getting Started with Re-linq - Chris Eldredge</title>
+  <meta name="author" content="Chris Eldredge">
+
+  
+  <meta name="description" content="The IQueryable Conundrum So, you have a datasource you can access from .net and you thought, hey wouldn&#8217;t it be
+cool if I could wire this up &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://chriseldredge.github.com/blog/2012/03/29/Getting-Started-With-Relinq/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="/javascripts/ender.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="/atom.xml" rel="alternate" title="Chris Eldredge" type="application/atom+xml">
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-30472598-1']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Chris Eldredge</a></h1>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:chriseldredge.github.com" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/about/">About</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Getting Started With Re-linq</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-03-29T00:00:00-07:00" pubdate data-updated="true">Mar 29<span>th</span>, 2012</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><h2>The IQueryable Conundrum</h2>
+
+<p>So, you have a datasource you can access from .net and you thought, hey wouldn&#8217;t it be
+cool if I could wire this up with LINQ?</p>
+
+<p>Maybe you&#8217;ve read about how <a href="http://blog.ploeh.dk/2012/03/26/IQueryableIsTightCoupling.aspx">IQueryable is Tight Coupling</a>,
+but you figure that you&#8217;re connecting up a low-level datasource and you&#8217;ll probably encapsulate the messy IQueryable stuff
+in your domain. So you forge ahead.</p>
+
+<p>You create a class that implements IQueryable, maybe using
+<a href="http://msdn.microsoft.com/en-us/library/bb546158.aspx">Walkthrough: Creating an IQueryable LINQ Provider</a>
+as a starting point.</p>
+
+<p>Now you&#8217;re left with an Expression object and you get to figure out what to do with it. Sure, you
+can use reflection like the MSDN example demonstrates, but some lingering doubt enters in when you
+realize how complex even the most basic statements will be to parse.</p>
+
+<p>Then maybe you find a new resource: <a href="http://blogs.msdn.com/b/mattwar/archive/2008/11/18/linq-links.aspx">LINQ: Building an IQueryable provider series</a>
+and you think, hey, only 17 massive posts to trudge through.</p>
+
+<p>Ok, so this is no work for the weary. No wonder we don&#8217;t have scads of LINQ providers floating around on codeplex.com and codeproject.com.</p>
+
+<h2>Enter re-linq</h2>
+
+<p><a href="http://relinq.codeplex.com/">re-linq</a> is an open source project that attempts to ease the burden of implementing IQueryable.</p>
+
+<p>It seems like a great project that should help you write less code, but there&#8217;s just one problem: re-linq has zero documentation.</p>
+
+<p>Their project page links to the tantalizingly friendly example <a href="http://www.codeproject.com/Articles/42059/re-linq-ishing-the-Pain-Using-re-linq-to-Implement">re-linq|ishing the Pain: Using re-linq to Implement a Powerful LINQ Provider on the Example of NHibernate</a>,
+but after you download the code you realize soon enough that the project is outdated and doesn&#8217;t even compile against re-linq 1.13.</p>
+
+<p>Alas, you have one demo project to go on as supplied in the re-linq source bundle: Linq.LinqToSqlAppender. Needlesstosay,
+this project is arguably more complex than the actual support library it builds on. For someone trying to get started, looking
+at a provider that generates SQL queries is probably a little too complex of a starting point.</p>
+
+<h2>The Bare Bones</h2>
+
+<p>Submitted for your entertainment, here lies the recipe for the most basic shell you can use to build upon re-linq.</p>
+
+<p>First, create a new c# project.  Then using Nuget or going on your own, grab a copy of Remotion.Linq
+(In the Package Manager Coneole, type <tt>Install-Package Remotion.Linq</tt>)</p>
+
+<p>One you have your project ready, here&#8217;s your code:</p>
+
+<script src="https://gist.github.com/2246429.js"> </script>
+
+
+<p>This implementation completely ignores the &#8220;where&#8221; clause, &#8220;order&#8221; clause, and any other clause you can
+name besides &#8220;select&#8221;.  It just returns the entire collection of items in the data source.</p>
+
+<p>Up next, translating the where clause.</p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Chris Eldredge</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-03-29T00:00:00-07:00" pubdate data-updated="true">Mar 29<span>th</span>, 2012</time>
+      
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://chriseldredge.github.com/blog/2012/03/29/Getting-Started-With-Relinq/" data-via="creldredge" data-counturl="http://chriseldredge.github.com/blog/2012/03/29/Getting-Started-With-Relinq/" >Tweet</a>
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+      
+        <a class="basic-alignment right" href="/blog/2012/04/19/Lucene-NumericField-Gotcha/" title="Next Post: Lucene NumericField Gotcha">Lucene NumericField Gotcha &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2012/07/03/Speeding-Up-NuGet-Server/">Speeding Up NuGet.Server</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2012/05/08/Introducing-Linq-to-Lucene/">Introducing LINQ to Lucene</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2012/04/19/Lucene-NumericField-Gotcha/">Lucene NumericField Gotcha</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2012/03/29/Getting-Started-With-Relinq/">Getting Started with Re-linq</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+<section>
+  <h1>Latest Tweets</h1>
+  <ul id="tweets">
+    <li class="loading">Status updating...</li>
+  </ul>
+  <script type="text/javascript">
+    $.domReady(function(){
+      getTwitterFeed("creldredge", 4, false);
+    });
+  </script>
+  <script src="/javascripts/twitter.js" type="text/javascript"> </script>
+  
+    <a href="http://twitter.com/creldredge" class="twitter-follow-button" data-show-count="false">Follow @creldredge</a>
+  
+</section>
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2012 - Chris Eldredge -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>
