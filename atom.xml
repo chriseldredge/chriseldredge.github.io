@@ -4,7 +4,7 @@
   <title><![CDATA[Chris Eldredge]]></title>
   <link href="http://chriseldredge.github.com/atom.xml" rel="self"/>
   <link href="http://chriseldredge.github.com/"/>
-  <updated>2012-07-13T13:56:09-07:00</updated>
+  <updated>2012-07-24T09:28:29-07:00</updated>
   <id>http://chriseldredge.github.com/</id>
   <author>
     <name><![CDATA[Chris Eldredge]]></name>
@@ -12,6 +12,147 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Unit of Work & Eventual Consistency]]></title>
+    <link href="http://chriseldredge.github.com/blog/2012/07/24/Unit-of-Work-and-Eventual-Consistency/"/>
+    <updated>2012-07-24T00:00:00-07:00</updated>
+    <id>http://chriseldredge.github.com/blog/2012/07/24/Unit-of-Work-and-Eventual-Consistency</id>
+    <content type="html"><![CDATA[<p><em>Lucene.Net.Linq is available on the NuGet Gallery at <a href="http://nuget.org/packages/Lucene.Net.Linq">http://nuget.org/packages/Lucene.Net.Linq</a>.</em></p>
+
+<p>Recent versions of Lucene.Net.Linq added support for the <a href="http://martinfowler.com/eaaCatalog/unitOfWork.html">Unit of Work</a> pattern.</p>
+
+<p>The standard Unit of Work has methods like <code>registerNew</code> and <code>registerDeleted</code>, but I decided to use more generic
+names that make the interface appear more like a simple collection of documents.</p>
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='csharp'><span class='line'><span class="k">public</span> <span class="k">interface</span> <span class="n">ISession</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;</span> <span class="p">:</span> <span class="n">IDisposable</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>  <span class="n">IQueryable</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;</span> <span class="n">Query</span><span class="p">();</span>
+</span><span class='line'>  <span class="k">void</span> <span class="nf">Add</span><span class="p">(</span><span class="k">params</span> <span class="n">T</span><span class="p">[]</span> <span class="n">items</span><span class="p">);</span>
+</span><span class='line'>  <span class="k">void</span> <span class="nf">Delete</span><span class="p">(</span><span class="k">params</span> <span class="n">T</span><span class="p">[]</span> <span class="n">items</span><span class="p">);</span>
+</span><span class='line'>  <span class="k">void</span> <span class="nf">Delete</span><span class="p">(</span><span class="k">params</span> <span class="n">Query</span><span class="p">[]</span> <span class="n">items</span><span class="p">);</span>
+</span><span class='line'>  <span class="k">void</span> <span class="nf">DeleteAll</span><span class="p">();</span>
+</span><span class='line'>  <span class="k">void</span> <span class="nf">Commit</span><span class="p">();</span>
+</span><span class='line'>  <span class="k">void</span> <span class="nf">Rollback</span><span class="p">();</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>The <code>Delete</code> method that takes one or more <code>Query</code> objects is a case special to Lucene.Net. This is an escape hatch
+for when you want to delete one or more documents without first retrieving them. For example, you may want to delete all documents that
+match a query like <code>type:person</code>. I have mixed feelings about this escape hatch, because it smells like a
+<a href="http://c2.com/cgi/wiki?LeakyAbstraction">Leaky Abstraction</a>. On the other hand, since it is an overload to a more abstract method,
+I think it makes sense from a performance standpoint.</p>
+
+<p>Anyway, one notable method pair is missing from the interface: <code>registerDirty</code> and <code>registerClean</code>. That&#8217;s because
+the session does some book keeping behind the scenes to automatically detect dirty documents when the session is committed.</p>
+
+<p>This makes using Lucene.Net.Linq as a <a href="http://martinfowler.com/eaaCatalog/repository.html">Repository</a> dead simple, and makes the code
+look nice and clean in the client:</p>
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='csharp'><span class='line'><span class="k">public</span> <span class="k">void</span> <span class="nf">ChangeMailingAddress</span><span class="p">(</span><span class="kt">string</span> <span class="n">name</span><span class="p">,</span> <span class="kt">string</span> <span class="n">newAddress</span><span class="p">)</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>    <span class="kt">var</span> <span class="n">session</span> <span class="p">=</span> <span class="n">provider</span><span class="p">.</span><span class="n">OpenSession</span><span class="p">&lt;</span><span class="n">SampleDocument</span><span class="p">&gt;();</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">using</span> <span class="p">(</span><span class="n">session</span><span class="p">)</span>
+</span><span class='line'>    <span class="p">{</span>
+</span><span class='line'>      <span class="kt">var</span> <span class="n">person</span> <span class="p">=</span> <span class="n">session</span><span class="p">.</span><span class="n">Query</span><span class="p">().</span><span class="n">Single</span><span class="p">(</span><span class="n">p</span> <span class="p">=&gt;</span> <span class="n">p</span><span class="p">.</span><span class="n">Name</span> <span class="p">==</span> <span class="n">name</span><span class="p">);</span>
+</span><span class='line'>      <span class="n">person</span><span class="p">.</span><span class="n">MailingAddress</span> <span class="p">=</span> <span class="n">newAddress</span><span class="p">;</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>Document Tracking</h2>
+
+<p>So how does it work?</p>
+
+<p>When you ask for an IQueryable from session, the session attaches an instance of IRetrievedDocumentTracker to the queryable before
+returning it. That internal interface has only one method call:</p>
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='csharp'><span class='line'><span class="k">void</span> <span class="nf">TrackDocument</span><span class="p">(</span><span class="n">T</span> <span class="n">item</span><span class="p">,</span> <span class="n">T</span> <span class="n">hiddenCopy</span><span class="p">);</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>When the LuceneQueryExecutor starts returning results one item at a time, if it detects that a document tracker has been attached,
+it makes two copies of each result. One is returned to the client and the other is passed only to the tracker as a hidden copy.
+This gives the library the ability to compare pristine objects that came from the index unmodified with ones that may have been
+modified with the client.</p>
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+</pre></td><td class='code'><pre><code class='csharp'><span class='line'><span class="k">for</span> <span class="p">(</span><span class="kt">var</span> <span class="n">i</span> <span class="p">=</span> <span class="n">skipResults</span><span class="p">;</span> <span class="n">i</span> <span class="p">&lt;</span> <span class="n">hits</span><span class="p">.</span><span class="n">ScoreDocs</span><span class="p">.</span><span class="n">Length</span><span class="p">;</span> <span class="n">i</span><span class="p">++)</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>  <span class="kt">var</span> <span class="n">doc</span> <span class="p">=</span> <span class="n">hits</span><span class="p">.</span><span class="n">ScoreDocs</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">doc</span><span class="p">;</span>
+</span><span class='line'>  <span class="kt">var</span> <span class="n">score</span> <span class="p">=</span> <span class="n">hits</span><span class="p">.</span><span class="n">ScoreDocs</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">score</span><span class="p">;</span>
+</span><span class='line'>  
+</span><span class='line'>  <span class="kt">var</span> <span class="n">item</span> <span class="p">=</span> <span class="n">ConvertDocument</span><span class="p">(</span><span class="n">searcher</span><span class="p">.</span><span class="n">Doc</span><span class="p">(</span><span class="n">doc</span><span class="p">),</span> <span class="n">score</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">if</span> <span class="p">(</span><span class="n">tracker</span> <span class="p">!=</span> <span class="k">null</span><span class="p">)</span>
+</span><span class='line'>  <span class="p">{</span>
+</span><span class='line'>      <span class="kt">var</span> <span class="n">copy</span> <span class="p">=</span> <span class="n">ConvertDocument</span><span class="p">(</span><span class="n">searcher</span><span class="p">.</span><span class="n">Doc</span><span class="p">(</span><span class="n">doc</span><span class="p">),</span> <span class="n">score</span><span class="p">);</span>
+</span><span class='line'>      <span class="n">tracker</span><span class="p">.</span><span class="n">TrackDocument</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">copy</span><span class="p">);</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">itemHolder</span><span class="p">.</span><span class="n">Current</span> <span class="p">=</span> <span class="n">item</span><span class="p">;</span>
+</span><span class='line'>  <span class="k">yield</span> <span class="k">return</span> <span class="nf">projector</span><span class="p">(</span><span class="n">itemHolder</span><span class="p">.</span><span class="n">Current</span><span class="p">);</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Finally, when the session is committed, all tracked documents are compared with their hidden copies (using reflection) to detect
+which documents were modified. Modified documents are written back to the index.</p>
+
+<h2>Eventual Consistency</h2>
+
+<p>The concepts of eventual consitency describe what expectations a client may have about the ordering and visibility of writes in
+a distributed asynchronous persistence system. Werner Vogels has written about different
+<a href="http://www.allthingsdistributed.com/2008/12/eventually_consistent.html">consistency definitions</a>.</p>
+
+<p>Since the unit of work in Lucene.Net.Linq is implemented by an interface named ISession, it would have been nice to provide
+Session Consistency. It&#8217;s open to some interpretation if this behavior is achieved or not. Since the underlying Lucene engine
+will not make changes visible to an IndexReader until a commit happens and the IndexReader is reopened, it is difficult or
+impossible to allow a client to see the effects of adding, deleting or modifying a document in subsequent queries within the same
+session. However, this problem can be side-stepped by simply calling <code>Commit</code> between making changes and subsequent queries.
+Calling <code>Commit</code> explicitly may have drawbacks if the client will make further changes and wishes for those changes to
+appear atomically. Knowing the details of when staged changes become visible will help clients to make changes smartly.</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Speeding Up NuGet.Server]]></title>
