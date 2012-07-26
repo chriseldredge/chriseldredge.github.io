@@ -150,4 +150,4 @@ And using <code>--uncovert</code> will put it back. The original assembly refere
 way so MSBuild and Visual Studio will ignore it, but making it easy for us to restore it without losing metadata like HintPath
 and SpecificVersion.
 
-As long as we remember to <code>--unconvert</code> before committing, this new featuer should provide a great benefit.
+As long as we remember to <code>--unconvert</code> before committing, this new feature should provide a great benefit.
