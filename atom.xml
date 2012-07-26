@@ -4,7 +4,7 @@
   <title><![CDATA[Chris Eldredge]]></title>
   <link href="http://chriseldredge.github.com/atom.xml" rel="self"/>
   <link href="http://chriseldredge.github.com/"/>
-  <updated>2012-07-24T09:28:29-07:00</updated>
+  <updated>2012-07-26T14:13:01-04:00</updated>
   <id>http://chriseldredge.github.com/</id>
   <author>
     <name><![CDATA[Chris Eldredge]]></name>
@@ -14,9 +14,340 @@
 
   
   <entry>
+    <title type="html"><![CDATA[MSBuild, Visual Studio & NuGet Hackery]]></title>
+    <link href="http://chriseldredge.github.com/blog/2012/07/26/MSBuild-NuGet-Visual-Studio-Hackery/"/>
+    <updated>2012-07-26T00:00:00-04:00</updated>
+    <id>http://chriseldredge.github.com/blog/2012/07/26/MSBuild-NuGet-Visual-Studio-Hackery</id>
+    <content type="html"><![CDATA[<p>My team at work recently switched to using NuGet. We have a fair amount of shared code that used to be in a
+monolithic code base with all the problems that came with it. Slow builds, no concept of versions, tight coupling, etc.
+To address these issues we started migrating to a new layout where we split Framework Projects out into seperate
+repositories and publish NuGet packages for those projects. Then our Application Projects use NuGet to depend on
+the Framework Projects and we get better control of when dependencies are upgraded, faster builds and everyone is happy.</p>
+
+<p>One drawback to this migration is that we no longer have all projects in one Visual Studio solution, making it hard to
+work on writing a new feature or fixing a bug in a Framework Project and testing that change in an Application Project.
+Where we used to be able to do this seemlessly, we now have to jump through some hoops:</p>
+
+<ol>
+<li>Change Framework Project</li>
+<li>Build Framework Project</li>
+<li>Manually copy the dll to the Application Project</li>
+<li>Change Application Project to use new code (if necessary)</li>
+<li>Build Application Project</li>
+</ol>
+
+
+<p>Once the code changes are deemed acceptable, additional work is necessary to commit/push changes to other developers:</p>
+
+<ol>
+<li>Commit/Push Framework Project</li>
+<li>Wait for build server to publish a NuGet package</li>
+<li>Use NuGet to update Framwork project dependency in Application Project</li>
+<li>Commit/Push Application Project</li>
+</ol>
+
+
+<p>This multistep process obviously slows down development significantly. My mission is to find a way to cut out some
+of these manual steps so our developers can get back to writing and refactoring code instead of wrestling with tools.</p>
+
+<p><strong> SlimJim </strong></p>
+
+<p>A colleague of mine, Aaron Togerson, started a project a while back called SlimJim.
+<a href="https://github.com/AaronTorgerson/SlimJim/commits/master">SlimJim</a> is a Visual Studio Solution Generator.
+I&#8217;ve always liked the phrase &#8220;Solution Generator&#8221; despite the fact that Visual Studio solution files have
+little to do with solving actual problems.</p>
+
+<p>Anyway, SlimJim is a command-line tool that analyzes c# projects and generates a <code>.sln</code> file
+that includes a target project (such as a Framework Project) and all projects that depend on it. This
+tool enables us to quickly generate Solutions that allow us to have Framework Projects and Application
+projects open in a single instance of Visual Studio. Since SlimJim generates these files pretty quickly,
+we never check them into source control.</p>
+
+<p>Using SlimJim in conjunction with ReSharper we gain the ability to navigate through the code and apply
+refactoring tools to rename types and methods, change method signatures, introduce parameters, and all
+the other fun stuff.</p>
+
+<p><strong> The Pitfall </strong></p>
+
+<p>It&#8217;s great that ReSharper knows how to do this, but the problem is when you hit F6 or click Build Solution,
+and you get a bunch of compilation errors. What&#8217;s going on? First, NuGet injects assembly references into
+the Application Project instead of injecting project references. Visual Studio uses project references to determine
+the build order. So because there is no project reference from Application Project pointing to Framework Project,
+the order in which the projects are built will be undefined. The second problem is that even if the build order
+could be corrected, there is nothing in place that copies the build output from Framework Project over to
+where Application Project will find it.</p>
+
+<p>We could solve both problems by converting the c# project files for Application Projects to replace
+&lt;Reference/&gt; items with &lt;ProjectReference/&gt; items. This is how Visual Studio decides what
+order projects are built in and how outputs from one project get copied to another.</p>
+
+<p>The problem is that we don&#8217;t want to accidentally commit changes like this. We only want them to apply
+to local development. Accidentally checking such changes in will certainly break the build and take us
+back to the bad old days of slow builds.</p>
+
+<p><strong> Attempt 1 </strong></p>
+
+<p>To avoid changing c# project files, the first approach I took was to try to do some MSBuild magic and
+hope Visual Studio would get in on the game. MSBuild provides some hooks that enable us to manipulate
+Item Groups dynamically. First, the <a href="http://msdn.microsoft.com/en-us/library/bcxfsh87.aspx">InitialTargets</a>
+attribute can be used to execute some targets before the requested targets are executed. Second, we
+can do some analysis of the solution file being built and the project references to try to remove
+&lt;Reference/&gt; items and add &lt;ProjectReference/&gt; items dynamically.</p>
+
+<p>Note: this example uses tasks from the <a href="https://github.com/loresoft/msbuildtasks">MSBuild Community Tasks</a> project.</p>
+
+<div><script src='https://gist.github.com/3177148.js?file='></script>
+<noscript><pre><code>&lt;Project ToolsVersion=&quot;4.0&quot; InitialTargets=&quot;_ReplaceReferencesWithProjectReferences&quot; xmlns=&quot;http://schemas.microsoft.com/developer/msbuild/2003&quot;&gt;
+    
+    &lt;Target Name=&quot;_ReplaceReferencesWithProjectReferences&quot; DependsOnTargets=&quot;Part1;Part2;Part3;Part4&quot; Condition=&quot; Exists('$(SolutionPath)') and '$(BuildingInsideVisualStudio)' == 'True' &quot;/&gt;
+    
+    &lt;Target Name=&quot;Part1&quot;&gt;
+        &lt;GetSolutionProjects Solution=&quot;$(SolutionPath)&quot;&gt;
+            &lt;Output TaskParameter=&quot;Output&quot; ItemName=&quot;_SolutionProject&quot;/&gt;
+        &lt;/GetSolutionProjects&gt;
+        
+        &lt;RemoveDuplicates Inputs=&quot;@(_SolutionProject)&quot;&gt;
+            &lt;Output TaskParameter=&quot;Filtered&quot; ItemName=&quot;_SolutionProjectUnique&quot;/&gt;
+        &lt;/RemoveDuplicates&gt;
+        
+        &lt;ItemGroup&gt;
+            &lt;_SolutionProject Remove=&quot;@(_SolutionProject)&quot;/&gt;
+        &lt;/ItemGroup&gt;
+    &lt;/Target&gt;
+    
+    &lt;Target Name=&quot;Part2&quot; Inputs=&quot;%(_SolutionProjectUnique.Identity)&quot; Outputs=&quot;**none**&quot;&gt;
+        &lt;XmlRead
+            XmlFileName=&quot;@(_SolutionProjectUnique)&quot;
+            XPath=&quot;/msb:Project/msb:PropertyGroup/msb:AssemblyName/text()&quot;
+            Prefix=&quot;msb&quot; Namespace=&quot;http://schemas.microsoft.com/developer/msbuild/2003&quot;&gt;
+            &lt;Output PropertyName=&quot;_SolutionProjectAssemblyName&quot; TaskParameter=&quot;Value&quot;/&gt;
+        &lt;/XmlRead&gt;
+        &lt;XmlRead
+            XmlFileName=&quot;@(_SolutionProjectUnique)&quot;
+            XPath=&quot;/msb:Project/msb:PropertyGroup/msb:ProjectGuid/text()&quot;
+            Prefix=&quot;msb&quot; Namespace=&quot;http://schemas.microsoft.com/developer/msbuild/2003&quot;&gt;
+            &lt;Output PropertyName=&quot;_SolutionProjectGuid&quot; TaskParameter=&quot;Value&quot;/&gt;
+        &lt;/XmlRead&gt;
+        
+        &lt;ItemGroup&gt;
+            &lt;_SolutionProject Include=&quot;@(_SolutionProjectUnique)&quot;&gt;
+                &lt;Project&gt;$(_SolutionProjectGuid)&lt;/Project&gt;
+                &lt;Name&gt;$(_SolutionProjectAssemblyName)&lt;/Name&gt;
+            &lt;/_SolutionProject&gt;
+        &lt;/ItemGroup&gt;
+    &lt;/Target&gt;
+    
+    &lt;Target Name=&quot;Part3&quot;&gt;
+        &lt;ItemGroup&gt;
+            &lt;_ReferenceWithHintPath Include=&quot;@(Reference)&quot; Condition=&quot;%(Reference.HintPath) != ''&quot;/&gt;
+        &lt;/ItemGroup&gt;
+            
+        &lt;ItemGroup&gt;
+            &lt;_ReferenceWithProjectName Include=&quot;@(_ReferenceWithHintPath)&quot;&gt;
+                &lt;Name&gt;$([System.IO.Path]::GetFileNameWithoutExtension('%(HintPath)'))&lt;/Name&gt;
+            &lt;/_ReferenceWithProjectName&gt;
+        &lt;/ItemGroup&gt;
+        
+        &lt;ItemGroup&gt;
+            &lt;_ReferenceToRemove Include=&quot;@(_ReferenceWithProjectName)&quot; Condition=&quot; %(Name) != '' and @(_ReferenceWithProjectName) != '' and @(_SolutionProject) != '' &quot;/&gt;
+        &lt;/ItemGroup&gt;
+        
+        &lt;ItemGroup&gt;
+            &lt;_ProjectReferenceToAdd Include=&quot;@(_SolutionProject)&quot; Condition=&quot; %(Name) != '' and @(_ReferenceWithProjectName) != '' and @(_SolutionProject) != '' &quot;/&gt;
+        &lt;/ItemGroup&gt;
+        
+        &lt;Message Text=&quot;Remove Reference: %(_ReferenceToRemove.Identity)&quot;/&gt;
+        &lt;Message Text=&quot;Add ProjectReference: %(_ProjectReferenceToAdd.Identity) Project %(_ProjectReferenceToAdd.Project) Name %(_ProjectReferenceToAdd.Name)&quot;/&gt;
+    &lt;/Target&gt;
+    
+    &lt;Target Name=&quot;Part4&quot;&gt;
+        &lt;ItemGroup&gt;
+            &lt;Reference Remove=&quot;@(ReferenceToReplace)&quot;/&gt;
+        &lt;/ItemGroup&gt;
+        
+        &lt;ItemGroup&gt;
+            &lt;ProjectReference Include=&quot;@(_ProjectReferenceToAdd)&quot;/&gt;
+        &lt;/ItemGroup&gt;
+    &lt;/Target&gt;
+&lt;/Project&gt;</code></pre></noscript></div>
+
+
+<p>This implementation works great in MSBuild on the command line when invoked on a c# project.
+If you specify a SolutionPath and BuildingInsideVisualStudio,
+MSBuild will faithfully build the Framework Projects before building the Application Project.</p>
+
+<p>However, it doesn&#8217;t work in Visual Studio. Evidently when Visual Studio loads a solution, it
+either doesn&#8217;t execute InitialTargets or it uses some other mechanism to extract &lt;ProjectReference/&gt;
+items from each project.</p>
+
+<p><strong> Attempt 2 </strong></p>
+
+<p>If we can&#8217;t dynamically tell Visual Studio about project references, I thought maybe we could just build
+the projects in the right order ourselves. MSBuild already does this when building outside Visual Studio
+provided the BuildProjectReferences property is not false.</p>
+
+<p>So I modified my MSBuild script to try to do that:</p>
+
+<div><script src='https://gist.github.com/3177381.js?file='></script>
+<noscript><pre><code>&lt;Project InitialTargets=&quot;_FindDependentSolutionProjects&quot; ToolsVersion=&quot;4.0&quot; xmlns=&quot;http://schemas.microsoft.com/developer/msbuild/2003&quot;&gt;
+    &lt;PropertyGroup&gt;
+        &lt;BuildDependsOn&gt;
+            BuildDependentSolutionProjects;
+            $(BuildDependsOn)
+        &lt;/BuildDependsOn&gt;
+    &lt;/PropertyGroup&gt;
+    
+    &lt;Target Name=&quot;BuildDependentSolutionProjects&quot; Condition=&quot; '@(_ProjectReference)' != '' &quot;&gt;
+        &lt;Message Text=&quot;$(MSBuildProjectName) is building @(_ProjectReference)&quot; Importance=&quot;High&quot;/&gt;
+        &lt;MSBuild
+            Projects=&quot;@(_ProjectReference)&quot;
+            Targets=&quot;Build&quot;
+            BuildInParallel=&quot;false&quot;
+            Condition=&quot; '$(BuildProjectReferences)' != 'false' &quot;
+            Properties=&quot;UseHostCompilerIfAvailable=false&quot;/&gt;
+    &lt;/Target&gt;
+    
+    &lt;Target Name=&quot;_FindDependentSolutionProjects&quot; DependsOnTargets=&quot;Part1;Part2;Part3&quot; Condition=&quot; Exists('$(SolutionPath)') and '$(BuildingInsideVisualStudio)' == 'True' &quot;/&gt;
+    
+    &lt;Target Name=&quot;Part1&quot;&gt;
+        &lt;GetSolutionProjects Solution=&quot;$(SolutionPath)&quot;&gt;
+            &lt;Output TaskParameter=&quot;Output&quot; ItemName=&quot;_SolutionProject&quot;/&gt;
+        &lt;/GetSolutionProjects&gt;
+        
+        &lt;RemoveDuplicates Inputs=&quot;@(_SolutionProject)&quot;&gt;
+            &lt;Output TaskParameter=&quot;Filtered&quot; ItemName=&quot;_SolutionProjectUnique&quot;/&gt;
+        &lt;/RemoveDuplicates&gt;
+        
+        &lt;ItemGroup&gt;
+            &lt;_SolutionProject Remove=&quot;@(_SolutionProject)&quot;/&gt;
+        &lt;/ItemGroup&gt;
+    &lt;/Target&gt;
+    
+    &lt;Target Name=&quot;Part2&quot; Inputs=&quot;%(_SolutionProjectUnique.Identity)&quot; Outputs=&quot;**none**&quot;&gt;
+        &lt;XmlRead
+            XmlFileName=&quot;@(_SolutionProjectUnique)&quot;
+            XPath=&quot;/msb:Project/msb:PropertyGroup/msb:AssemblyName/text()&quot;
+            Prefix=&quot;msb&quot; Namespace=&quot;http://schemas.microsoft.com/developer/msbuild/2003&quot;&gt;
+            &lt;Output PropertyName=&quot;_SolutionProjectAssemblyName&quot; TaskParameter=&quot;Value&quot;/&gt;
+        &lt;/XmlRead&gt;
+        &lt;XmlRead
+            XmlFileName=&quot;@(_SolutionProjectUnique)&quot;
+            XPath=&quot;/msb:Project/msb:PropertyGroup/msb:ProjectGuid/text()&quot;
+            Prefix=&quot;msb&quot; Namespace=&quot;http://schemas.microsoft.com/developer/msbuild/2003&quot;&gt;
+            &lt;Output PropertyName=&quot;_SolutionProjectGuid&quot; TaskParameter=&quot;Value&quot;/&gt;
+        &lt;/XmlRead&gt;
+        
+        &lt;ItemGroup&gt;
+            &lt;_SolutionProject Include=&quot;@(_SolutionProjectUnique)&quot;&gt;
+                &lt;Project&gt;$(_SolutionProjectGuid)&lt;/Project&gt;
+                &lt;Name&gt;$(_SolutionProjectAssemblyName)&lt;/Name&gt;
+            &lt;/_SolutionProject&gt;
+        &lt;/ItemGroup&gt;
+    &lt;/Target&gt;
+    
+    &lt;Target Name=&quot;Part3&quot;&gt;
+        &lt;ItemGroup&gt;
+            &lt;_ReferenceWithHintPath Include=&quot;@(Reference)&quot; Condition=&quot;%(Reference.HintPath) != ''&quot;/&gt;
+        &lt;/ItemGroup&gt;
+            
+        &lt;ItemGroup&gt;
+            &lt;_ReferenceWithProjectName Include=&quot;@(_ReferenceWithHintPath)&quot;&gt;
+                &lt;Name&gt;$([System.IO.Path]::GetFileNameWithoutExtension('%(HintPath)'))&lt;/Name&gt;
+            &lt;/_ReferenceWithProjectName&gt;
+        &lt;/ItemGroup&gt;
+        
+        &lt;ItemGroup&gt;
+            &lt;_ProjectReference Include=&quot;@(_SolutionProject)&quot; Condition=&quot; %(Name) != '' and @(_ReferenceWithProjectName) != '' and @(_SolutionProject) != '' &quot;/&gt;
+        &lt;/ItemGroup&gt;
+        
+        &lt;Message Text=&quot;Detected ProjectReference: %(_ProjectReference.Identity) Project %(_ProjectReference.Project) Name %(_ProjectReference.Name)&quot;/&gt;
+    &lt;/Target&gt;
+&lt;/Project&gt;</code></pre></noscript></div>
+
+
+<p>Once again, this works great in MSBuild outside of Visual Studio. When you load up the solution in VS
+and hit build, the Output pane says encouraging things like &#8220;MyApp is building C:\Projects\MyFramework\src\MyFramework\MyFramework.csproj&#8221;.</p>
+
+<p>Except it doesn&#8217;t. I couldn&#8217;t figure out why, but somehow Visual Studio seems to know that we&#8217;re trying to trick it, and it refuses
+to actually build the project. It pretends to, but it doesn&#8217;t. I thought this might have to do with In-Process Compilers and
+other optimizations described in the <a href="http://msdn.microsoft.com/en-us/library/ms171468.aspx">Visual Studio MSBuild Integration</a> article,
+but attempting to disable <code>UseHostCompilerIfAvailable</code> has no effect.</p>
+
+<p>I gave up on this strategy becuase even if it helped to build projects in the right order, it doesn&#8217;t copy build outputs from one
+project to the other.</p>
+
+<p><strong> Attempt 3 </strong></p>
+
+<p>Once again, Visual Studio proved to be too enterprisey for us to customize. The only proof of concept I was able to make work
+was the dumb one: converting c# projects and risking that the converted versions get checked in. We can solve the accidental commit
+issue with a pre-commit hook, so maybe it isn&#8217;t all bad as long as we can seemlessly convert back and forth.</p>
+
+<p>Since we already have a tool that analyzes c# project references, it makes sense to extend SlimJim to mangle c# projects while analyzing them.</p>
+
+<p>My <a href="https://github.com/chriseldredge/SlimJim">fork</a> of SlimJim now includes two new switches: <code>--convert</code> and <code>--unconvert</code>.</p>
+
+<p>Suppose SlimJim finds two projects, MyApp and MyFramework, and MyApp.csproj looks like this:</p>
+
+<figure class='code'><figcaption><span>MyApp.csproj</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='xml'><span class='line'><span class="nt">&lt;Project</span> <span class="na">ToolsVersion=</span><span class="s">&quot;4.0&quot;</span> <span class="na">DefaultTargets=</span><span class="s">&quot;Build&quot;</span> <span class="na">xmlns=</span><span class="s">&quot;http://schemas.microsoft.com/developer/msbuild/2003&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;ItemGroup&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;Reference</span> <span class="na">Include=</span><span class="s">&quot;MyFramework, Version=1.0.0.0, Culture=neutral, PublicKeyToken=3c369c070579152a, processorArchitecture=MSIL&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>      <span class="nt">&lt;HintPath&gt;</span>..\packages\MyFramework\lib\net40\MyFramework.dll<span class="nt">&lt;/HintPath&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;/Reference&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;/ItemGroup&gt;</span>
+</span><span class='line'><span class="nt">&lt;/Project&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Using <code>--convert</code>, SlimJim will change MyApp.csproj to look like this:</p>
+
+<figure class='code'><figcaption><span>MyApp.csproj after SlimJim</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class='xml'><span class='line'><span class="nt">&lt;Project</span> <span class="na">ToolsVersion=</span><span class="s">&quot;4.0&quot;</span> <span class="na">DefaultTargets=</span><span class="s">&quot;Build&quot;</span> <span class="na">xmlns=</span><span class="s">&quot;http://schemas.microsoft.com/developer/msbuild/2003&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;ItemGroup&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;ProjectReference</span> <span class="na">Include=</span><span class="s">&quot;C:\projects\MyFramework\src\MyFramework\MyFramework.csproj&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>      <span class="nt">&lt;Project&gt;</span>{673A97DA-4302-48C9-BFF0-A57FD7DBA93F}<span class="nt">&lt;/Project&gt;</span>
+</span><span class='line'>      <span class="nt">&lt;Name&gt;</span>MyFramework<span class="nt">&lt;/Name&gt;</span>
+</span><span class='line'>      <span class="nt">&lt;SlimJimReplacedReference&gt;</span>
+</span><span class='line'>        <span class="nt">&lt;Reference</span> <span class="na">Include=</span><span class="s">&quot;MyFramework, Version=1.0.0.0, Culture=neutral, PublicKeyToken=3c369c070579152a, processorArchitecture=MSIL&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>          <span class="nt">&lt;HintPath&gt;</span>..\packages\MyFramework\lib\net40\MyFramework.dll<span class="nt">&lt;/HintPath&gt;</span>
+</span><span class='line'>        <span class="nt">&lt;/Reference&gt;</span>
+</span><span class='line'>      <span class="nt">&lt;/SlimJimReplacedReference&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;/ProjectReference&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;/ItemGroup&gt;</span>
+</span><span class='line'><span class="nt">&lt;/Project&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>And using <code>--uncovert</code> will put it back. The original assembly reference is preserved in the markup, moved out of the
+way so MSBuild and Visual Studio will ignore it, but making it easy for us to restore it without losing metadata like HintPath
+and SpecificVersion.</p>
+
+<p>As long as we remember to <code>--unconvert</code> before committing, this new featuer should provide a great benefit.</p>
+]]></content>
+  </entry>
+  
+  <entry>
     <title type="html"><![CDATA[Unit of Work & Eventual Consistency]]></title>
     <link href="http://chriseldredge.github.com/blog/2012/07/24/Unit-of-Work-and-Eventual-Consistency/"/>
-    <updated>2012-07-24T00:00:00-07:00</updated>
+    <updated>2012-07-24T00:00:00-04:00</updated>
     <id>http://chriseldredge.github.com/blog/2012/07/24/Unit-of-Work-and-Eventual-Consistency</id>
     <content type="html"><![CDATA[<p><em>Lucene.Net.Linq is available on the NuGet Gallery at <a href="http://nuget.org/packages/Lucene.Net.Linq">http://nuget.org/packages/Lucene.Net.Linq</a>.</em></p>
 
@@ -157,7 +488,7 @@ appear atomically. Knowing the details of when staged changes become visible wil
   <entry>
     <title type="html"><![CDATA[Speeding Up NuGet.Server]]></title>
     <link href="http://chriseldredge.github.com/blog/2012/07/03/Speeding-Up-NuGet-Server/"/>
-    <updated>2012-07-03T00:00:00-07:00</updated>
+    <updated>2012-07-03T00:00:00-04:00</updated>
     <id>http://chriseldredge.github.com/blog/2012/07/03/Speeding-Up-NuGet-Server</id>
     <content type="html"><![CDATA[<p><em>(Get the source code at <a href="https://github.com/themotleyfool/NuGet">https://github.com/themotleyfool/NuGet</a>)</em></p>
 
@@ -247,7 +578,7 @@ OSS projects that attempt to do what it does, but I think it is already one of t
   <entry>
     <title type="html"><![CDATA[Introducing LINQ to Lucene]]></title>
     <link href="http://chriseldredge.github.com/blog/2012/05/08/Introducing-Linq-to-Lucene/"/>
-    <updated>2012-05-08T00:00:00-07:00</updated>
+    <updated>2012-05-08T00:00:00-04:00</updated>
     <id>http://chriseldredge.github.com/blog/2012/05/08/Introducing-Linq-to-Lucene</id>
     <content type="html"><![CDATA[<p><em>(Get the source code at <a href="https://github.com/themotleyfool/Lucene.Net.Linq">https://github.com/themotleyfool/Lucene.Net.Linq</a>)</em></p>
 
@@ -378,7 +709,7 @@ and <a href="http://www.apache.org/licenses/LICENSE-2.0">Apache License</a>.</p>
   <entry>
     <title type="html"><![CDATA[Lucene NumericField Gotcha]]></title>
     <link href="http://chriseldredge.github.com/blog/2012/04/19/Lucene-NumericField-Gotcha/"/>
-    <updated>2012-04-19T00:00:00-07:00</updated>
+    <updated>2012-04-19T00:00:00-04:00</updated>
     <id>http://chriseldredge.github.com/blog/2012/04/19/Lucene-NumericField-Gotcha</id>
     <content type="html"><![CDATA[<p>Today I ran into an interesting problem using
 <a href="https://svn.apache.org/repos/asf/incubator/lucene.net/trunk/src/core/Document/NumericField.cs">NumericField</a>.</p>
@@ -400,7 +731,7 @@ any NumericFields before adding the document back to the index, even if they did
   <entry>
     <title type="html"><![CDATA[Getting Started with Re-linq]]></title>
     <link href="http://chriseldredge.github.com/blog/2012/03/29/Getting-Started-With-Relinq/"/>
-    <updated>2012-03-29T00:00:00-07:00</updated>
+    <updated>2012-03-29T00:00:00-04:00</updated>
     <id>http://chriseldredge.github.com/blog/2012/03/29/Getting-Started-With-Relinq</id>
     <content type="html"><![CDATA[<h2>The IQueryable Conundrum</h2>
 
