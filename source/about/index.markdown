@@ -6,6 +6,18 @@ sharing: false
 footer: true
 ---
 
+<img src="/images/portrait.jpeg" alt="Portrait" title="Rawr!" width="200" height="200"/>
+
+<h2>Blurb</h2>
+
+I'm a .net developer for [The Motley Fool](http://www.fool.com) with a background in java.
+When I was in grade school I got into programming because I wanted to make video games.
+I tend to spend a lot of time on build and release tools.
+
+You can see my open source work at [GitHub](https://github.com/chriseldredge). Sorry, you can't see my closed source work.
+
+When I'm not hacking codes, I'm probably reading, cooking, drinking old-man drinks or studying Korean with [TTMIK](http://ttmik.com/).
+
 <h2>Projects</h2>
 <ul>
 	<li><a href="https://github.com/themotleyfool/Lucene.Net.Linq">Lucene.Net.Linq</a> LINQ provider to run native queries on a Lucene.Net index</li>
