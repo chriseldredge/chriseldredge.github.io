@@ -1,0 +1,325 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>How The Motley Fool uses NuGet (part 1) - Chris Eldredge</title>
+  <meta name="author" content="Chris Eldredge">
+
+  
+  <meta name="description" content="This post describes how we came to using binary package management. In the next part I&#8217;ll get into NuGet. In the beginning, there was one &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://chriseldredge.github.com/blog/2012/08/07/how-the-motley-fool-uses-nuget/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="/javascripts/ender.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="/atom.xml" rel="alternate" title="Chris Eldredge" type="application/atom+xml">
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-30472598-1']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Chris Eldredge</a></h1>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:chriseldredge.github.com" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/about/">About</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">How the Motley Fool Uses NuGet (Part 1)</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-08-07T14:25:00-04:00" pubdate data-updated="true">Aug 7<span>th</span>, 2012</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>This post describes how we came to using binary package management. In the next part I&#8217;ll get into NuGet.</p>
+
+<p>In the beginning, there was one repository and it held all the projects for The Motley Fool, and it was good.
+There were around a dozen asp.net web projects, a smattering of service and console apps, and a bunch of class libraries
+to hold shared code. There was one Solution (sln) to rule them all.</p>
+
+<p>As time went on, we found that there are downsides to the one-giant-solution approach to .net development:</p>
+
+<ul>
+<li><a href="http://www.laputan.org/mud/">Big Ball of Mud</a></li>
+<li>Slow builds</li>
+<li>Tight coupling</li>
+<li>Configuration hell</li>
+<li>Hard to release different applications on different schedules</li>
+</ul>
+
+
+<p>Typically our larger applications would be split into several projects following a typical N-tier layered architecture:</p>
+
+<ul>
+<li>Web</li>
+<li>Service</li>
+<li>Domain</li>
+<li>Data Access</li>
+</ul>
+
+
+<p>Despite our attempts to encapsulate data access and domain logic behind the service project, code ended up leaking out
+to the point where domain projects were using types and methods from unrelated domain projects. Cats and dogs were
+sleeping together.</p>
+
+<p>Around this time Steven Bohlen presented a <a href="http://unhandled-exceptions.com/blog/index.php/2010/11/27/dc-altnet-presentationthats-a-wrap/">talk</a>
+to the Washington DC Alt.NET User Group titled &#8220;Domain Driven Design Implementation Patterns in .NET&#8221;. While some of us
+were already familiar with concepts of DDD, this talk lit a spark for us to try fixing our big ball of mud.</p>
+
+<p>In late 2010 we started to make some changes. Instead of having one giant repository, shared code would be split out
+into separate repositories. We also took this opportunity to introduce a new project organization and architecture.</p>
+
+<p>We established one repository to hold utility code, broken into specific class libraries:</p>
+
+<ul>
+<li><tt>Fool.Abstractions</tt> - similar in spirit to System.Web.Abstractions; adds interfaces and wrappers to various FCL types that lack them</li>
+<li><tt>Fool.Lang</tt> - similar in spirit to <a href="http://commons.apache.org/lang/">Jakarta Commons Lang</a>; adds general utility classes and methods not found elsewhere</li>
+<li>Other projects that extend 3rd party class libraries to make them easier for us to work with in standardized ways.</li>
+</ul>
+
+
+<p>Then we established another repository to hold Domain Driven, er, Domains. For example, many of our applications and web sites deal with
+stock market data, so one of our business domains is Quotes. In the Quotes Domain we have these projects:</p>
+
+<ul>
+<li><tt>Fool.Quotes</tt> - contains service interfaces and value types; serves as an API to the domain</li>
+<li><tt>Fool.Quotes.Core</tt> - contains domain logic, models, and entities; serves as a private implementation</li>
+<li><tt>Fool.Quotes.Web.Api</tt> - exposes Fool.Quotes interfaces over a RESTful web API</li>
+</ul>
+
+
+<p>The key to keeping our domains distinct and decoupled is to keep Core projects private. While Core is required at runtime,
+it should never be referenced at compile time. To bridge the gap, we use Dependency Injection to provide concrete implementations.</p>
+
+<p>Domains may depend on other domains provided that they consume each other through the API project. That way entities and business logic
+are kept focused on their own concerns and don&#8217;t leak out to other problem areas where they don&#8217;t fit.</p>
+
+<h2>Gluing It Together</h2>
+
+<p>Having projects split into different repositories and different solutions meant that we couldn&#8217;t simply have one mega Solution
+that includes everything. That&#8217;s by design, so good on us. But this introduces a problem in that we still need to reference code
+from our utility projects and DDD projects in our applications. The first solution we came up with to handle this problem was
+to use the <a href="http://msdn.microsoft.com/en-us/library/wkze6zky.aspx">AssemblyFolders</a> registry to have our libraries
+appear in the <tt>Add Reference</tt> dialog. Then to solve the runtime dependency on our private Core assemblies, we install
+those to the GAC so they can be loaded using reflection by our IoC container.</p>
+
+<p>This approach worked fine, mostly. But we encountered some downsides after using it for a while:</p>
+
+<ul>
+<li>Need to have all library code checked out and built on each development machine</li>
+<li>No built-in way to manage different versions of the same dependency</li>
+<li><a href="http://www.sellsbrothers.com/Posts/Details/12503">GAC considered harmful</a></li>
+<li>Hard to debug build errors and runtime errors</li>
+</ul>
+
+
+<p>Using Continuous Integration means we&#8217;re producing new builds dozens of times a day, so it isn&#8217;t practical for us to
+manage different assembly versions for each build. Like most shops, we leave our assembly versions at 1.0.0.0 despite
+injecting actual version information into the AssemblyInformationalVersion attribute.</p>
+
+<p>In order to support parallel development, we needed to find a more flexible way of managing dependencies, and
+at this point we started to look at binary package management.</p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Chris Eldredge</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-08-07T14:25:00-04:00" pubdate data-updated="true">Aug 7<span>th</span>, 2012</time>
+      
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://chriseldredge.github.com/blog/2012/08/07/how-the-motley-fool-uses-nuget/" data-via="creldredge" data-counturl="http://chriseldredge.github.com/blog/2012/08/07/how-the-motley-fool-uses-nuget/" >Tweet</a>
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2012/07/26/MSBuild-NuGet-Visual-Studio-Hackery/" title="Previous Post: MSBuild, Visual Studio & NuGet Hackery">&laquo; MSBuild, Visual Studio & NuGet Hackery</a>
+      
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2012/08/07/how-the-motley-fool-uses-nuget/">How The Motley Fool uses NuGet (part 1)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2012/07/26/MSBuild-NuGet-Visual-Studio-Hackery/">MSBuild, Visual Studio & NuGet Hackery</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2012/07/24/Unit-of-Work-and-Eventual-Consistency/">Unit of Work & Eventual Consistency</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2012/07/03/Speeding-Up-NuGet-Server/">Speeding Up NuGet.Server</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2012/05/08/Introducing-Linq-to-Lucene/">Introducing LINQ to Lucene</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+<section>
+  <h1>Latest Tweets</h1>
+  <ul id="tweets">
+    <li class="loading">Status updating...</li>
+  </ul>
+  <script type="text/javascript">
+    $.domReady(function(){
+      getTwitterFeed("creldredge", 4, false);
+    });
+  </script>
+  <script src="/javascripts/twitter.js" type="text/javascript"> </script>
+  
+    <a href="http://twitter.com/creldredge" class="twitter-follow-button" data-show-count="false">Follow @creldredge</a>
+  
+</section>
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2012 - Chris Eldredge -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>
