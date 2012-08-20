@@ -4,7 +4,7 @@
   <title><![CDATA[Chris Eldredge]]></title>
   <link href="http://chriseldredge.github.com/atom.xml" rel="self"/>
   <link href="http://chriseldredge.github.com/"/>
-  <updated>2012-08-07T15:36:01-04:00</updated>
+  <updated>2012-08-20T15:08:28-04:00</updated>
   <id>http://chriseldredge.github.com/</id>
   <author>
     <name><![CDATA[Chris Eldredge]]></name>
@@ -12,6 +12,151 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[How The Motley Fool Uses NuGet (Part 2)]]></title>
+    <link href="http://chriseldredge.github.com/blog/2012/08/20/how-the-motley-fool-uses-nuget-part-2/"/>
+    <updated>2012-08-20T13:56:00-04:00</updated>
+    <id>http://chriseldredge.github.com/blog/2012/08/20/how-the-motley-fool-uses-nuget-part-2</id>
+    <content type="html"><![CDATA[<p><a href="http://chriseldredge.github.com/blog/2012/08/07/how-the-motley-fool-uses-nuget/">Last time</a>
+I talked about how my development team progressed from having all
+of our .net code in a single repository with a single solution to using a more
+modular architecture complete with encapsulated domains.</p>
+
+<p>When we started using this appraoch, we were still limited in a few ways:</p>
+
+<ul>
+<li>Everyone needs to integrate with the newest code</li>
+<li>Difficult to patch an old version of a dependency</li>
+<li>Cascading failures on the build server</li>
+</ul>
+
+
+<p>Even though we broke the ProjectReference rats nest, we still had an
+implicit dependency on various shared code. It all had to be checked out
+and built in the right order.</p>
+
+<h2>Binary Package Management</h2>
+
+<p>The next logical step was to further decouple our shared code by
+packaging it up and publishing those packages. If we could do that,
+we could decide when to upgrade dependencies on a product by product
+basis.</p>
+
+<p>There are two package managers in the .net ecosystem: OpenWrap and NuGet.</p>
+
+<p>When we started shopping around, OpenWrap had been around longer and seemed
+to be a better choice. There&#8217;s a <a href="http://stackoverflow.com/questions/4256994/openwrap-vs-nuget">comparison of the products</a>
+on stackoverflow.</p>
+
+<p>We worked with OpenWrap for over 6 months and during that time started
+to find some problems around integration with Visual Studio and ReSharper.
+OpenWrap wants to manage dependencies per solution, and we have many cases
+where we want to control dependencies at a per project level. We also
+started to notice that NuGet was getting new versions released on a fairly
+regular schedule, while OpenWrap 2.0 was in unstable beta limbo for over
+a year.</p>
+
+<p>Around the same time we started playing with <a href="http://octopusdeploy.com/">Octopus Deploy</a>
+for deploying our code. Since Octopus uses NuGet packages for deployment, we
+figured it would make sense to standardize on one package management system
+for both deployments and dependency management. It&#8217;s true that those are
+separate problem spaces, but having less build scripts is always a good thing.</p>
+
+<h2>Thoughts on NuGet</h2>
+
+<h3>Conventions</h3>
+
+<p>NuGet has several conventions that make it easy to create simple packages
+that others can reference. You can share assemblies and content easily,
+and when you want to customize anything there are some powershell extension
+points you can hook into.</p>
+
+<p>One problem we run into is that when building packages, sometimes there&#8217;s
+a NuGet convention we want to customize or suppress, and often we can&#8217;t.</p>
+
+<p>For example, if you create a <code>nuspec</code> and place it adjacent to a <code>csproj</code>
+file, NuGet will look at the project and automatically inject metadata
+and content into the package. For some things, you can override this
+behavior with explicit specifications in the nuspec, but the behavior
+can be surprising and confusing.</p>
+
+<h3>Dependency Scoping</h3>
+
+<p>NuGet supports the concept of transitive dependencies&#8230; sort of. If you
+install package A, and A depends on package B, NuGet will go find a version
+of B and install it while installing A. However, NuGet doesn&#8217;t do any record
+keeping to remember that B is a transitive dependency. To your project, A and
+B appear simply as direct dependencies.</p>
+
+<p>There may be cases where A depends on B at runtime, but consumers of A
+shouldn&#8217;t need to code against B at design time.</p>
+
+<p>There may be other cases where B is an optional dependency for A, and
+A can be used without it.</p>
+
+<p>Since NuGet doesn&#8217;t have a concept of scope, it only has one simplistic
+approach to dealing with transitive dependencies: treat them just like
+direct dependencies.</p>
+
+<h3>Upgrade Behavior</h3>
+
+<p>When you ask NuGet to update a specific package, it will first look for
+updates to transitive dependencies that the package depends on. This may
+seem obvious or desirable to some, but personally I find it confusing.
+You can control this behavior with the <code>-IgnoreDependencies</code> flag in
+the Package Manament Console, but oddly you don&#8217;t get that option
+in the command line <code>nuget.exe</code> or from the Visual Studio GUI Package
+Manager.</p>
+
+<h3>Package Feed Performance</h3>
+
+<p>We use continuous integration, and every successful build produces
+&#8220;release candidate&#8221; versions of packages. We generate 50 to 100 packages
+a day.</p>
+
+<p>Using the simple NuGet UNC share quickly failed to scale, so next we tried
+NuGet.Server and found that it doesn&#8217;t perform well either.</p>
+
+<p>NuGet Gallery seemed like overkill with its SQL Server requirement, so
+I started optimizing NuGet.Server. This project ended up taking quite
+a while, but the good news is that the fruits of the labor are now
+open source on GitHub at <a href="https://github.com/themotleyfool/NuGet">https://github.com/themotleyfool/NuGet</a>.</p>
+
+<p>For more information about that project, see my <a href="http://chriseldredge.github.com/blog/2012/07/03/Speeding-Up-NuGet-Server/">previous post</a>.</p>
+
+<h3>Refactoring Applications and Shared Code</h3>
+
+<p>We try to use <a href="http://semver.org/">Semantic Versioning</a> to communicate
+breaking changes in the packages we publish, so sometimes when
+we want to use a refactoring tool like Change Method Signature
+or Use Base Class it would be nice to have application and shared
+code loaded into a single instance of Visual Studio.</p>
+
+<p>We created a tool called <a href="https://github.com/TheMotleyFool/SlimJim">SlimJim</a>
+that generates these Solution files on the fly.</p>
+
+<p>If you create a Solution with application code and shared library code,
+ReSharper will be smart enough to apply refactoring tools across the projects
+even though ProjectReference style references are not being used.</p>
+
+<p>However, Visual Studio won&#8217;t know the correct order to build projects in,
+and won&#8217;t automatically copy outputs from shared libraries over to applications.</p>
+
+<p>We extended SlimJim to convert assembly references to project references and back
+to address this limitation.</p>
+
+<h2>Conclusion</h2>
+
+<p>In terms of capability and maturity, we&#8217;re in a much better place than
+we were a few years ago. However, we still have a ways to go in terms of
+productivity and workflow.</p>
+
+<p>NuGet has helped us move in the right direction and we hope to see
+further enhancements and even contribute some more of our own as we
+develop them.</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[How The Motley Fool uses NuGet (part 1)]]></title>
