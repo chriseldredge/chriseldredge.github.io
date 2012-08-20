@@ -1,6 +1,8 @@
 ---
 layout: post
 title: Speeding Up NuGet.Server
+comments: true
+categories: 
 ---
 
 _(Get the source code at [https://github.com/themotleyfool/NuGet](https://github.com/themotleyfool/NuGet))_

@@ -1,6 +1,8 @@
 ---
 layout: post
 title: Getting Started with Re-linq
+comments: true
+categories: 
 ---
 
 ## The IQueryable Conundrum ##

@@ -1,6 +1,8 @@
 ---
 layout: post
 title: Lucene NumericField Gotcha
+comments: true
+categories: 
 ---
 
 Today I ran into an interesting problem using

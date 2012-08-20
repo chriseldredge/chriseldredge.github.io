@@ -90,7 +90,7 @@ When you ask NuGet to update a specific package, it will first look for
 updates to transitive dependencies that the package depends on. This may
 seem obvious or desirable to some, but personally I find it confusing.
 You can control this behavior with the `-IgnoreDependencies` flag in
-the Package Manament Console, but oddly you don't get that option
+the Package Management Console, but oddly you don't get that option
 in the command line `nuget.exe` or from the Visual Studio GUI Package
 Manager.
 

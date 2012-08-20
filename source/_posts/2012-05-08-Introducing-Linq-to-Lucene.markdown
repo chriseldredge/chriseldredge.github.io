@@ -1,6 +1,8 @@
 ---
 layout: post
 title: Introducing LINQ to Lucene
+comments: true
+categories: 
 ---
 
 _(Get the source code at [https://github.com/themotleyfool/Lucene.Net.Linq](https://github.com/themotleyfool/Lucene.Net.Linq))_

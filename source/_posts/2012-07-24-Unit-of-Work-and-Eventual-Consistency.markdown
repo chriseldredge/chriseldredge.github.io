@@ -1,6 +1,8 @@
 ---
 layout: post
 title: Unit of Work & Eventual Consistency
+comments: true
+categories: 
 ---
 
 _Lucene.Net.Linq is available on the NuGet Gallery at [http://nuget.org/packages/Lucene.Net.Linq](http://nuget.org/packages/Lucene.Net.Linq)._

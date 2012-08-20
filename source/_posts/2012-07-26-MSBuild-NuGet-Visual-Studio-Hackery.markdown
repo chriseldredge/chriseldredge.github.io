@@ -1,6 +1,8 @@
 ---
 layout: post
 title: MSBuild, Visual Studio & NuGet Hackery
+comments: true
+categories: 
 ---
 
 My team at work recently switched to using NuGet. We have a fair amount of shared code that used to be in a
