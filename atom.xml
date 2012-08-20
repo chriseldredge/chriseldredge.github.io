@@ -4,7 +4,7 @@
   <title><![CDATA[Chris Eldredge]]></title>
   <link href="http://chriseldredge.github.com/atom.xml" rel="self"/>
   <link href="http://chriseldredge.github.com/"/>
-  <updated>2012-08-20T18:30:14-04:00</updated>
+  <updated>2012-08-20T18:39:01-04:00</updated>
   <id>http://chriseldredge.github.com/</id>
   <author>
     <name><![CDATA[Chris Eldredge]]></name>
@@ -105,7 +105,7 @@ direct dependencies.</p>
 updates to transitive dependencies that the package depends on. This may
 seem obvious or desirable to some, but personally I find it confusing.
 You can control this behavior with the <code>-IgnoreDependencies</code> flag in
-the Package Manament Console, but oddly you don&#8217;t get that option
+the Package Management Console, but oddly you don&#8217;t get that option
 in the command line <code>nuget.exe</code> or from the Visual Studio GUI Package
 Manager.</p>
 

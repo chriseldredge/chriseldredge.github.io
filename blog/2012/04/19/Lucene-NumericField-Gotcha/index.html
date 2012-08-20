@@ -164,6 +164,12 @@ any NumericFields before adding the document back to the index, even if they did
   </footer>
 </article>
 
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
 </div>
 
 <aside class="sidebar">
@@ -234,7 +240,10 @@ any NumericFields before adding the document back to the index, even if they did
       var disqus_shortname = 'chriseldredge';
       
         
-        var disqus_script = 'count.js';
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://chriseldredge.github.com/blog/2012/04/19/Lucene-NumericField-Gotcha/';
+        var disqus_url = 'http://chriseldredge.github.com/blog/2012/04/19/Lucene-NumericField-Gotcha/';
+        var disqus_script = 'embed.js';
       
     (function () {
       var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
