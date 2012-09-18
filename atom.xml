@@ -4,7 +4,7 @@
   <title><![CDATA[Chris Eldredge]]></title>
   <link href="http://chriseldredge.github.com/atom.xml" rel="self"/>
   <link href="http://chriseldredge.github.com/"/>
-  <updated>2012-08-20T18:39:01-04:00</updated>
+  <updated>2012-09-18T12:06:47-04:00</updated>
   <id>http://chriseldredge.github.com/</id>
   <author>
     <name><![CDATA[Chris Eldredge]]></name>
@@ -12,6 +12,185 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[How The Motley Fool Uses Octopus Deploy]]></title>
+    <link href="http://chriseldredge.github.com/blog/2012/09/06/how-the-motley-fool-uses-octopus-deploy/"/>
+    <updated>2012-09-06T11:23:00-04:00</updated>
+    <id>http://chriseldredge.github.com/blog/2012/09/06/how-the-motley-fool-uses-octopus-deploy</id>
+    <content type="html"><![CDATA[<p>I&#8217;ve mentioned a few times that my team has been using <a href="http://octopusdeploy.com/">Octopus Deploy</a> in a few of my posts.
+Now I&#8217;ll describe in more detail some of the ways we&#8217;ve integrated with Octopus that may help others.</p>
+
+<h2>The Before Times</h2>
+
+<p>Octopus started a beta phase in late 2011, so what were we doing before? Since I started working in an asp.net shop
+in 2006, I&#8217;ve been surprised by the lack of robust deployment tools for the ecosystem.</p>
+
+<p>The Web Deployment Projects system provided by Microsoft has always seemed like a non-starter for me. When you
+have mature processes like version control, continuous integration, automated testing, and quality assurance,
+how does it make sense to hand the keys over to a developer running Visual Studio to click &#8220;Deploy&#8221;
+on their desktop? What guarantee do you have that the code has been checked in, that it builds, that
+the tests pass, that QA signed off?</p>
+
+<p>Even if you only give trusted users permission to deploy, I&#8217;ve never understood how it makes sense that you
+would need Visual Studio to deploy your projects. I mean, Visual Studio is for development. It isn&#8217;t even
+needed by a build server to compile your code. But now QA (or whoever is allowed to perform deployments) needs
+to have Visual Studio installed somewhere and checkout the code and build it themselves? So much for automation.
+So much for predictability. So much for repeatability.</p>
+
+<p>So it was with a lack of viable alternatives that I started writing a deployment tool in 2007. The tool was
+named Bazooka (because it &#8220;shoots&#8221; software onto servers), and we used it for 5 years. We never released it as
+open source because it made several assumptions particular to us and we didn&#8217;t take the time to clean it up.</p>
+
+<p>Bazooka was a web application that watched a directory for release candidates to show up as they were
+prepared by our build server. Each release candidate contained a deployment descriptor that had some
+meta data and a list of components that could be deployed to servers that matched certain roles like
+WebServer or AppServer.</p>
+
+<p>Bazooka used xml configuration for everything. The deployment descriptor was xml, the server and environment
+configuration was xml, the permissions were xml, and the log files that recorded what had been deployed where
+were also xml. This made Bazooka pretty slow as deployment logs piled up, but it beat the heck out of
+doing anything more heavy-weight with sql.</p>
+
+<p>Bazooka was, in reality, just a web interface to MSBuild. When you went through the deployment wizard,
+Bazooka simply executed MSBuild in the directory specified by each component with some properties saying
+which server to deploy to, which target to execute, what the environment was, etc.</p>
+
+<p>We could have easily kept improving Bazooka, but we had actual code to write for our business, so Bazooka
+had some weaknesses that we never really addressed. For example, managing servers and environments was
+done by hand-editing the xml files. We didn&#8217;t build a UI for that. Also, it was pretty tough to answer
+simple questions like, &#8220;What was the most recent deployment of my project to the staging environment?&#8221;</p>
+
+<p>But it worked as a fine stand-in for 5 years until someone built something better.</p>
+
+<h2>Octopus Trial</h2>
+
+<p>It was fun playing with Octopus during the beta period and seeing another approach to a web based
+deployment tool. In the beginning there were plenty of things Bazooka had that Octopus didn&#8217;t (yet),
+but development has been pretty rapid with Octopus delivering frequent releases.</p>
+
+<p>The one time where we asked if using Octopus was right was when Paul Stovell, the creator/developer
+of Octopus Deploy, took a few months to rewrite the persistence layer, converting it from Entity
+Framework to RavenDB. It was the right decision to make and we&#8217;re happy in the long run, but we
+found ourselves in a lurch waiting for some important features and bugfixes. We came out fine on
+the other side though.</p>
+
+<p>We also found that using a local file-based NuGet feed with Octopus doesn&#8217;t scale very well, and
+switching to NuGet Server provided no benefit either. This inspired us to create a
+<a href="https://github.com/themotleyfool/NuGet">custom fork</a> of NuGet Server that uses
+<a href="http://incubator.apache.org/lucene.net/">Lucene.Net</a> and
+<a href="https://github.com/themotleyfool/Lucene.Net.Linq">Lucene.Net.Linq</a> to provide a scalable, lightning fast internal feed for Octopus.</p>
+
+<h2>The Switch</h2>
+
+<p>As we integrated some pilot projects with Octopus, we slowly stopped using Bazooka and
+eventually turned off Bazooka integration. Some quick stats of our Octopus configuration today:</p>
+
+<ul>
+<li>48 projects</li>
+<li>18,080 release candidates</li>
+<li>1,405 deployments</li>
+</ul>
+
+
+<p>Octopus has done a decent job managing our high demands. We have experienced some slow page
+loads here and there, but Paul has been very responsive about troubleshooting and optimizing
+these.</p>
+
+<h2>Reusing Deployment Scripts</h2>
+
+<p>Since we already had a highly automated deployment system, we wanted to preserve our exising
+capabilities while finding ways to improve the system.</p>
+
+<p>One problem that Octopus doesn&#8217;t solve for you is how to share deployment scripts across
+projects. By default, Octopus will execute deployment scripts contained in each project,
+but there isn&#8217;t a built-in or standard way to reuse common functionality.</p>
+
+<p>One of the first projects we set up in Octopus we named OctopusScripts. This project
+consists of a collection of PowerShell modules that we want to be available everywhere.
+When we deploy the project, the deployment scripts install the modules into a
+standard location where PowerShell will probe for them. Then from other projects,
+we can simply start a script with:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>Import-Module SmokeTest</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>Reuse Moar</h2>
+
+<p>Moving most of our scripts into PowerShell modules was working great, but we started
+to notice that our Deploy.ps1 scripts still looked awfully repetitious.</p>
+
+<p>All of our web projects follow the same basic deployment recipe:</p>
+
+<ol>
+<li>PreDeploy
+
+<ol>
+<li>Disable machine in load balancer</li>
+<li>Create IIS site and app pool definitions if missing</li>
+<li>Update site host-header bindings as needed</li>
+</ol>
+</li>
+<li>Let Octopus update the document root to point to the new application</li>
+<li>PostDeploy
+
+<ol>
+<li>Execute smoke tests against the server and abort if any URLs return a non-200 response</li>
+<li>Enable machine in load balancer</li>
+</ol>
+</li>
+</ol>
+
+
+<p>Of course we have different configurations and different URLs to use for smoke tests
+for each project. We ended up creating a configuration based, modular script collection
+so that each project simply needs to include a stub:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>Import-Module Fool-Octopus
+</span><span class='line'>Invoke-OctopusDeploymentTasks</span></code></pre></td></tr></table></div></figure>
+
+
+<p>The Invoke-OctopusDeploymentTasks function looks at whatever variable and configuration
+are present and figure out which steps to execute. The same scripts are used for Windows
+Service type projects and others too, and they figure out based on conventions if they
+need to run web steps, create services, etc.</p>
+
+<p>If the stub is missing from a project (because why duplicate the stub?) our build scripts
+automatically insert a stub Deploy.ps1, PreDeploy.ps1 and PostDeploy.ps1.</p>
+
+<p>We think we&#8217;re about as DRY as we can get with regards to our deployment scripts.</p>
+
+<h2>Ad-hoc PowerShell</h2>
+
+<p>One thing we&#8217;d like to see that hasn&#8217;t made it into Octopus yet is the concept of ad-hoc
+powershell scripts. Basically, we want to be able to run some arbitrary scripts during a
+deployment, only once. It doesn&#8217;t need to run once on each machine being deployed to, just
+once and then done. There&#8217;s a <a href="https://trello.com/card/new-deployment-step-ad-hoc-powershell/4e907de70880ba000079b75c/8">story card</a>
+on Paul&#8217;s Trello board that we&#8217;re looking forward to. In the mean time, we&#8217;ve been emulating
+this behavior by deploying a small package to a dummy server and letting the script run there.</p>
+
+<p>We mostly want this feature to simplify tasks such as sending email/other notifications when
+deployments are beginning or completed. It might also be useful for a green/blue style
+deployment model where the load balancer needs to toggle just once after the servers
+have been updated.</p>
+
+<p>Without the Ad-hoc feature, one of the stumbling points we run into is sometimes forgetting
+to check the &#8220;Force redeployment&#8221; checkbox that Octopus leaves unchecked. When we forget,
+some steps get skipped leading to confusing results.</p>
+
+<h2>Looking Ahead</h2>
+
+<p>Because of the level of automation we integrated with Octopus, our business is able to
+deploy software more frequently and more reliably than ever before. In the coming
+months and years, we look forward to seeing improvements in Octopus features that will
+help us with cloud deployments to AWS or Azure. Octopus has definitely filled a gap
+in our deployment capabilities, allowing us to deliver value to our business quickly,
+iteratively and predictably.</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[How The Motley Fool Uses NuGet (Part 2)]]></title>
