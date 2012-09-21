@@ -4,7 +4,7 @@
   <title><![CDATA[Chris Eldredge]]></title>
   <link href="http://chriseldredge.github.com/atom.xml" rel="self"/>
   <link href="http://chriseldredge.github.com/"/>
-  <updated>2012-09-18T12:06:47-04:00</updated>
+  <updated>2012-09-21T09:55:31-04:00</updated>
   <id>http://chriseldredge.github.com/</id>
   <author>
     <name><![CDATA[Chris Eldredge]]></name>
@@ -12,6 +12,130 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[RavenDB NuGet Review]]></title>
+    <link href="http://chriseldredge.github.com/blog/2012/09/21/ravendb-nuget-review/"/>
+    <updated>2012-09-21T15:25:00-04:00</updated>
+    <id>http://chriseldredge.github.com/blog/2012/09/21/ravendb-nuget-review</id>
+    <content type="html"><![CDATA[<p><a href="http://ayende.com/blog">Ayende</a> has been doing a series of posts about how simple and fast RavenDB is, using NuGet
+as an example and pointing out some <a href="http://blog.nuget.org/20120824/nuget-feed-performance-update.html">complex, poorly performing queries</a>
+that have been bogging down nuget.org recently.</p>
+
+<p>Series 1</p>
+
+<ol>
+<li><a href="http://ayende.com/blog/158145/nuget-perf-problems-part-i">NuGet Perf Problems, part I</a></li>
+<li><a href="http://ayende.com/blog/158177/nuget-perf-problem-part-iindash-importing-to-ravendb">Nuget Perf Problem, Part II-Importing To RavenDB</a></li>
+<li><a href="http://ayende.com/blog/158209/nuget-perf-part-iiindash-displaying-the-packages-page">NuGet Perf, Part III-Displaying the Packages page</a></li>
+<li><a href="http://ayende.com/blog/158210/nuget-perf-part-ivndash-modeling-the-packages">NuGet Perf, Part IV-Modeling the packages</a></li>
+<li><a href="http://ayende.com/blog/158211/nugget-perf-part-vndash-searching-packages">NugGet Perf, Part V-Searching Packages</a></li>
+<li><a href="http://ayende.com/blog/158241/nuget-perf-part-vi-aka-how-to-be-the-most-popular-dev-around">NuGet Perf, Part VI AKA how to be the most popular dev around</a></li>
+<li><a href="http://ayende.com/blog/158242/nuget-perf-part-vii-aka-getting-results-is-only-half-the-work">NuGet Perf, Part VII AKA getting results is only half the work</a></li>
+<li><a href="http://ayende.com/blog/158465/nuget-perf-part-viii-correcting-a-mistake-and-doing-aggregations">NuGet Perf, Part VIII: Correcting a mistake and doing aggregations</a></li>
+</ol>
+
+
+<p>Series 2</p>
+
+<ol>
+<li><a href="http://ayende.com/blog/158529/nuget-perf-the-final-part-ndash-load-testing-ndash-setup">NuGet Perf, The Final Part - Load Testing - Setup</a></li>
+<li><a href="http://ayende.com/blog/158530/nuget-perf-the-final-part-ndash-load-testing-ndash-the-tests">NuGet Perf, The Final Part - Load Testing - The Tests</a></li>
+<li><a href="http://ayende.com/blog/158561/nuget-perf-the-final-part-ndash-loading-testing-ndash-results">NuGet Perf, The Final Part - Load Testing - The Results</a></li>
+<li><a href="http://ayende.com/blog/158593/nuget-perf-the-final-part-ndash-load-testing-ndash-results-2">NuGet Perf, The Final Part - Load Testing - Results ^ 2</a></li>
+<li><a href="http://ayende.com/blog/158625/nuget-perf-the-final-part-ndash-load-testing-ndash-source-code">NuGet Perf, The Final Part - Load Testing - Source Code</a></li>
+</ol>
+
+
+<p>This series piqued my interest given that I&#8217;ve been working on Lucene.Net.Linq and integrating it with NuGet.Server. I haven&#8217;t worked
+directly with RavenDB, but I have used some products like Octopus Deploy which uses RavenDB. It seems like a pretty cool product and
+I don&#8217;t have anything against it. However, there are some problems with the blog series that might lead the casual reader
+to be misled about what has been accomplished, especially with regards to declarations of victory and some misleading
+performance numbers.</p>
+
+<p>I know the blog series is only meant to show off RavenDB and give potential users an idea of what their code might look like,
+but nonetheless some hefty claims are made about performance in comparison to the Entity Framework / SQL Server solution in
+use at <a href="http://nuget.org/">nuget.org</a>. Let&#8217;s take a look.</p>
+
+<h2>Pick a Schema, Any Schema Will Do</h2>
+
+<p>Of course if you&#8217;re going to model data in a new persistence layer, it makes perfect sense to simplify or improve the
+way your data is stored and indexed for later retrieval. Ayende points out some problems with the dense, non-semantic
+way some fields are stored in nuget, such as dependency versions and tags. He uses these as examples that illustrate
+how RavenDB can handle nested collections of strings and complex objects.</p>
+
+<p>That&#8217;s great and all, but if we&#8217;re redesigning the schema, we&#8217;ve already changed the rules. Nuget.org is having some
+trouble specifically because of a poorly designed schema that requires too many joins and some other complex hoop-jumping
+to execute some frequently used queries.</p>
+
+<p>Furthermore, regardless of how the data is stored behind the server, NuGet uses an OData API to expose its packages
+to clients. If you change the schema, you have to do it in a way that remains compatible with that client API, or
+the millions of installed instances suddenly stop working.</p>
+
+<h2>Semantic Version Sort vs. Lexical Sort</h2>
+
+<p>One of the primary ways that packages are sorted in NuGet is by version. Unfortunately, the complex nature of
+semantic versions, such as 0.9-alpha or 1.0.5, makes it impossible to sort them correctly using a basic lexical sort.
+For example, 1.0-alpha should get sorted before 1.0, and 1.2 should get sorted before 1.10. With lexical sort
+they do not.</p>
+
+<p>This problem was pointed out in a comment on <a href="http://ayende.com/blog/158210/nuget-perf-part-ivndash-modeling-the-packages">Part IV</a>
+but left unresolved.</p>
+
+<h2>Review</h2>
+
+<p>In using NuGet as an example for RavenDB, the following features are not addressed:</p>
+
+<ol>
+<li>Providing a backwards-compatible OData endpoint</li>
+<li>Sorting correctly by package version</li>
+<li>Storing and retrieving package contents (only package metadata is addressed)</li>
+<li>Adding new packages into the index</li>
+<li>Keeping track of download counters (per-package and total)</li>
+</ol>
+
+
+<p>Without addressing adding new packages and tracking downloads, the data store is effectively read-only,
+meaning that caches never get invalidated and there are no writes to disk. Based on this criteria, is
+it really fair to compare performance benchmarks between this sample and a real, production system?</p>
+
+<h2>The Load Tests</h2>
+
+<p>In the next part of the series, the sample system is put under some load to see what kind of performance
+RavenDB can provide when there are concurrent users. <a href="http://ayende.com/blog/158530/nuget-perf-the-final-part-ndash-load-testing-ndash-the-tests">The Tests</a>
+goes into some detail about the load testing plan.</p>
+
+<p>Reviewing the load test, we have another obvious problem: only a handful of sample queries are being used.
+When the number of search queries is low, say, under 10, the system under load can simply cache the results
+from the previous time the query was executed and return that to the user. Since there isn&#8217;t any variance
+in which columns are used to sort, what page is retrieved, etc., the system under load doesn&#8217;t have to think
+very hard at all.</p>
+
+<p>Combine the simplicity of the test plan with the fact that the system under test is not doing any writes at all,
+and you might as well be slinging static html at that point. I guess it does validate, if nothing else, that
+the caching built into RavenDB works.</p>
+
+<p>One indicator that the load test isn&#8217;t really hitting any critical thresholds is that Pages/Sec grows pretty
+linearly as User Load ramps up. If the system hit such a threshold, one would expect Pages/Sec to peak at
+a certain rate and (ideally) sustain that rate as concurrency continues to grow.</p>
+
+<h2>Summary</h2>
+
+<p>To reiterate, I&#8217;m not trying to bash RavenDB, which I&#8217;m sure is an awesome product and probably really would
+perform very effectively under load similar to that experienced by <a href="http://nuget.org/">nuget.org</a>. However,
+casual observers may come away with unrealistic expectations after reading the performance results offered
+up on <a href="http://ayende.com">ayende.com</a>.</p>
+
+<h2>Why Do I Care</h2>
+
+<p>If Ayende had picked virtually any example other than NuGet packages to do a blog series on, I probably would have
+read along and not thought much about any of it. But having worked on NuGet.Server + Lucene.Net.Linq for
+several months earlier this year, the subject matter is near and dear to my heart.</p>
+
+<p>In future posts I&#8217;ll get into some more compare and contrast on RavenDB vs. <a href="https://github.com/themotleyfool/Lucene.Net.Linq">Lucene.Net.Linq</a>
+and maybe do a load test of my own of our <a href="https://github.com/themotleyfool/NuGet/downloads">custom NuGet.Server builds</a>.</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[How The Motley Fool Uses Octopus Deploy]]></title>

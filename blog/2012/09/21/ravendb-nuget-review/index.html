@@ -1,0 +1,376 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>RavenDB NuGet Review - Chris Eldredge</title>
+  <meta name="author" content="Chris Eldredge">
+
+  
+  <meta name="description" content="Ayende has been doing a series of posts about how simple and fast RavenDB is, using NuGet
+as an example and pointing out some complex, poorly &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://chriseldredge.github.com/blog/2012/09/21/ravendb-nuget-review/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="/javascripts/ender.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="/atom.xml" rel="alternate" title="Chris Eldredge" type="application/atom+xml">
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-30472598-1']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Chris Eldredge</a></h1>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:chriseldredge.github.com" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/about/">About</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">RavenDB NuGet Review</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-09-21T15:25:00-04:00" pubdate data-updated="true">Sep 21<span>st</span>, 2012</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p><a href="http://ayende.com/blog">Ayende</a> has been doing a series of posts about how simple and fast RavenDB is, using NuGet
+as an example and pointing out some <a href="http://blog.nuget.org/20120824/nuget-feed-performance-update.html">complex, poorly performing queries</a>
+that have been bogging down nuget.org recently.</p>
+
+<p>Series 1</p>
+
+<ol>
+<li><a href="http://ayende.com/blog/158145/nuget-perf-problems-part-i">NuGet Perf Problems, part I</a></li>
+<li><a href="http://ayende.com/blog/158177/nuget-perf-problem-part-iindash-importing-to-ravendb">Nuget Perf Problem, Part II-Importing To RavenDB</a></li>
+<li><a href="http://ayende.com/blog/158209/nuget-perf-part-iiindash-displaying-the-packages-page">NuGet Perf, Part III-Displaying the Packages page</a></li>
+<li><a href="http://ayende.com/blog/158210/nuget-perf-part-ivndash-modeling-the-packages">NuGet Perf, Part IV-Modeling the packages</a></li>
+<li><a href="http://ayende.com/blog/158211/nugget-perf-part-vndash-searching-packages">NugGet Perf, Part V-Searching Packages</a></li>
+<li><a href="http://ayende.com/blog/158241/nuget-perf-part-vi-aka-how-to-be-the-most-popular-dev-around">NuGet Perf, Part VI AKA how to be the most popular dev around</a></li>
+<li><a href="http://ayende.com/blog/158242/nuget-perf-part-vii-aka-getting-results-is-only-half-the-work">NuGet Perf, Part VII AKA getting results is only half the work</a></li>
+<li><a href="http://ayende.com/blog/158465/nuget-perf-part-viii-correcting-a-mistake-and-doing-aggregations">NuGet Perf, Part VIII: Correcting a mistake and doing aggregations</a></li>
+</ol>
+
+
+<p>Series 2</p>
+
+<ol>
+<li><a href="http://ayende.com/blog/158529/nuget-perf-the-final-part-ndash-load-testing-ndash-setup">NuGet Perf, The Final Part - Load Testing - Setup</a></li>
+<li><a href="http://ayende.com/blog/158530/nuget-perf-the-final-part-ndash-load-testing-ndash-the-tests">NuGet Perf, The Final Part - Load Testing - The Tests</a></li>
+<li><a href="http://ayende.com/blog/158561/nuget-perf-the-final-part-ndash-loading-testing-ndash-results">NuGet Perf, The Final Part - Load Testing - The Results</a></li>
+<li><a href="http://ayende.com/blog/158593/nuget-perf-the-final-part-ndash-load-testing-ndash-results-2">NuGet Perf, The Final Part - Load Testing - Results ^ 2</a></li>
+<li><a href="http://ayende.com/blog/158625/nuget-perf-the-final-part-ndash-load-testing-ndash-source-code">NuGet Perf, The Final Part - Load Testing - Source Code</a></li>
+</ol>
+
+
+<p>This series piqued my interest given that I&#8217;ve been working on Lucene.Net.Linq and integrating it with NuGet.Server. I haven&#8217;t worked
+directly with RavenDB, but I have used some products like Octopus Deploy which uses RavenDB. It seems like a pretty cool product and
+I don&#8217;t have anything against it. However, there are some problems with the blog series that might lead the casual reader
+to be misled about what has been accomplished, especially with regards to declarations of victory and some misleading
+performance numbers.</p>
+
+<p>I know the blog series is only meant to show off RavenDB and give potential users an idea of what their code might look like,
+but nonetheless some hefty claims are made about performance in comparison to the Entity Framework / SQL Server solution in
+use at <a href="http://nuget.org/">nuget.org</a>. Let&#8217;s take a look.</p>
+
+<h2>Pick a Schema, Any Schema Will Do</h2>
+
+<p>Of course if you&#8217;re going to model data in a new persistence layer, it makes perfect sense to simplify or improve the
+way your data is stored and indexed for later retrieval. Ayende points out some problems with the dense, non-semantic
+way some fields are stored in nuget, such as dependency versions and tags. He uses these as examples that illustrate
+how RavenDB can handle nested collections of strings and complex objects.</p>
+
+<p>That&#8217;s great and all, but if we&#8217;re redesigning the schema, we&#8217;ve already changed the rules. Nuget.org is having some
+trouble specifically because of a poorly designed schema that requires too many joins and some other complex hoop-jumping
+to execute some frequently used queries.</p>
+
+<p>Furthermore, regardless of how the data is stored behind the server, NuGet uses an OData API to expose its packages
+to clients. If you change the schema, you have to do it in a way that remains compatible with that client API, or
+the millions of installed instances suddenly stop working.</p>
+
+<h2>Semantic Version Sort vs. Lexical Sort</h2>
+
+<p>One of the primary ways that packages are sorted in NuGet is by version. Unfortunately, the complex nature of
+semantic versions, such as 0.9-alpha or 1.0.5, makes it impossible to sort them correctly using a basic lexical sort.
+For example, 1.0-alpha should get sorted before 1.0, and 1.2 should get sorted before 1.10. With lexical sort
+they do not.</p>
+
+<p>This problem was pointed out in a comment on <a href="http://ayende.com/blog/158210/nuget-perf-part-ivndash-modeling-the-packages">Part IV</a>
+but left unresolved.</p>
+
+<h2>Review</h2>
+
+<p>In using NuGet as an example for RavenDB, the following features are not addressed:</p>
+
+<ol>
+<li>Providing a backwards-compatible OData endpoint</li>
+<li>Sorting correctly by package version</li>
+<li>Storing and retrieving package contents (only package metadata is addressed)</li>
+<li>Adding new packages into the index</li>
+<li>Keeping track of download counters (per-package and total)</li>
+</ol>
+
+
+<p>Without addressing adding new packages and tracking downloads, the data store is effectively read-only,
+meaning that caches never get invalidated and there are no writes to disk. Based on this criteria, is
+it really fair to compare performance benchmarks between this sample and a real, production system?</p>
+
+<h2>The Load Tests</h2>
+
+<p>In the next part of the series, the sample system is put under some load to see what kind of performance
+RavenDB can provide when there are concurrent users. <a href="http://ayende.com/blog/158530/nuget-perf-the-final-part-ndash-load-testing-ndash-the-tests">The Tests</a>
+goes into some detail about the load testing plan.</p>
+
+<p>Reviewing the load test, we have another obvious problem: only a handful of sample queries are being used.
+When the number of search queries is low, say, under 10, the system under load can simply cache the results
+from the previous time the query was executed and return that to the user. Since there isn&#8217;t any variance
+in which columns are used to sort, what page is retrieved, etc., the system under load doesn&#8217;t have to think
+very hard at all.</p>
+
+<p>Combine the simplicity of the test plan with the fact that the system under test is not doing any writes at all,
+and you might as well be slinging static html at that point. I guess it does validate, if nothing else, that
+the caching built into RavenDB works.</p>
+
+<p>One indicator that the load test isn&#8217;t really hitting any critical thresholds is that Pages/Sec grows pretty
+linearly as User Load ramps up. If the system hit such a threshold, one would expect Pages/Sec to peak at
+a certain rate and (ideally) sustain that rate as concurrency continues to grow.</p>
+
+<h2>Summary</h2>
+
+<p>To reiterate, I&#8217;m not trying to bash RavenDB, which I&#8217;m sure is an awesome product and probably really would
+perform very effectively under load similar to that experienced by <a href="http://nuget.org/">nuget.org</a>. However,
+casual observers may come away with unrealistic expectations after reading the performance results offered
+up on <a href="http://ayende.com">ayende.com</a>.</p>
+
+<h2>Why Do I Care</h2>
+
+<p>If Ayende had picked virtually any example other than NuGet packages to do a blog series on, I probably would have
+read along and not thought much about any of it. But having worked on NuGet.Server + Lucene.Net.Linq for
+several months earlier this year, the subject matter is near and dear to my heart.</p>
+
+<p>In future posts I&#8217;ll get into some more compare and contrast on RavenDB vs. <a href="https://github.com/themotleyfool/Lucene.Net.Linq">Lucene.Net.Linq</a>
+and maybe do a load test of my own of our <a href="https://github.com/themotleyfool/NuGet/downloads">custom NuGet.Server builds</a>.</p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Chris Eldredge</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-09-21T15:25:00-04:00" pubdate data-updated="true">Sep 21<span>st</span>, 2012</time>
+      
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://chriseldredge.github.com/blog/2012/09/21/ravendb-nuget-review/" data-via="creldredge" data-counturl="http://chriseldredge.github.com/blog/2012/09/21/ravendb-nuget-review/" >Tweet</a>
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2012/09/06/how-the-motley-fool-uses-octopus-deploy/" title="Previous Post: How The Motley Fool Uses Octopus Deploy">&laquo; How The Motley Fool Uses Octopus Deploy</a>
+      
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2012/09/21/ravendb-nuget-review/">RavenDB NuGet Review</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2012/09/06/how-the-motley-fool-uses-octopus-deploy/">How The Motley Fool Uses Octopus Deploy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2012/08/20/how-the-motley-fool-uses-nuget-part-2/">How The Motley Fool Uses NuGet (Part 2)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2012/08/07/how-the-motley-fool-uses-nuget/">How The Motley Fool uses NuGet (part 1)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2012/07/26/MSBuild-NuGet-Visual-Studio-Hackery/">MSBuild, Visual Studio & NuGet Hackery</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+<section>
+  <h1>Latest Tweets</h1>
+  <ul id="tweets">
+    <li class="loading">Status updating...</li>
+  </ul>
+  <script type="text/javascript">
+    $.domReady(function(){
+      getTwitterFeed("creldredge", 4, false);
+    });
+  </script>
+  <script src="/javascripts/twitter.js" type="text/javascript"> </script>
+  
+    <a href="http://twitter.com/creldredge" class="twitter-follow-button" data-show-count="false">Follow @creldredge</a>
+  
+</section>
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2012 - Chris Eldredge -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'chriseldredge';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://chriseldredge.github.com/blog/2012/09/21/ravendb-nuget-review/';
+        var disqus_url = 'http://chriseldredge.github.com/blog/2012/09/21/ravendb-nuget-review/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>
