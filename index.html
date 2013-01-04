@@ -9,8 +9,8 @@
   <meta name="author" content="Chris Eldredge">
 
   
-  <meta name="description" content="Ayende has been doing a series of posts about how simple and fast RavenDB is, using NuGet
-as an example and pointing out some complex, poorly &hellip;">
+  <meta name="description" content="Since we&#8217;re starting a new year and health &amp; fitness are on the mind, here&#8217;s how I attempt
+to combat the negative affects of the &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -76,6 +76,112 @@ as an example and pointing out some complex, poorly &hellip;">
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2013/01/04/sitting-at-your-desk-is-killing-you/">Sitting at Your Desk Is Killing You</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-01-04T10:44:00-05:00" pubdate data-updated="true">Jan 4<span>th</span>, 2013</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>Since we&#8217;re starting a new year and health &amp; fitness are on the mind, here&#8217;s how I attempt
+to combat the negative affects of the sedentary lifestyle of the professional programmer.</p>
+
+<p>I came across the <a href="http://ergo.human.cornell.edu/">Cornell University Ergonomics Department</a>&#8217;s
+research summarization on <a href="http://ergo.human.cornell.edu/CUESitStand.html">Sitting and Standing at Work</a>
+a few years ago. The article starts off by describing some scary correlations between
+glucose metabolism, heart disease and kidney disease with sitting for prolonged periods of time,
+then goes to say that regular aerobic exercise does not seem to counteract some of the negative
+affects.</p>
+
+<p>The recommended activity is to take a short, 2 minute break every 20-30 minutes and move around.
+The theory is that taking a short walk or doing other light exercise increases circulation and
+encourages the metabolism to burn blood sugar instead of storing it as fat.</p>
+
+<h2>Workrave</h2>
+
+<p>Since I work in a c#/.net shop, my workstation is a Windows PC, so I found a program called
+<a href="http://www.workrave.org/">Workrave</a>. It also runs on Linux, but if you&#8217;re a Mac user there
+are programs that do similar things too.</p>
+
+<p>Workrave is designed primarily to prevent a different ailment: Repetitive Strain Injury (RSI).
+To that end, the program aims to remind the user to take &#8220;micro breaks&#8221; every 10-15 minutes
+to let the wrists and fingers rest or give them a nice stretch. Workrave also has an optional
+daily limit feature that will tell you when you&#8217;ve been at the keyboard for too many hours
+in a day, and politely ask you to drop what you&#8217;re doing until tomorrow.</p>
+
+<p>Personally, I haven&#8217;t had much trouble with wrist pain, so I don&#8217;t use the micro-break and
+daily limit features. But Workrave also has a &#8220;Rest break&#8221; timer that you can customize to
+remind you to take a break.</p>
+
+<p>For my purposes, Workrave is really just a glorified countdown timer, but it has a pretty
+friendly notification system that gets your attention but doesn&#8217;t completely interrupt
+your work when the time comes due. It also has a nice option to postpone or skip a rest
+break when it comes due.</p>
+
+<p>One important caveat about Workrave: since it was created to prevent RSI, the program
+only runs the timer by default when it detects keyboard and mouse activity. So if you
+spend lots of time reading code, browsing, reading e-mail and the like, Workrave will
+go significantly longer than the time limit you set before asking you to take a break.
+This is easily fixed however by enabling the &#8220;Reading mode&#8221; option, which causes the
+timer to run continuously regardless of whether you are reading or typing and mousing.</p>
+
+<p>Workrave also has built-in suggested exercises you can try during breaks that help
+relax your eyes, stretch the neck and things like that. These are pretty useful, but
+it&#8217;s paramount to get out of the chair and get your blood flowing. I largely ignore
+the built in exercises and just go for a short walk.</p>
+
+<h2>Breaks</h2>
+
+<p>The trouble you inevitably run into is that getting little reminders to take breaks
+can be distracting. Programmers, like anybody else, are most productive when they
+achieve that state of mind known as <a href="http://en.wikipedia.org/wiki/Flow_(psychology)">flow</a>,
+where attention to the task at hand is so focused that even the passing of time
+fades away. The notification UI is subtle enough that I find I can often postpone
+a rest break without losing much focus, but the trouble is that the whole point
+is to get up and move away from the computer at least every 30 minutes.</p>
+
+<p>When I really get into the zone, I still struggle sometimes with tearing myself
+away, and I end up hitting postpone repeatedly. But whenever I do take a break
+I find that I can come back and settle back into my work quickly without having to
+warm up again. Plenty has been written about the negative affects of
+&#8220;context switching&#8221; between various tasks, but taking a short break actually
+lets you keep noodling on the same task while you take a brief walk around.
+Sometimes taking your eyes off the code lets you think about a problem from
+a different angle. I&#8217;ve actually found it beneficial to take these breaks
+while debugging or troubleshooting a tough problem that I&#8217;ve been stuck on.</p>
+
+<h2>Conclusion</h2>
+
+<p>Sitting all day is bad for you. Working out after work doesn&#8217;t change that.
+Twice an hour, get up and move around. It&#8217;s good for your health and productivity.</p>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -1579,93 +1685,9 @@ any NumericFields before adding the document back to the index, even if they did
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2012/03/29/Getting-Started-With-Relinq/">Getting Started With Re-linq</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-03-29T00:00:00-04:00" pubdate data-updated="true">Mar 29<span>th</span>, 2012</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h2>The IQueryable Conundrum</h2>
-
-<p>So, you have a datasource you can access from .net and you thought, hey wouldn&#8217;t it be
-cool if I could wire this up with LINQ?</p>
-
-<p>Maybe you&#8217;ve read about how <a href="http://blog.ploeh.dk/2012/03/26/IQueryableIsTightCoupling.aspx">IQueryable is Tight Coupling</a>,
-but you figure that you&#8217;re connecting up a low-level datasource and you&#8217;ll probably encapsulate the messy IQueryable stuff
-in your domain. So you forge ahead.</p>
-
-<p>You create a class that implements IQueryable, maybe using
-<a href="http://msdn.microsoft.com/en-us/library/bb546158.aspx">Walkthrough: Creating an IQueryable LINQ Provider</a>
-as a starting point.</p>
-
-<p>Now you&#8217;re left with an Expression object and you get to figure out what to do with it. Sure, you
-can use reflection like the MSDN example demonstrates, but some lingering doubt enters in when you
-realize how complex even the most basic statements will be to parse.</p>
-
-<p>Then maybe you find a new resource: <a href="http://blogs.msdn.com/b/mattwar/archive/2008/11/18/linq-links.aspx">LINQ: Building an IQueryable provider series</a>
-and you think, hey, only 17 massive posts to trudge through.</p>
-
-<p>Ok, so this is no work for the weary. No wonder we don&#8217;t have scads of LINQ providers floating around on codeplex.com and codeproject.com.</p>
-
-<h2>Enter re-linq</h2>
-
-<p><a href="http://relinq.codeplex.com/">re-linq</a> is an open source project that attempts to ease the burden of implementing IQueryable.</p>
-
-<p>It seems like a great project that should help you write less code, but there&#8217;s just one problem: re-linq has zero documentation.</p>
-
-<p>Their project page links to the tantalizingly friendly example <a href="http://www.codeproject.com/Articles/42059/re-linq-ishing-the-Pain-Using-re-linq-to-Implement">re-linq|ishing the Pain: Using re-linq to Implement a Powerful LINQ Provider on the Example of NHibernate</a>,
-but after you download the code you realize soon enough that the project is outdated and doesn&#8217;t even compile against re-linq 1.13.</p>
-
-<p>Alas, you have one demo project to go on as supplied in the re-linq source bundle: Linq.LinqToSqlAppender. Needlesstosay,
-this project is arguably more complex than the actual support library it builds on. For someone trying to get started, looking
-at a provider that generates SQL queries is probably a little too complex of a starting point.</p>
-
-<h2>The Bare Bones</h2>
-
-<p>Submitted for your entertainment, here lies the recipe for the most basic shell you can use to build upon re-linq.</p>
-
-<p>First, create a new c# project.  Then using Nuget or going on your own, grab a copy of Remotion.Linq
-(In the Package Manager Coneole, type <tt>Install-Package Remotion.Linq</tt>)</p>
-
-<p>One you have your project ready, here&#8217;s your code:</p>
-
-<script src="https://gist.github.com/2246429.js"> </script>
-
-
-<p>This implementation completely ignores the &#8220;where&#8221; clause, &#8220;order&#8221; clause, and any other clause you can
-name besides &#8220;select&#8221;.  It just returns the entire collection of items in the data source.</p>
-
-<p>Up next, translating the where clause.</p>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
+    
+      <a class="prev" href="/blog/page/2/">&larr; Older</a>
     
     <a href="/blog/archives">Blog Archives</a>
     
@@ -1676,6 +1698,10 @@ name besides &#8220;select&#8221;.  It just returns the entire collection of ite
     <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2013/01/04/sitting-at-your-desk-is-killing-you/">Sitting at Your Desk is Killing You</a>
+      </li>
     
       <li class="post">
         <a href="/blog/2012/09/21/ravendb-nuget-review/">RavenDB NuGet Review</a>
@@ -1691,10 +1717,6 @@ name besides &#8220;select&#8221;.  It just returns the entire collection of ite
     
       <li class="post">
         <a href="/blog/2012/08/07/how-the-motley-fool-uses-nuget/">How The Motley Fool uses NuGet (part 1)</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2012/07/26/MSBuild-NuGet-Visual-Studio-Hackery/">MSBuild, Visual Studio & NuGet Hackery</a>
       </li>
     
   </ul>
@@ -1727,7 +1749,7 @@ name besides &#8220;select&#8221;.  It just returns the entire collection of ite
     </div>
   </div>
   <footer role="contentinfo"><p>
-  Copyright &copy; 2012 - Chris Eldredge -
+  Copyright &copy; 2013 - Chris Eldredge -
   <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
 </p>
 

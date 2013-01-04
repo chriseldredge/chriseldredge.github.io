@@ -5,14 +5,12 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>Blog Archive - Chris Eldredge</title>
+  <title>Chris Eldredge</title>
   <meta name="author" content="Chris Eldredge">
 
   
-  <meta name="description" content="Blog Archive 2013 Sitting at Your Desk is Killing You
-Jan 04 2013 2012 RavenDB NuGet Review
-Sep 21 2012 How The Motley Fool Uses Octopus Deploy
-Sep &hellip;">
+  <meta name="description" content="The IQueryable Conundrum So, you have a datasource you can access from .net and you thought, hey wouldn&#8217;t it be
+cool if I could wire this up &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -21,7 +19,7 @@ Sep &hellip;">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://chriseldredge.github.com/blog/archives/">
+  <link rel="canonical" href="http://chriseldredge.github.com/blog/page/2/">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <script src="/javascripts/modernizr-2.0.js"></script>
@@ -76,139 +74,103 @@ Sep &hellip;">
 </nav>
   <div id="main">
     <div id="content">
-      <div>
-<article role="article">
+      <div class="blog-index">
   
+  
+  
+    <article>
+      
   <header>
-    <h1 class="entry-title">Blog Archive</h1>
+    
+      <h1 class="entry-title"><a href="/blog/2012/03/29/Getting-Started-With-Relinq/">Getting Started With Re-linq</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-03-29T00:00:00-04:00" pubdate data-updated="true">Mar 29<span>th</span>, 2012</time>
+        
+      </p>
     
   </header>
-  
-  <div id="blog-archives">
 
 
+  <div class="entry-content"><h2>The IQueryable Conundrum</h2>
 
-  
-  <h2>2013</h2>
+<p>So, you have a datasource you can access from .net and you thought, hey wouldn&#8217;t it be
+cool if I could wire this up with LINQ?</p>
 
-<article>
-  
-<h1><a href="/blog/2013/01/04/sitting-at-your-desk-is-killing-you/">Sitting at Your Desk is Killing You</a></h1>
-<time datetime="2013-01-04T10:44:00-05:00" pubdate><span class='month'>Jan</span> <span class='day'>04</span> <span class='year'>2013</span></time>
+<p>Maybe you&#8217;ve read about how <a href="http://blog.ploeh.dk/2012/03/26/IQueryableIsTightCoupling.aspx">IQueryable is Tight Coupling</a>,
+but you figure that you&#8217;re connecting up a low-level datasource and you&#8217;ll probably encapsulate the messy IQueryable stuff
+in your domain. So you forge ahead.</p>
 
+<p>You create a class that implements IQueryable, maybe using
+<a href="http://msdn.microsoft.com/en-us/library/bb546158.aspx">Walkthrough: Creating an IQueryable LINQ Provider</a>
+as a starting point.</p>
 
-</article>
+<p>Now you&#8217;re left with an Expression object and you get to figure out what to do with it. Sure, you
+can use reflection like the MSDN example demonstrates, but some lingering doubt enters in when you
+realize how complex even the most basic statements will be to parse.</p>
 
+<p>Then maybe you find a new resource: <a href="http://blogs.msdn.com/b/mattwar/archive/2008/11/18/linq-links.aspx">LINQ: Building an IQueryable provider series</a>
+and you think, hey, only 17 massive posts to trudge through.</p>
 
+<p>Ok, so this is no work for the weary. No wonder we don&#8217;t have scads of LINQ providers floating around on codeplex.com and codeproject.com.</p>
 
-  
-  <h2>2012</h2>
+<h2>Enter re-linq</h2>
 
-<article>
-  
-<h1><a href="/blog/2012/09/21/ravendb-nuget-review/">RavenDB NuGet Review</a></h1>
-<time datetime="2012-09-21T15:25:00-04:00" pubdate><span class='month'>Sep</span> <span class='day'>21</span> <span class='year'>2012</span></time>
+<p><a href="http://relinq.codeplex.com/">re-linq</a> is an open source project that attempts to ease the burden of implementing IQueryable.</p>
 
+<p>It seems like a great project that should help you write less code, but there&#8217;s just one problem: re-linq has zero documentation.</p>
 
-</article>
+<p>Their project page links to the tantalizingly friendly example <a href="http://www.codeproject.com/Articles/42059/re-linq-ishing-the-Pain-Using-re-linq-to-Implement">re-linq|ishing the Pain: Using re-linq to Implement a Powerful LINQ Provider on the Example of NHibernate</a>,
+but after you download the code you realize soon enough that the project is outdated and doesn&#8217;t even compile against re-linq 1.13.</p>
 
+<p>Alas, you have one demo project to go on as supplied in the re-linq source bundle: Linq.LinqToSqlAppender. Needlesstosay,
+this project is arguably more complex than the actual support library it builds on. For someone trying to get started, looking
+at a provider that generates SQL queries is probably a little too complex of a starting point.</p>
 
+<h2>The Bare Bones</h2>
 
-<article>
-  
-<h1><a href="/blog/2012/09/06/how-the-motley-fool-uses-octopus-deploy/">How The Motley Fool Uses Octopus Deploy</a></h1>
-<time datetime="2012-09-06T11:23:00-04:00" pubdate><span class='month'>Sep</span> <span class='day'>06</span> <span class='year'>2012</span></time>
+<p>Submitted for your entertainment, here lies the recipe for the most basic shell you can use to build upon re-linq.</p>
 
+<p>First, create a new c# project.  Then using Nuget or going on your own, grab a copy of Remotion.Linq
+(In the Package Manager Coneole, type <tt>Install-Package Remotion.Linq</tt>)</p>
 
-</article>
+<p>One you have your project ready, here&#8217;s your code:</p>
 
-
-
-<article>
-  
-<h1><a href="/blog/2012/08/20/how-the-motley-fool-uses-nuget-part-2/">How The Motley Fool Uses NuGet (Part 2)</a></h1>
-<time datetime="2012-08-20T13:56:00-04:00" pubdate><span class='month'>Aug</span> <span class='day'>20</span> <span class='year'>2012</span></time>
-
-
-</article>
-
-
-
-<article>
-  
-<h1><a href="/blog/2012/08/07/how-the-motley-fool-uses-nuget/">How The Motley Fool uses NuGet (part 1)</a></h1>
-<time datetime="2012-08-07T14:25:00-04:00" pubdate><span class='month'>Aug</span> <span class='day'>07</span> <span class='year'>2012</span></time>
+<script src="https://gist.github.com/2246429.js"> </script>
 
 
-</article>
+<p>This implementation completely ignores the &#8220;where&#8221; clause, &#8220;order&#8221; clause, and any other clause you can
+name besides &#8220;select&#8221;.  It just returns the entire collection of items in the data source.</p>
 
-
-
-<article>
-  
-<h1><a href="/blog/2012/07/26/MSBuild-NuGet-Visual-Studio-Hackery/">MSBuild, Visual Studio & NuGet Hackery</a></h1>
-<time datetime="2012-07-26T00:00:00-04:00" pubdate><span class='month'>Jul</span> <span class='day'>26</span> <span class='year'>2012</span></time>
-
-
-</article>
-
-
-
-<article>
-  
-<h1><a href="/blog/2012/07/24/Unit-of-Work-and-Eventual-Consistency/">Unit of Work & Eventual Consistency</a></h1>
-<time datetime="2012-07-24T00:00:00-04:00" pubdate><span class='month'>Jul</span> <span class='day'>24</span> <span class='year'>2012</span></time>
-
-
-</article>
-
-
-
-<article>
-  
-<h1><a href="/blog/2012/07/03/Speeding-Up-NuGet-Server/">Speeding Up NuGet.Server</a></h1>
-<time datetime="2012-07-03T00:00:00-04:00" pubdate><span class='month'>Jul</span> <span class='day'>03</span> <span class='year'>2012</span></time>
-
-
-</article>
-
-
-
-<article>
-  
-<h1><a href="/blog/2012/05/08/Introducing-Linq-to-Lucene/">Introducing LINQ to Lucene</a></h1>
-<time datetime="2012-05-08T00:00:00-04:00" pubdate><span class='month'>May</span> <span class='day'>08</span> <span class='year'>2012</span></time>
-
-
-</article>
-
-
-
-<article>
-  
-<h1><a href="/blog/2012/04/19/Lucene-NumericField-Gotcha/">Lucene NumericField Gotcha</a></h1>
-<time datetime="2012-04-19T00:00:00-04:00" pubdate><span class='month'>Apr</span> <span class='day'>19</span> <span class='year'>2012</span></time>
-
-
-</article>
-
-
-
-<article>
-  
-<h1><a href="/blog/2012/03/29/Getting-Started-With-Relinq/">Getting Started with Re-linq</a></h1>
-<time datetime="2012-03-29T00:00:00-04:00" pubdate><span class='month'>Mar</span> <span class='day'>29</span> <span class='year'>2012</span></time>
-
-
-</article>
-
+<p>Up next, translating the where clause.</p>
 </div>
-
   
-</article>
+  
 
+
+    </article>
+  
+  <div class="pagination">
+    
+    <a href="/blog/archives">Blog Archives</a>
+    
+    <a class="next" href="/">Newer &rarr;</a>
+    
+  </div>
 </div>
-
 <aside class="sidebar">
   
     <section>
@@ -242,7 +204,7 @@ Sep &hellip;">
 <section>
   <h1>Latest Tweets</h1>
   <ul id="tweets">
-    <li class="loading">Status updating...</li>
+    <li class="loading">Status updating&#8230;</li>
   </ul>
   <script type="text/javascript">
     $.domReady(function(){
@@ -261,7 +223,6 @@ Sep &hellip;">
 
   
 </aside>
-
 
     </div>
   </div>
