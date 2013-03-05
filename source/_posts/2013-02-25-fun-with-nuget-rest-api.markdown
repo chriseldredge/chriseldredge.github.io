@@ -16,7 +16,7 @@ I was going to title this post "Fun with the NuGet REST Api", but then I had to 
 because what NuGet does is pretty far from RESTful. The documentation for
 [Tab Completion Endpoints](https://github.com/NuGet/NuGetGallery/wiki/Tab-Completion-API-Endpoints)
 openly acknowledges this, stating, "We currently don't look at the Accept header or do lots of other
-proper HTTP API stuff". Fair enough.
+proper HTTP API stuff". Caveat emptor.
 
 There have been plenty of well written posts about what REST is and why most things that
 speak json or xml over HTTP are not Restful.
@@ -73,18 +73,10 @@ are available:
             <EntitySet Name="Packages" EntityType="NuGetGallery.V2FeedPackage" />
             <FunctionImport Name="Search" EntitySet="Packages" ReturnType="Collection(NuGetGallery.V2FeedPackage)" m:HttpMethod="GET">
               <Parameter Name="searchTerm" Type="Edm.String" Mode="In" />
-              <Parameter Name="targetFramework" Type="Edm.String" Mode="In" />
               <Parameter Name="includePrerelease" Type="Edm.Boolean" Mode="In" />
             </FunctionImport>
             <FunctionImport Name="FindPackagesById" EntitySet="Packages" ReturnType="Collection(NuGetGallery.V2FeedPackage)" m:HttpMethod="GET">
               <Parameter Name="id" Type="Edm.String" Mode="In" />
-            </FunctionImport>
-            <FunctionImport Name="GetUpdates" EntitySet="Packages" ReturnType="Collection(NuGetGallery.V2FeedPackage)" m:HttpMethod="GET">
-              <Parameter Name="packageIds" Type="Edm.String" Mode="In" />
-              <Parameter Name="versions" Type="Edm.String" Mode="In" />
-              <Parameter Name="includePrerelease" Type="Edm.Boolean" Mode="In" />
-              <Parameter Name="includeAllVersions" Type="Edm.Boolean" Mode="In" />
-              <Parameter Name="targetFrameworks" Type="Edm.String" Mode="In" />
             </FunctionImport>
           </EntityContainer>
         </Schema>
@@ -92,13 +84,13 @@ are available:
     </edmx:Edmx>
 
 This xml vomit says that in addition to the hard-coded, out-of-band RPC API that is OData, you
-can also invoke the Search, FindPackagesById or GetUpdates functions, how to invoke them
+can also invoke the Search and FindPackagesById functions, how to invoke them
 and what parameters they take.
 
 At some point the NuGet developers must have gotten sick of using WCF Data Services, because the endpoints for
 uploading a package, deleting a package, and the tab completion endpoints all are implemented
 without integration with WCF Data Services. That means that these operations are not discoverable
-by a client, so if the client wants to invoke them it has to hard-code their locations.
+by a client, so if the client wants to invoke them it has to know their locations.
 
 The Evolution of a Public API
 -----------------------------
@@ -109,28 +101,28 @@ change the namespace of those resources, or risk breaking older clients.
 SalesForce has at least 26 namespaced versions of some services which causes some problems
 that @kellabyte discusses on a [twitter thread](https://twitter.com/kellabyte/status/276661580257701889).
 
-NuGet has managed to stay on v2 for a while now and we've seen some new features get added
-without forcing everyone to move over to v3. The v2 should never have been introduced, but
-since it is we're stuck with it.
+NuGet in its current form uses /api/v2 for most HTTP API calls, and has managed to stay on v2 for a while
+now. We've seen some new features get added without forcing everyone to move over to v3 yet.
+The v1/v2 crutch should never have been introduced, but since it is we're stuck with it.
 
 Dumb Servers and Dumber Clients
 -------------------------------
 
 Since the server won't tell the client how to invoke certain operations, the client
-must make assumptions and NuGet does exactly this. Stupidly.
+must make assumptions and NuGet does exactly this. Badly.
 
 The tab completion endpoints are predictably dumb. If you deploy a NuGet feed at
 http://example.com/ and point Visual Studio to it, the PowerShell console will
 try to go to http://example.com/api/v2/package-ids. If you deploy the same feed at
 http://example.com/nuget, and point Visual Studio to that, the PowerShell console will
 still try to go to http://example.com/api/v2/package-ids. Note how the /nuget/ part of
-the namespace vanished, and how this will generally result in a 404.
+the namespace vanished. This will generally result in a 404.
 
 Try to push or delete a package and things get more confusing. If you do
-<tt>nuget push Foo.nupkg -source http://example.com/</tt>, instead of blindly appending
-<tt>api/v2</tt> to the URI, the client first does a GET request on the root URI.
+"nuget push Foo.nupkg -source http://example.com/", instead of blindly appending
+api/v2 to the URI, the client first does a GET request on the root URI.
 If that GET request results in a 301/302 Redirect, the client will follow the redirect
-and use that to push the package. However, if the root URI returns some other
+and use that location to push the package. However, if the root URI returns some other
 response code, the client reverts to dumbly hard-coding the path to api/v2/package.
 
 But if you push to a URI that is not the root URI, the client listens to you
@@ -156,5 +148,5 @@ Next
 ----
 
 I would love to see NuGet adopt more RESTful practices with regards to
-its HTTP API, but having one pull request declined already, I'm not sure
+its HTTP API, but having had one pull request declined already, I'm not sure
 how eager I'll be in trying to bring about this change.
