@@ -4,7 +4,7 @@
   <title><![CDATA[Chris Eldredge]]></title>
   <link href="http://chriseldredge.github.com/atom.xml" rel="self"/>
   <link href="http://chriseldredge.github.com/"/>
-  <updated>2013-01-04T13:48:26-05:00</updated>
+  <updated>2013-03-04T20:51:21-05:00</updated>
   <id>http://chriseldredge.github.com/</id>
   <author>
     <name><![CDATA[Chris Eldredge]]></name>
@@ -12,6 +12,160 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Fun with NuGet Web Api]]></title>
+    <link href="http://chriseldredge.github.com/blog/2013/02/25/fun-with-nuget-rest-api/"/>
+    <updated>2013-02-25T10:57:00-05:00</updated>
+    <id>http://chriseldredge.github.com/blog/2013/02/25/fun-with-nuget-rest-api</id>
+    <content type="html"><![CDATA[<p>NuGet is a package management system for .net. Like most things these days, NuGet uses HTTP
+for client/server communication to enable search, download, upload and other operations.</p>
+
+<p>Since I&#8217;ve been working on writing a NuGet web application, I have had the opportunity to
+become intimately familiar with the web api and its wrinkles.</p>
+
+<p>I was going to title this post &#8220;Fun with the NuGet REST Api&#8221;, but then I had to change it
+because what NuGet does is pretty far from RESTful. The documentation for
+<a href="https://github.com/NuGet/NuGetGallery/wiki/Tab-Completion-API-Endpoints">Tab Completion Endpoints</a>
+openly acknowledges this, stating, &#8220;We currently don&#8217;t look at the Accept header or do lots of other
+proper HTTP API stuff&#8221;. Caveat emptor.</p>
+
+<p>There have been plenty of well written posts about what REST is and why most things that
+speak json or xml over HTTP are not Restful.</p>
+
+<ol>
+<li><a href="http://kellabyte.com/2011/09/04/clarifying-rest/">Clarifying REST</a> from @kellabyte</li>
+<li><a href="http://www.ics.uci.edu/~fielding/pubs/dissertation/rest_arch_style.htm">Representational State Transfer (REST)</a> Roy Fielding&#8217;s doctoral thesis</li>
+<li><a href="http://roy.gbiv.com/untangled/2008/rest-apis-must-be-hypertext-driven">REST APIs must be hypertext-driven</a></li>
+</ol>
+
+
+<h2>WCF Data Services and REST</h2>
+
+<p>NuGet has used WCF Data Services (OData) since inception to do the heavy lifting.
+OData kind of sort of does a decent job of adhering to RESTful constraints and
+using hyperlinks that give hints to clients about collections, entities and
+functions that can be invoked on them.</p>
+
+<p>Query the API Root:</p>
+
+<pre><code>curl http://nuget.org/api/v2/
+
+&lt;?xml version="1.0" encoding="utf-8" standalone="yes"?&gt;
+&lt;service xml:base="http://nuget.org/api/v2/" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:app="http://www.w3.org/2007/app" xmlns="http://www.w3.org/2007/app"&gt;
+  &lt;workspace&gt;
+    &lt;atom:title&gt;Default&lt;/atom:title&gt;
+    &lt;collection href="Packages"&gt;
+      &lt;atom:title&gt;Packages&lt;/atom:title&gt;
+    &lt;/collection&gt;
+  &lt;/workspace&gt;
+&lt;/service&gt;
+</code></pre>
+
+<p>You can see there&#8217;s a collection of Packages, and you even get an href that tells you where it is.</p>
+
+<p>Unfortunately it does not tell you about the magic $metadata RPC call that gets you more
+information about the entities contained in the Packages collection, and what other functions
+are available:</p>
+
+<pre><code>curl 'http://nuget.org/api/v2/$metadata'
+
+&lt;?xml version="1.0" encoding="utf-8" standalone="yes"?&gt;
+&lt;edmx:Edmx Version="1.0" xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx"&gt;
+  &lt;edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="2.0"&gt;
+    &lt;Schema Namespace="NuGetGallery" xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" xmlns="http://schemas.microsoft.com/ado/2006/04/edm"&gt;
+      &lt;EntityType Name="V2FeedPackage" m:HasStream="true"&gt;
+        &lt;Key&gt;
+          &lt;PropertyRef Name="Id" /&gt;
+          &lt;PropertyRef Name="Version" /&gt;
+        &lt;/Key&gt;
+        &lt;Property Name="Id" Type="Edm.String" Nullable="false" m:FC_TargetPath="SyndicationTitle" m:FC_ContentKind="text" m:FC_KeepInContent="false" /&gt;
+        &lt;Property Name="Version" Type="Edm.String" Nullable="false" /&gt;
+        &lt;Property Name="Authors" Type="Edm.String" Nullable="true" m:FC_TargetPath="SyndicationAuthorName" m:FC_ContentKind="text" m:FC_KeepInContent="false" /&gt;
+        &lt;snip/&gt;
+      &lt;/EntityType&gt;
+      &lt;EntityContainer Name="FeedContext_x0060_1" m:IsDefaultEntityContainer="true"&gt;
+        &lt;EntitySet Name="Packages" EntityType="NuGetGallery.V2FeedPackage" /&gt;
+        &lt;FunctionImport Name="Search" EntitySet="Packages" ReturnType="Collection(NuGetGallery.V2FeedPackage)" m:HttpMethod="GET"&gt;
+          &lt;Parameter Name="searchTerm" Type="Edm.String" Mode="In" /&gt;
+          &lt;Parameter Name="includePrerelease" Type="Edm.Boolean" Mode="In" /&gt;
+        &lt;/FunctionImport&gt;
+        &lt;FunctionImport Name="FindPackagesById" EntitySet="Packages" ReturnType="Collection(NuGetGallery.V2FeedPackage)" m:HttpMethod="GET"&gt;
+          &lt;Parameter Name="id" Type="Edm.String" Mode="In" /&gt;
+        &lt;/FunctionImport&gt;
+      &lt;/EntityContainer&gt;
+    &lt;/Schema&gt;
+  &lt;/edmx:DataServices&gt;
+&lt;/edmx:Edmx&gt;
+</code></pre>
+
+<p>This xml vomit says that in addition to the hard-coded, out-of-band RPC API that is OData, you
+can also invoke the Search and FindPackagesById functions, how to invoke them
+and what parameters they take.</p>
+
+<p>At some point the NuGet developers must have gotten sick of using WCF Data Services, because the endpoints for
+uploading a package, deleting a package, and the tab completion endpoints all are implemented
+without integration with WCF Data Services. That means that these operations are not discoverable
+by a client, so if the client wants to invoke them it has to know their locations.</p>
+
+<h2>The Evolution of a Public API</h2>
+
+<p>When the client has no way of discovering available resources, that means the server can never
+change the namespace of those resources, or risk breaking older clients.</p>
+
+<p>SalesForce has at least 26 namespaced versions of some services which causes some problems
+that @kellabyte discusses on a <a href="https://twitter.com/kellabyte/status/276661580257701889">twitter thread</a>.</p>
+
+<p>NuGet in its current form uses /api/v2 for most HTTP API calls, and has managed to stay on v2 for a while
+now. We&#8217;ve seen some new features get added without forcing everyone to move over to v3 yet.
+The v1/v2 crutch should never have been introduced, but since it is we&#8217;re stuck with it.</p>
+
+<h2>Dumb Servers and Dumber Clients</h2>
+
+<p>Since the server won&#8217;t tell the client how to invoke certain operations, the client
+must make assumptions and NuGet does exactly this. Badly.</p>
+
+<p>The tab completion endpoints are predictably dumb. If you deploy a NuGet feed at
+http://example.com/ and point Visual Studio to it, the PowerShell console will
+try to go to http://example.com/api/v2/package-ids. If you deploy the same feed at
+http://example.com/nuget, and point Visual Studio to that, the PowerShell console will
+still try to go to http://example.com/api/v2/package-ids. Note how the /nuget/ part of
+the namespace vanished. This will generally result in a 404.</p>
+
+<p>Try to push or delete a package and things get more confusing. If you do
+&#8220;nuget push Foo.nupkg -source http://example.com/&#8221;, instead of blindly appending
+api/v2 to the URI, the client first does a GET request on the root URI.
+If that GET request results in a 301/302 Redirect, the client will follow the redirect
+and use that location to push the package. However, if the root URI returns some other
+response code, the client reverts to dumbly hard-coding the path to api/v2/package.</p>
+
+<p>But if you push to a URI that is not the root URI, the client listens to you
+and pushes to whatever URI you told it.</p>
+
+<p>What all of this means is that it is surprisingly hard to write a web application
+that complies with all the weird shit that the NuGet client does. If you tell
+Visual Studio that the package feed is at http://example.com/api/v2, then NuGet will
+push to http://example.com/api/v2. But if you tell NuGet to publish to
+http://example.com/ then it will publish to http://example.com/api/v2/package.</p>
+
+<p>That means you need redundant routes to catch both cases.</p>
+
+<h2>Example Routes</h2>
+
+<p>For my application, here are the routes I came up with that seem to keep
+the NuGet client happy, as long as you don&#8217;t deploy it as a child application:</p>
+
+<div><script src='https://gist.github.com/5052423.js?file='></script>
+<noscript><pre><code></code></pre></noscript></div>
+
+
+<h2>Next</h2>
+
+<p>I would love to see NuGet adopt more RESTful practices with regards to
+its HTTP API, but having had one pull request declined already, I&#8217;m not sure
+how eager I&#8217;ll be in trying to bring about this change.</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Sitting at Your Desk is Killing You]]></title>

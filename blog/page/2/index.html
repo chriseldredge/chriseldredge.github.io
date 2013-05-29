@@ -9,8 +9,8 @@
   <meta name="author" content="Chris Eldredge">
 
   
-  <meta name="description" content="The IQueryable Conundrum So, you have a datasource you can access from .net and you thought, hey wouldn&#8217;t it be
-cool if I could wire this up &hellip;">
+  <meta name="description" content="Today I ran into an interesting problem using
+NumericField. The issue is that when a document is retrieved, fields encoded using NumericField come &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -76,6 +76,55 @@ cool if I could wire this up &hellip;">
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2012/04/19/Lucene-NumericField-Gotcha/">Lucene NumericField Gotcha</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-04-19T00:00:00-04:00" pubdate data-updated="true">Apr 19<span>th</span>, 2012</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>Today I ran into an interesting problem using
+<a href="https://svn.apache.org/repos/asf/incubator/lucene.net/trunk/src/core/Document/NumericField.cs">NumericField</a>.</p>
+
+<p>The issue is that when a document is retrieved, fields encoded using NumericField come back as plain old
+strings.  This isn&#8217;t a problem by itself, but if you retrieve a document, modify some fields and leave
+others alone, any unmodified field that was previously a NumericField reverts to a basic string value.</p>
+
+<p>The issue is demonstrated by this sample NUnit test fixture:</p>
+
+<script src="https://gist.github.com/2425347.js"> </script>
+
+
+<p>Long story short, if your documents are going to take round trips and get re-indexed, you must re-encode
+any NumericFields before adding the document back to the index, even if they did not change.</p>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -178,6 +227,10 @@ name besides &#8220;select&#8221;.  It just returns the entire collection of ite
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2013/02/25/fun-with-nuget-rest-api/">Fun with NuGet Web Api</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2013/01/04/sitting-at-your-desk-is-killing-you/">Sitting at Your Desk is Killing You</a>
       </li>
     
@@ -191,10 +244,6 @@ name besides &#8220;select&#8221;.  It just returns the entire collection of ite
     
       <li class="post">
         <a href="/blog/2012/08/20/how-the-motley-fool-uses-nuget-part-2/">How The Motley Fool Uses NuGet (Part 2)</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2012/08/07/how-the-motley-fool-uses-nuget/">How The Motley Fool uses NuGet (part 1)</a>
       </li>
     
   </ul>
