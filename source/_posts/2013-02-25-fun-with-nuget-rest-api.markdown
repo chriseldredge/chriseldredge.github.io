@@ -146,7 +146,7 @@ Example Routes
 For my application, here are the routes I came up with that seem to keep
 the NuGet client happy, as long as you don't deploy it as a child application:
 
-{% gist 5052423 %}
+{% gist chriseldredge/5052423 %}
 
 Next
 ----

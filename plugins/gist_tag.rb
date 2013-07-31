@@ -21,7 +21,7 @@ module Jekyll
     end
 
     def render(context)
-      if parts = @text.match(/([\d]*) (.*)/)
+      if parts = @text.match(/([\w\/]*) (.*)/)
         gist, file = parts[1].strip, parts[2].strip
         script_url = script_url_for gist, file
         code       = get_cached_gist(gist, file) || get_gist_from_web(gist, file)
@@ -44,7 +44,11 @@ module Jekyll
     end
 
     def get_gist_url_for(gist, file)
-      "https://raw.github.com/gist/#{gist}/#{file}"
+      url = "https://gist.github.com/#{gist}/raw"
+      if file != nil
+        url += "/#{file}"
+      end
+      url
     end
 
     def cache(gist, file, data)

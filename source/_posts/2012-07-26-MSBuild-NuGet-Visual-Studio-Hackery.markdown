@@ -77,7 +77,7 @@ can do some analysis of the solution file being built and the project references
 
 Note: this example uses tasks from the [MSBuild Community Tasks](https://github.com/loresoft/msbuildtasks) project.
 
-{% gist 3177148 %}
+{% gist chriseldredge/3177148 %}
 
 This implementation works great in MSBuild on the command line when invoked on a c# project.
 If you specify a SolutionPath and BuildingInsideVisualStudio,
@@ -95,7 +95,7 @@ provided the BuildProjectReferences property is not false.
 
 So I modified my MSBuild script to try to do that:
 
-{% gist 3177381 %}
+{% gist chriseldredge/3177381 %}
 
 Once again, this works great in MSBuild outside of Visual Studio. When you load up the solution in VS
 and hit build, the Output pane says encouraging things like "MyApp is building C:\Projects\MyFramework\src\MyFramework\MyFramework.csproj".
