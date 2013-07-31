@@ -98,7 +98,7 @@ for client/server communication to enable search, &hellip;">
   
 
 
-<time datetime="2013-02-25T10:57:00-05:00" pubdate data-updated="true">Feb 25<span>th</span>, 2013</time>
+<time datetime="2013-02-25T10:57:00+00:00" pubdate data-updated="true">Feb 25<span>th</span>, 2013</time>
         
       </p>
     
@@ -137,17 +137,28 @@ functions that can be invoked on them.</p>
 <p>Query the API Root:</p>
 
 <pre><code>curl http://nuget.org/api/v2/
-
-&lt;?xml version="1.0" encoding="utf-8" standalone="yes"?&gt;
-&lt;service xml:base="http://nuget.org/api/v2/" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:app="http://www.w3.org/2007/app" xmlns="http://www.w3.org/2007/app"&gt;
-  &lt;workspace&gt;
-    &lt;atom:title&gt;Default&lt;/atom:title&gt;
-    &lt;collection href="Packages"&gt;
-      &lt;atom:title&gt;Packages&lt;/atom:title&gt;
-    &lt;/collection&gt;
-  &lt;/workspace&gt;
-&lt;/service&gt;
 </code></pre>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='xml'><span class='line'><span class="cp">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot; standalone=&quot;yes&quot;?&gt;</span>
+</span><span class='line'><span class="nt">&lt;service</span> <span class="na">xml:base=</span><span class="s">&quot;http://nuget.org/api/v2/&quot;</span> <span class="na">xmlns:atom=</span><span class="s">&quot;http://www.w3.org/2005/Atom&quot;</span> <span class="na">xmlns:app=</span><span class="s">&quot;http://www.w3.org/2007/app&quot;</span> <span class="na">xmlns=</span><span class="s">&quot;http://www.w3.org/2007/app&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;workspace&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;atom:title&gt;</span>Default<span class="nt">&lt;/atom:title&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;collection</span> <span class="na">href=</span><span class="s">&quot;Packages&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>      <span class="nt">&lt;atom:title&gt;</span>Packages<span class="nt">&lt;/atom:title&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;/collection&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;/workspace&gt;</span>
+</span><span class='line'><span class="nt">&lt;/service&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
 
 <p>You can see there&#8217;s a collection of Packages, and you even get an href that tells you where it is.</p>
 
@@ -156,35 +167,64 @@ information about the entities contained in the Packages collection, and what ot
 are available:</p>
 
 <pre><code>curl 'http://nuget.org/api/v2/$metadata'
-
-&lt;?xml version="1.0" encoding="utf-8" standalone="yes"?&gt;
-&lt;edmx:Edmx Version="1.0" xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx"&gt;
-  &lt;edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="2.0"&gt;
-    &lt;Schema Namespace="NuGetGallery" xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" xmlns="http://schemas.microsoft.com/ado/2006/04/edm"&gt;
-      &lt;EntityType Name="V2FeedPackage" m:HasStream="true"&gt;
-        &lt;Key&gt;
-          &lt;PropertyRef Name="Id" /&gt;
-          &lt;PropertyRef Name="Version" /&gt;
-        &lt;/Key&gt;
-        &lt;Property Name="Id" Type="Edm.String" Nullable="false" m:FC_TargetPath="SyndicationTitle" m:FC_ContentKind="text" m:FC_KeepInContent="false" /&gt;
-        &lt;Property Name="Version" Type="Edm.String" Nullable="false" /&gt;
-        &lt;Property Name="Authors" Type="Edm.String" Nullable="true" m:FC_TargetPath="SyndicationAuthorName" m:FC_ContentKind="text" m:FC_KeepInContent="false" /&gt;
-        &lt;snip/&gt;
-      &lt;/EntityType&gt;
-      &lt;EntityContainer Name="FeedContext_x0060_1" m:IsDefaultEntityContainer="true"&gt;
-        &lt;EntitySet Name="Packages" EntityType="NuGetGallery.V2FeedPackage" /&gt;
-        &lt;FunctionImport Name="Search" EntitySet="Packages" ReturnType="Collection(NuGetGallery.V2FeedPackage)" m:HttpMethod="GET"&gt;
-          &lt;Parameter Name="searchTerm" Type="Edm.String" Mode="In" /&gt;
-          &lt;Parameter Name="includePrerelease" Type="Edm.Boolean" Mode="In" /&gt;
-        &lt;/FunctionImport&gt;
-        &lt;FunctionImport Name="FindPackagesById" EntitySet="Packages" ReturnType="Collection(NuGetGallery.V2FeedPackage)" m:HttpMethod="GET"&gt;
-          &lt;Parameter Name="id" Type="Edm.String" Mode="In" /&gt;
-        &lt;/FunctionImport&gt;
-      &lt;/EntityContainer&gt;
-    &lt;/Schema&gt;
-  &lt;/edmx:DataServices&gt;
-&lt;/edmx:Edmx&gt;
 </code></pre>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+</pre></td><td class='code'><pre><code class='xml'><span class='line'><span class="cp">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot; standalone=&quot;yes&quot;?&gt;</span>
+</span><span class='line'><span class="nt">&lt;edmx:Edmx</span> <span class="na">Version=</span><span class="s">&quot;1.0&quot;</span> <span class="na">xmlns:edmx=</span><span class="s">&quot;http://schemas.microsoft.com/ado/2007/06/edmx&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;edmx:DataServices</span> <span class="na">xmlns:m=</span><span class="s">&quot;http://schemas.microsoft.com/ado/2007/08/dataservices/metadata&quot;</span> <span class="na">m:DataServiceVersion=</span><span class="s">&quot;2.0&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;Schema</span> <span class="na">Namespace=</span><span class="s">&quot;NuGetGallery&quot;</span> <span class="na">xmlns:d=</span><span class="s">&quot;http://schemas.microsoft.com/ado/2007/08/dataservices&quot;</span> <span class="na">xmlns:m=</span><span class="s">&quot;http://schemas.microsoft.com/ado/2007/08/dataservices/metadata&quot;</span> <span class="na">xmlns=</span><span class="s">&quot;http://schemas.microsoft.com/ado/2006/04/edm&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>      <span class="nt">&lt;EntityType</span> <span class="na">Name=</span><span class="s">&quot;V2FeedPackage&quot;</span> <span class="na">m:HasStream=</span><span class="s">&quot;true&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>        <span class="nt">&lt;Key&gt;</span>
+</span><span class='line'>          <span class="nt">&lt;PropertyRef</span> <span class="na">Name=</span><span class="s">&quot;Id&quot;</span> <span class="nt">/&gt;</span>
+</span><span class='line'>          <span class="nt">&lt;PropertyRef</span> <span class="na">Name=</span><span class="s">&quot;Version&quot;</span> <span class="nt">/&gt;</span>
+</span><span class='line'>        <span class="nt">&lt;/Key&gt;</span>
+</span><span class='line'>        <span class="nt">&lt;Property</span> <span class="na">Name=</span><span class="s">&quot;Id&quot;</span> <span class="na">Type=</span><span class="s">&quot;Edm.String&quot;</span> <span class="na">Nullable=</span><span class="s">&quot;false&quot;</span> <span class="na">m:FC_TargetPath=</span><span class="s">&quot;SyndicationTitle&quot;</span> <span class="na">m:FC_ContentKind=</span><span class="s">&quot;text&quot;</span> <span class="na">m:FC_KeepInContent=</span><span class="s">&quot;false&quot;</span> <span class="nt">/&gt;</span>
+</span><span class='line'>        <span class="nt">&lt;Property</span> <span class="na">Name=</span><span class="s">&quot;Version&quot;</span> <span class="na">Type=</span><span class="s">&quot;Edm.String&quot;</span> <span class="na">Nullable=</span><span class="s">&quot;false&quot;</span> <span class="nt">/&gt;</span>
+</span><span class='line'>        <span class="nt">&lt;Property</span> <span class="na">Name=</span><span class="s">&quot;Authors&quot;</span> <span class="na">Type=</span><span class="s">&quot;Edm.String&quot;</span> <span class="na">Nullable=</span><span class="s">&quot;true&quot;</span> <span class="na">m:FC_TargetPath=</span><span class="s">&quot;SyndicationAuthorName&quot;</span> <span class="na">m:FC_ContentKind=</span><span class="s">&quot;text&quot;</span> <span class="na">m:FC_KeepInContent=</span><span class="s">&quot;false&quot;</span> <span class="nt">/&gt;</span>
+</span><span class='line'>        <span class="nt">&lt;snip/&gt;</span>
+</span><span class='line'>      <span class="nt">&lt;/EntityType&gt;</span>
+</span><span class='line'>      <span class="nt">&lt;EntityContainer</span> <span class="na">Name=</span><span class="s">&quot;FeedContext_x0060_1&quot;</span> <span class="na">m:IsDefaultEntityContainer=</span><span class="s">&quot;true&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>        <span class="nt">&lt;EntitySet</span> <span class="na">Name=</span><span class="s">&quot;Packages&quot;</span> <span class="na">EntityType=</span><span class="s">&quot;NuGetGallery.V2FeedPackage&quot;</span> <span class="nt">/&gt;</span>
+</span><span class='line'>        <span class="nt">&lt;FunctionImport</span> <span class="na">Name=</span><span class="s">&quot;Search&quot;</span> <span class="na">EntitySet=</span><span class="s">&quot;Packages&quot;</span> <span class="na">ReturnType=</span><span class="s">&quot;Collection(NuGetGallery.V2FeedPackage)&quot;</span> <span class="na">m:HttpMethod=</span><span class="s">&quot;GET&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>          <span class="nt">&lt;Parameter</span> <span class="na">Name=</span><span class="s">&quot;searchTerm&quot;</span> <span class="na">Type=</span><span class="s">&quot;Edm.String&quot;</span> <span class="na">Mode=</span><span class="s">&quot;In&quot;</span> <span class="nt">/&gt;</span>
+</span><span class='line'>          <span class="nt">&lt;Parameter</span> <span class="na">Name=</span><span class="s">&quot;includePrerelease&quot;</span> <span class="na">Type=</span><span class="s">&quot;Edm.Boolean&quot;</span> <span class="na">Mode=</span><span class="s">&quot;In&quot;</span> <span class="nt">/&gt;</span>
+</span><span class='line'>        <span class="nt">&lt;/FunctionImport&gt;</span>
+</span><span class='line'>        <span class="nt">&lt;FunctionImport</span> <span class="na">Name=</span><span class="s">&quot;FindPackagesById&quot;</span> <span class="na">EntitySet=</span><span class="s">&quot;Packages&quot;</span> <span class="na">ReturnType=</span><span class="s">&quot;Collection(NuGetGallery.V2FeedPackage)&quot;</span> <span class="na">m:HttpMethod=</span><span class="s">&quot;GET&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>          <span class="nt">&lt;Parameter</span> <span class="na">Name=</span><span class="s">&quot;id&quot;</span> <span class="na">Type=</span><span class="s">&quot;Edm.String&quot;</span> <span class="na">Mode=</span><span class="s">&quot;In&quot;</span> <span class="nt">/&gt;</span>
+</span><span class='line'>        <span class="nt">&lt;/FunctionImport&gt;</span>
+</span><span class='line'>      <span class="nt">&lt;/EntityContainer&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;/Schema&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;/edmx:DataServices&gt;</span>
+</span><span class='line'><span class="nt">&lt;/edmx:Edmx&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
 
 <p>This xml vomit says that in addition to the hard-coded, out-of-band RPC API that is OData, you
 can also invoke the Search and FindPackagesById functions, how to invoke them
@@ -242,8 +282,51 @@ http://example.com/ then it will publish to http://example.com/api/v2/package.</
 <p>For my application, here are the routes I came up with that seem to keep
 the NuGet client happy, as long as you don&#8217;t deploy it as a child application:</p>
 
-<div><script src='https://gist.github.com/5052423.js?file='></script>
-<noscript><pre><code></code></pre></noscript></div>
+<div><script src='https://gist.github.com/chriseldredge/5052423.js?file='></script>
+<noscript><pre><code>public static void MapApiRoutes(HttpRouteCollection routes)
+{
+    // Serves up HTML to browsers that accept text/html
+    routes.MapHttpRoute(RouteNames.Home,
+                        &quot;&quot;,
+                        new { controller = &quot;Home&quot; },
+                        new { acceptHeader = new AcceptHtmlConstraint() });
+
+    routes.MapHttpRoute(RouteNames.PackageDownload,
+                        &quot;api/v2/package/{id}/{version}/content&quot;,
+                        new { controller = &quot;Packages&quot;, action = &quot;DownloadPackage&quot; });
+
+    routes.MapHttpRoute(RouteNames.PackageInfo,
+                        &quot;api/v2/package/{id}/{version}&quot;,
+                        new {controller = &quot;Packages&quot;, action = &quot;GetPackageInfo&quot;, version = &quot;&quot;},
+                        new { httpMethod = new HttpMethodConstraint(HttpMethod.Get) });
+    
+    routes.MapHttpRoute(RouteNames.PackageApi,
+                        &quot;api/v2/package/{id}/{version}&quot;,
+                        new { controller = &quot;Packages&quot;, id = &quot;&quot;, version = &quot;&quot; },
+                        new { httpMethod = new HttpMethodConstraint(HttpMethod.Put, HttpMethod.Post, HttpMethod.Delete) });
+    
+    routes.MapHttpRoute(RouteNames.TabCompletionPackageIds,
+                        &quot;api/v2/package-ids&quot;,
+                        new { controller = &quot;TabCompletion&quot;, action = &quot;GetMatchingPackages&quot;, maxResults = 30, includePrerelease = false });
+
+    routes.MapHttpRoute(RouteNames.TabCompletionPackageVersions,
+                        &quot;api/v2/package-versions/{packageId}&quot;,
+                        new {controller = &quot;TabCompletion&quot;, action = &quot;GetPackageVersions&quot;, includePrerelease = false});
+}
+
+public static void MapDataServiceRoutes(RouteCollection routes)
+{
+    var dataServiceHostFactory = new DataServiceHostFactory();
+    
+    // Maps OData to root of application (NOT /api/v2)
+    var serviceRoute = new ServiceRoute(&quot;&quot;, dataServiceHostFactory, typeof(PackageDataService))
+        {
+            Defaults = RouteNames.PackageFeedRouteValues,
+            Constraints = RouteNames.PackageFeedRouteValues
+        };
+    
+    routes.Add(RouteNames.PackageFeed, serviceRoute);
+}</code></pre></noscript></div>
 
 
 <h2>Next</h2>
@@ -279,7 +362,7 @@ how eager I&#8217;ll be in trying to bring about this change.</p>
   
 
 
-<time datetime="2013-01-04T10:44:00-05:00" pubdate data-updated="true">Jan 4<span>th</span>, 2013</time>
+<time datetime="2013-01-04T10:44:00+00:00" pubdate data-updated="true">Jan 4<span>th</span>, 2013</time>
         
       </p>
     
@@ -385,7 +468,7 @@ Twice an hour, get up and move around. It&#8217;s good for your health and produ
   
 
 
-<time datetime="2012-09-21T15:25:00-04:00" pubdate data-updated="true">Sep 21<span>st</span>, 2012</time>
+<time datetime="2012-09-21T15:25:00+00:00" pubdate data-updated="true">Sep 21<span>st</span>, 2012</time>
         
       </p>
     
@@ -536,7 +619,7 @@ and maybe do a load test of my own of our <a href="https://github.com/themotleyf
   
 
 
-<time datetime="2012-09-06T11:23:00-04:00" pubdate data-updated="true">Sep 6<span>th</span>, 2012</time>
+<time datetime="2012-09-06T11:23:00+00:00" pubdate data-updated="true">Sep 6<span>th</span>, 2012</time>
         
       </p>
     
@@ -742,7 +825,7 @@ iteratively and predictably.</p>
   
 
 
-<time datetime="2012-08-20T13:56:00-04:00" pubdate data-updated="true">Aug 20<span>th</span>, 2012</time>
+<time datetime="2012-08-20T13:56:00+00:00" pubdate data-updated="true">Aug 20<span>th</span>, 2012</time>
         
       </p>
     
@@ -914,7 +997,7 @@ develop them.</p>
   
 
 
-<time datetime="2012-08-07T14:25:00-04:00" pubdate data-updated="true">Aug 7<span>th</span>, 2012</time>
+<time datetime="2012-08-07T14:25:00+00:00" pubdate data-updated="true">Aug 7<span>th</span>, 2012</time>
         
       </p>
     
@@ -1037,7 +1120,7 @@ at this point we started to look at binary package management.</p>
   
 
 
-<time datetime="2012-07-26T00:00:00-04:00" pubdate data-updated="true">Jul 26<span>th</span>, 2012</time>
+<time datetime="2012-07-26T00:00:00+00:00" pubdate data-updated="true">Jul 26<span>th</span>, 2012</time>
         
       </p>
     
@@ -1122,7 +1205,7 @@ can do some analysis of the solution file being built and the project references
 
 <p>Note: this example uses tasks from the <a href="https://github.com/loresoft/msbuildtasks">MSBuild Community Tasks</a> project.</p>
 
-<div><script src='https://gist.github.com/3177148.js?file='></script>
+<div><script src='https://gist.github.com/chriseldredge/3177148.js?file='></script>
 <noscript><pre><code>&lt;Project ToolsVersion=&quot;4.0&quot; InitialTargets=&quot;_ReplaceReferencesWithProjectReferences&quot; xmlns=&quot;http://schemas.microsoft.com/developer/msbuild/2003&quot;&gt;
     
     &lt;Target Name=&quot;_ReplaceReferencesWithProjectReferences&quot; DependsOnTargets=&quot;Part1;Part2;Part3;Part4&quot; Condition=&quot; Exists('$(SolutionPath)') and '$(BuildingInsideVisualStudio)' == 'True' &quot;/&gt;
@@ -1214,7 +1297,7 @@ provided the BuildProjectReferences property is not false.</p>
 
 <p>So I modified my MSBuild script to try to do that:</p>
 
-<div><script src='https://gist.github.com/3177381.js?file='></script>
+<div><script src='https://gist.github.com/chriseldredge/3177381.js?file='></script>
 <noscript><pre><code>&lt;Project InitialTargets=&quot;_FindDependentSolutionProjects&quot; ToolsVersion=&quot;4.0&quot; xmlns=&quot;http://schemas.microsoft.com/developer/msbuild/2003&quot;&gt;
     &lt;PropertyGroup&gt;
         &lt;BuildDependsOn&gt;
@@ -1395,7 +1478,7 @@ and SpecificVersion.</p>
   
 
 
-<time datetime="2012-07-24T00:00:00-04:00" pubdate data-updated="true">Jul 24<span>th</span>, 2012</time>
+<time datetime="2012-07-24T00:00:00+00:00" pubdate data-updated="true">Jul 24<span>th</span>, 2012</time>
         
       </p>
     
@@ -1563,7 +1646,7 @@ appear atomically. Knowing the details of when staged changes become visible wil
   
 
 
-<time datetime="2012-07-03T00:00:00-04:00" pubdate data-updated="true">Jul 3<span>rd</span>, 2012</time>
+<time datetime="2012-07-03T00:00:00+00:00" pubdate data-updated="true">Jul 3<span>rd</span>, 2012</time>
         
       </p>
     
@@ -1680,7 +1763,7 @@ OSS projects that attempt to do what it does, but I think it is already one of t
   
 
 
-<time datetime="2012-05-08T00:00:00-04:00" pubdate data-updated="true">May 8<span>th</span>, 2012</time>
+<time datetime="2012-05-08T00:00:00+00:00" pubdate data-updated="true">May 8<span>th</span>, 2012</time>
         
       </p>
     
@@ -1856,19 +1939,8 @@ and <a href="http://www.apache.org/licenses/LICENSE-2.0">Apache License</a>.</p>
 
 
 <section>
-  <h1>Latest Tweets</h1>
-  <ul id="tweets">
-    <li class="loading">Status updating&#8230;</li>
-  </ul>
-  <script type="text/javascript">
-    $.domReady(function(){
-      getTwitterFeed("creldredge", 4, false);
-    });
-  </script>
-  <script src="/javascripts/twitter.js" type="text/javascript"> </script>
-  
-    <a href="http://twitter.com/creldredge" class="twitter-follow-button" data-show-count="false">Follow @creldredge</a>
-  
+<a class="twitter-timeline" data-dnt="true" href="https://twitter.com/creldredge" data-widget-id="362388405302214657">Tweets by @creldredge</a>
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
 </section>
 
 
