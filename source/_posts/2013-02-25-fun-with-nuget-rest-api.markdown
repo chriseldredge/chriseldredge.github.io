@@ -37,15 +37,17 @@ Query the API Root:
 
     curl http://nuget.org/api/v2/
 
-    <?xml version="1.0" encoding="utf-8" standalone="yes"?>
-    <service xml:base="http://nuget.org/api/v2/" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:app="http://www.w3.org/2007/app" xmlns="http://www.w3.org/2007/app">
-      <workspace>
-        <atom:title>Default</atom:title>
-        <collection href="Packages">
-          <atom:title>Packages</atom:title>
-        </collection>
-      </workspace>
-    </service>
+```xml
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<service xml:base="http://nuget.org/api/v2/" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:app="http://www.w3.org/2007/app" xmlns="http://www.w3.org/2007/app">
+  <workspace>
+    <atom:title>Default</atom:title>
+    <collection href="Packages">
+      <atom:title>Packages</atom:title>
+    </collection>
+  </workspace>
+</service>
+```
 
 You can see there's a collection of Packages, and you even get an href that tells you where it is.
 
@@ -55,33 +57,35 @@ are available:
 
     curl 'http://nuget.org/api/v2/$metadata'
 
-    <?xml version="1.0" encoding="utf-8" standalone="yes"?>
-    <edmx:Edmx Version="1.0" xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx">
-      <edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="2.0">
-        <Schema Namespace="NuGetGallery" xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" xmlns="http://schemas.microsoft.com/ado/2006/04/edm">
-          <EntityType Name="V2FeedPackage" m:HasStream="true">
-            <Key>
-              <PropertyRef Name="Id" />
-              <PropertyRef Name="Version" />
-            </Key>
-            <Property Name="Id" Type="Edm.String" Nullable="false" m:FC_TargetPath="SyndicationTitle" m:FC_ContentKind="text" m:FC_KeepInContent="false" />
-            <Property Name="Version" Type="Edm.String" Nullable="false" />
-            <Property Name="Authors" Type="Edm.String" Nullable="true" m:FC_TargetPath="SyndicationAuthorName" m:FC_ContentKind="text" m:FC_KeepInContent="false" />
-            <snip/>
-          </EntityType>
-          <EntityContainer Name="FeedContext_x0060_1" m:IsDefaultEntityContainer="true">
-            <EntitySet Name="Packages" EntityType="NuGetGallery.V2FeedPackage" />
-            <FunctionImport Name="Search" EntitySet="Packages" ReturnType="Collection(NuGetGallery.V2FeedPackage)" m:HttpMethod="GET">
-              <Parameter Name="searchTerm" Type="Edm.String" Mode="In" />
-              <Parameter Name="includePrerelease" Type="Edm.Boolean" Mode="In" />
-            </FunctionImport>
-            <FunctionImport Name="FindPackagesById" EntitySet="Packages" ReturnType="Collection(NuGetGallery.V2FeedPackage)" m:HttpMethod="GET">
-              <Parameter Name="id" Type="Edm.String" Mode="In" />
-            </FunctionImport>
-          </EntityContainer>
-        </Schema>
-      </edmx:DataServices>
-    </edmx:Edmx>
+```xml
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<edmx:Edmx Version="1.0" xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx">
+  <edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="2.0">
+    <Schema Namespace="NuGetGallery" xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" xmlns="http://schemas.microsoft.com/ado/2006/04/edm">
+      <EntityType Name="V2FeedPackage" m:HasStream="true">
+        <Key>
+          <PropertyRef Name="Id" />
+          <PropertyRef Name="Version" />
+        </Key>
+        <Property Name="Id" Type="Edm.String" Nullable="false" m:FC_TargetPath="SyndicationTitle" m:FC_ContentKind="text" m:FC_KeepInContent="false" />
+        <Property Name="Version" Type="Edm.String" Nullable="false" />
+        <Property Name="Authors" Type="Edm.String" Nullable="true" m:FC_TargetPath="SyndicationAuthorName" m:FC_ContentKind="text" m:FC_KeepInContent="false" />
+        <snip/>
+      </EntityType>
+      <EntityContainer Name="FeedContext_x0060_1" m:IsDefaultEntityContainer="true">
+        <EntitySet Name="Packages" EntityType="NuGetGallery.V2FeedPackage" />
+        <FunctionImport Name="Search" EntitySet="Packages" ReturnType="Collection(NuGetGallery.V2FeedPackage)" m:HttpMethod="GET">
+          <Parameter Name="searchTerm" Type="Edm.String" Mode="In" />
+          <Parameter Name="includePrerelease" Type="Edm.Boolean" Mode="In" />
+        </FunctionImport>
+        <FunctionImport Name="FindPackagesById" EntitySet="Packages" ReturnType="Collection(NuGetGallery.V2FeedPackage)" m:HttpMethod="GET">
+          <Parameter Name="id" Type="Edm.String" Mode="In" />
+        </FunctionImport>
+      </EntityContainer>
+    </Schema>
+  </edmx:DataServices>
+</edmx:Edmx>
+```
 
 This xml vomit says that in addition to the hard-coded, out-of-band RPC API that is OData, you
 can also invoke the Search and FindPackagesById functions, how to invoke them

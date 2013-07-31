@@ -1,2 +1,23 @@
 // This File is imported last, and will override other styles in the cascade
 // Add styles here to make changes without digging in too much
+
+.highlight {
+	margin-bottom: 0;
+}
+
+.code-title {
+  text-shadow: none;
+  font-weight: bold;
+  background: #fafafa;
+  border-radius: 0;
+}
+
+html .gist .gist-file .gist-meta a[href*=raw] {
+	text-shadow: none;
+}
+
+/* undo shit github injects when a gist is injected. */
+.gist pre {
+	line-height: 1.45em !important;
+	font-size: 13px !important;
+}
