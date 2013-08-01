@@ -2,9 +2,17 @@
 @include global-reset;
 @include reset-html5;
 
+// Dependencies: variables, helper classes, mixins
+@import "dependencies/globals";
+@import "dependencies/helpers";
+@import "dependencies/mixins";
+
+// Default Octopress theme
+@import "base";
+@import "partials";
+
+// Custom styles
 @import "custom/colors";
 @import "custom/fonts";
 @import "custom/layout";
-@import "base";
-@import "partials";
 @import "custom/styles";
