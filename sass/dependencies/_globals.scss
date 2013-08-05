@@ -1,12 +1,13 @@
 // =============================
 // Color Palette
 // =============================
-
-
-// =============================
-// Gray Color Palette
-// =============================
-
+$gray:          #bbbbbb;
+$gray-dark:     #333333;
+$gray-light:    #e4e2e4;
+$gray-lightest: #f8f8f8;
+$red:           #e80000;
+$teal:          #4f9ba8;
+$teal-light:    #94c4cc;
 
 // =============================
 // Messages and Alerts
@@ -17,4 +18,9 @@
 // Typography
 // =============================
 
+$text-color:         $gray-dark;
+$link-color:         $teal;
+$link-color-visited: $teal;
+$link-color-active:  $teal;
+$link-color-hover:   $red;
 
