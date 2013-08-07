@@ -1,19 +1,58 @@
-body > footer {
+// Padding to offset text from the headshot
+$footer-offset: 110px;
+
+.site-footer {
+  background: $teal-light;
   font-family: $sans;
-  font-size: .8em;
-  color: $footer-color;
-  text-shadow: lighten($footer-bg, 5) 0 1px;
-  background-color: $footer-bg;
-  @include background($footer-bg-front, $footer-bg-back);
-  border-top: 1px solid $footer-border-top;
-  position: relative;
-  padding-top: 1em;
-  padding-bottom: 1em;
-  margin-bottom: 3em;
-  @include border-bottom-radius(.4em);
-  z-index: 1;
-  a {
-    @include link-colors($footer-link-color, $footer-link-color-hover, $visited: $footer-link-color);
+  margin: 0 auto;
+  max-width: $max-width;
+  padding: 15px 0;
+  h3 {
+    font-family: $sans;
+    margin-bottom: 5px;
+  }
+  p {
+    font-size: 16px;
+    line-height: 24px;
+    margin-top: 0;
   }
   p:last-child { margin-bottom: 0; }
+}
+
+.bio {
+  padding-left: $footer-offset;
+  position: relative;
+
+  &:before {
+    background: url(/images/headshot.png) 0 0 no-repeat;
+    content: "";
+    display: block;
+      height: 90px;
+      width: 90px;
+    position: absolute;
+      left: 0;
+      top: 0;
+  }
+}
+
+.social {
+  list-style: none;
+  margin-left: 0;
+  margin-top: 30px;
+  padding-left: $footer-offset;
+  li {
+    display: inline-block;
+    margin-right: 15px;
+  }
+  a {
+    color: #fff;
+    font-size: 30px;
+    &:hover {
+      color: $teal;
+    }
+  }
+}
+
+.copyright {
+  padding-left: $footer-offset;
 }

@@ -1,4 +1,4 @@
-$max-width: 780px !default;
+$max-width: 620px !default;
 
 // Padding used for layout margins
 $pad-min: 18px !default;
@@ -19,6 +19,10 @@ $header-padding-top: 1.5em !default;
 $header-padding-bottom: 1.5em !default;
 
 .group { @include pie-clearfix; }
+
+* {
+  box-sizing: border-box;
+}
 
 @mixin collapse-sidebar {
   float: none;
@@ -47,23 +51,6 @@ body {
   -webkit-text-size-adjust: none;
   position: relative;
   margin: 0 auto;
-  > header, > nav, > footer, #content > article, #content > div > article, #content > div > section {
-    @extend .group;
-    padding-left: $pad-min;
-    padding-right: $pad-min;
-    @media only screen and (min-width: 480px) {
-      padding-left: $pad-narrow;
-      padding-right: $pad-narrow;
-    }
-    @media only screen and (min-width: 768px) {
-      padding-left: $pad-medium;
-      padding-right: $pad-medium;
-    }
-    @media only screen and (min-width: 992px) {
-      padding-left: $pad-wide;
-      padding-right: $pad-wide;
-    }
-  }
   div.pagination {
     @extend .group;
     margin-left: $pad-min;
