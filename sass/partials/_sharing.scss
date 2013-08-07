@@ -1,8 +1,6 @@
 .sharing {
-  p.meta + & {
-    padding: { top: 1em; left: 0; }
-    background: $img-border top left repeat-x;
-  }
+  margin-bottom: 15px;
+  text-align: left;
 }
 
 #fb-root { display: none; }

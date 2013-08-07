@@ -208,3 +208,12 @@ blockquote {
   white-space: pre-wrap;
   word-wrap: break-word;
 }
+
+.see-more {
+  font-family: $serif;
+  font-size: 18px;
+  font-style: italic;
+  &:after {
+    content: " \00bb";
+  }
+}

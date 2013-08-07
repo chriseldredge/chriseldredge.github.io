@@ -6,14 +6,27 @@ sidebar: false
 
 <article class="hentry" role="article">
   {% include article.html %}
-  <footer class="entry-footer">
+
     {% unless page.sharing == false %}
       {% include post/sharing.html %}
     {% endunless %}
+
+  <footer class="page-footer">
+    <a href="{{ site.subscribe_rss }}" rel="subscribe-rss" title="subscribe via RSS" class="ss-icon rss">RSS</a>
+
+{% if site.simple_search %}
+  <form action="{{ site.simple_search }}" method="get">
+    <input type="hidden" name="q" value="site:{{ site.url | shorthand_url }}" />
+    <input class="search ss-search" type="text" name="q" results="0" />
+  </form>
+{% endif %}
+
+    <a href="/blog/archives" class="see-more">see older entries</a>
   </footer>
+
 </article>
 {% if site.disqus_short_name and page.comments == true %}
-<section>
+<section class="comments">
   <h1>Comments</h1>
   <div id="disqus_thread" aria-live="polite">{% include post/disqus_thread.html %}</div>
 </section>

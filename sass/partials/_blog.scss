@@ -1,3 +1,30 @@
+article header {
+  background: none;
+  padding: 0;
+}
+
+.entry-title {
+  border-bottom: 1px solid $border-color;
+  margin-bottom: 15px;
+  padding-bottom: 15px;
+
+  a {
+    color: $text-color;
+    &:hover {
+      color: $link-color-hover;
+    }
+  }
+}
+
+.entry-content h2 {
+  margin-bottom: 15px;
+  margin-top: 40px;
+}
+
+.entry-footer {
+  font-size: 20px;
+}
+
 .meta {
   color: $text-color-light;
   font-family: $sans;
@@ -7,4 +34,56 @@
 .meta-date,
 .meta-updated {
   text-transform: uppercase;
+}
+
+.sharing {
+  text-align: center;
+}
+
+.page-footer {
+  position: relative;
+  text-align: center;
+  z-index: 1;
+}
+
+.rss {
+  background: #fff;
+  color: $teal-light;
+  font-size: 30px;
+  padding: 0 15px;
+
+  &:before {
+    border-top: 1px solid $border-color;
+    content: "";
+    display: block;
+    height: 1px;
+    width: 100%;
+    position: absolute;
+      top: 10px;
+    z-index: -1;
+  }
+}
+
+.search {
+  @include transition(border-color .5s);
+  background: #fff url(/images/search.svg) 8px 6px no-repeat;
+  border: 1px solid $border-color;
+  border-radius: 4px;
+  display: inline-block;
+  margin: 15px 0;
+  padding: 8px 8px 8px 32px;
+  width: 320px;
+  &:focus {
+    border: 1px solid $teal-light;
+    outline: none;
+  }
+}
+
+.comments {
+  border-top: 1px solid $border-color;
+
+  h1 {
+    font-size: 24px;
+    font-weight: bold;
+  }
 }
