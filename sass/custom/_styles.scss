@@ -16,8 +16,44 @@ html .gist .gist-file .gist-meta a[href*=raw] {
 	text-shadow: none;
 }
 
+// Posts
+
+article header {
+  background: none;
+  padding: 0;
+}
+
+.entry-title {
+  border-bottom: 1px solid $border-color;
+  margin-bottom: 15px;
+  padding-bottom: 15px;
+}
+
+.meta {
+  position: static;
+}
+
+.entry-content h2 {
+  margin-bottom: 15px;
+  margin-top: 40px;
+}
+
+.entry-footer {
+  font-size: 20px;
+}
+
+.sharing {
+  text-align: center;
+}
+
 /* undo shit github injects when a gist is injected. */
 .gist pre {
 	line-height: 1.45em !important;
 	font-size: 13px !important;
+}
+
+@media only screen and (min-width: 768px) {
+  .no-sidebar #content {
+    margin-right: auto;
+  }
 }

@@ -9,6 +9,7 @@ article {
     background: $img-border bottom left repeat-x;
     h1 {
       margin: 0;
+      font-weight: normal;
       a { text-decoration: none;
         &:hover { text-decoration: underline; } }
     }
@@ -17,9 +18,12 @@ article {
       color: $text-color-light;
       margin: 0;
       &.meta {
-        @extend .sans;
+        font-family: $sans;
+        font-size: 14px;
+      }
+      time {
+        margin-right: 15px;
         text-transform: uppercase;
-        position: absolute; top: 0;
       }
     }
     @media only screen and (min-width: 768px) {
@@ -27,10 +31,6 @@ article {
       padding-bottom: 1em;
       background: $img-border bottom left repeat-x;
     }
-  }
-  h2 {
-    padding-top: 0.8em;
-    background: $img-border top left repeat-x;
   }
   .entry-content & h2:first-child, header + h2 { padding-top: 0; }
   h2:first-child, header + h2 { background: none; }
@@ -92,7 +92,7 @@ article + article {
   article { padding-top: 2em; }
   article header { background: none; padding-bottom: 0; }
   article h1 {
-    font-size: 2.2em;
+    font-size: 30px;
     a { color: inherit; &:hover { color: $link-color-hover; } }
   }
   a[rel=full-article] {
