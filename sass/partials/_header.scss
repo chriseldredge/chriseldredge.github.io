@@ -1,10 +1,15 @@
+#page-header {
+  text-align: center;
+}
+
 body > header {
-  background: $header-bg;
+  background: $gray-lightest;
+  border-top: 10px solid $teal-light;
   h1 {
     display: inline-block;
     margin: 0;
     a, a:visited, a:hover {
-      color: $title_color;
+      color: $text-color;
       text-decoration: none;
     }
   }
@@ -12,7 +17,7 @@ body > header {
     margin: .2em 0 0;
     @extend .sans;
     font-size: 1em;
-    color: $subtitle-color;
+    color: $text-color;
     font-weight: normal;
   }
 }

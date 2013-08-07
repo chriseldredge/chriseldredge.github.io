@@ -1,4 +1,4 @@
-$max-width: 1200px !default;
+$max-width: 780px !default;
 
 // Padding used for layout margins
 $pad-min: 18px !default;
@@ -45,7 +45,6 @@ $header-padding-bottom: 1.5em !default;
 
 body {
   -webkit-text-size-adjust: none;
-  max-width: $max-width;
   position: relative;
   margin: 0 auto;
   > header, > nav, > footer, #content > article, #content > div > article, #content > div > section {
@@ -89,7 +88,13 @@ body {
   }
 }
 
+.container {
+  max-width: $max-width;
+}
+
 #content {
+  margin: 0 auto;
+  max-width: $max-width;
   overflow: hidden;
   > div, > article { width: 100%; }
 }
@@ -181,12 +186,6 @@ body.sidebar-footer {
     .collapse-sidebar & {
       padding: { left: $pad-wide; right: $pad-wide; }
     }
-  }
-}
-
-@if $indented-lists == false {
-  @media only screen and (min-width: 768px) {
-    ul, ol { margin-left: 0; }
   }
 }
 
