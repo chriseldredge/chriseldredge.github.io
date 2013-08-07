@@ -15,7 +15,7 @@ body > header {
   }
   h2 {
     margin: .2em 0 0;
-    @extend .sans;
+    font-family: $sans;
     font-size: 1em;
     color: $text-color;
     font-weight: normal;

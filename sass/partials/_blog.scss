@@ -69,7 +69,7 @@ article {
   > footer {
     padding-bottom: 2.5em;
     margin-top: 2em;
-    @extend .sans;
+    font-family: $sans;
     p.meta {
       margin-bottom: .8em;
       font-size: .85em;
@@ -102,7 +102,7 @@ article + article {
     margin-right: .5em;
     text-decoration: none;
     color: mix($text-color, $text-color-light);
-    @extend .serif;
+    font-family: $serif;
     @include transition(background-color .5s);
     &:hover {
       background: $link-color-hover;
@@ -111,7 +111,7 @@ article + article {
     }
   }
   footer {
-    @extend .sans;
+    font-family: $sans;
     margin-top: 1em;
   }
 }

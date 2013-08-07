@@ -24,7 +24,7 @@
     }
   }
   a.category, time {
-    @extend .sans;
+    font-family: $sans;
     color: $text-color-light;
   }
   color: $text-color-light;
