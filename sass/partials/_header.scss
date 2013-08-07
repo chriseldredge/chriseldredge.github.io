@@ -1,23 +1,27 @@
 #page-header {
-  text-align: center;
-}
-
-body > header {
   background: $gray-lightest;
   border-top: 10px solid $teal-light;
+  text-align: center;
+
   h1 {
-    display: inline-block;
-    margin: 0;
-    a, a:visited, a:hover {
+    font-family: $title-font;
+    font-size: 34px;
+    font-weight: bold;
+    line-height: 34px;
+    margin-bottom: 10px;
+    margin-top: 0;
+    a,
+    a:visited,
+    a:hover {
       color: $text-color;
       text-decoration: none;
     }
   }
   h2 {
-    margin: .2em 0 0;
-    font-family: $sans;
-    font-size: 1em;
-    color: $text-color;
+    font-family: $subtitle-font;
+    font-size: 20px;
+    font-style: italic;
     font-weight: normal;
+    margin: 0;
   }
 }
