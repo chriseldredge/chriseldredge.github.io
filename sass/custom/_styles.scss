@@ -22,6 +22,12 @@ html .gist .gist-file .gist-meta a[href*=raw] {
 	font-size: 13px !important;
 }
 
+td pre { 
+  padding-top: 0;
+  padding-bottom: 0;
+  margin: 0;
+}
+
 @media only screen and (min-width: 768px) {
   .no-sidebar #content {
     margin-right: auto;
