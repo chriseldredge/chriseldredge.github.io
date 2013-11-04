@@ -146,7 +146,52 @@ Example Routes
 For my application, here are the routes I came up with that seem to keep
 the NuGet client happy, as long as you don't deploy it as a child application:
 
-{% gist chriseldredge/5052423 %}
+```c#
+public static void MapApiRoutes(HttpRouteCollection routes)
+{
+    // Serves up HTML to browsers that accept text/html
+    routes.MapHttpRoute(RouteNames.Home,
+                        "",
+                        new { controller = "Home" },
+                        new { acceptHeader = new AcceptHtmlConstraint() });
+ 
+    routes.MapHttpRoute(RouteNames.PackageDownload,
+                        "api/v2/package/{id}/{version}/content",
+                        new { controller = "Packages", action = "DownloadPackage" });
+ 
+    routes.MapHttpRoute(RouteNames.PackageInfo,
+                        "api/v2/package/{id}/{version}",
+                        new {controller = "Packages", action = "GetPackageInfo", version = ""},
+                        new { httpMethod = new HttpMethodConstraint(HttpMethod.Get) });
+    
+    routes.MapHttpRoute(RouteNames.PackageApi,
+                        "api/v2/package/{id}/{version}",
+                        new { controller = "Packages", id = "", version = "" },
+                        new { httpMethod = new HttpMethodConstraint(HttpMethod.Put, HttpMethod.Post, HttpMethod.Delete) });
+    
+    routes.MapHttpRoute(RouteNames.TabCompletionPackageIds,
+                        "api/v2/package-ids",
+                        new { controller = "TabCompletion", action = "GetMatchingPackages", maxResults = 30, includePrerelease = false });
+ 
+    routes.MapHttpRoute(RouteNames.TabCompletionPackageVersions,
+                        "api/v2/package-versions/{packageId}",
+                        new {controller = "TabCompletion", action = "GetPackageVersions", includePrerelease = false});
+}
+ 
+public static void MapDataServiceRoutes(RouteCollection routes)
+{
+    var dataServiceHostFactory = new DataServiceHostFactory();
+    
+    // Maps OData to root of application (NOT /api/v2)
+    var serviceRoute = new ServiceRoute("", dataServiceHostFactory, typeof(PackageDataService))
+        {
+            Defaults = RouteNames.PackageFeedRouteValues,
+            Constraints = RouteNames.PackageFeedRouteValues
+        };
+    
+    routes.Add(RouteNames.PackageFeed, serviceRoute);
+}
+```
 
 Next
 ----
