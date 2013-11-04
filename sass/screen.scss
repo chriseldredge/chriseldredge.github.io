@@ -5,12 +5,12 @@
 @import "dependencies/helpers";
 @import "dependencies/mixins";
 
-// Default Octopress theme
-@import "base";
-@import "partials";
-
 // Custom styles
 @import "custom/colors";
 @import "custom/fonts";
 @import "custom/layout";
 @import "custom/styles";
+
+// Default Octopress theme
+@import "base";
+@import "partials";
