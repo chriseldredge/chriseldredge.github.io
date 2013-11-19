@@ -25,8 +25,8 @@ HTTP, ReST and the Web
 
 Writing an application that speaks json over http does not automatically give
 you something that can be called ReST. To get to ReST nirvana your api needs
-to speak with hypermedia, giving the client, in addition to data, links and forms
-that can do stuff with the data.
+to speak using hypermedia, providing the client with not just data, but
+links and forms that can do stuff with the data.
 
 If you aren't familiar with this distinction, here are some great resources:
 
@@ -143,3 +143,6 @@ Similar to Jon Moore's python based microdata
 client, work has started on a .net dynamic
 client which I hope to share soon.
 
+----
+
+Get the source and see examples at [https://github.com/themotleyfool/AspNet.WebApi.HtmlMicrodataFormatter](https://github.com/themotleyfool/AspNet.WebApi.HtmlMicrodataFormatter).
