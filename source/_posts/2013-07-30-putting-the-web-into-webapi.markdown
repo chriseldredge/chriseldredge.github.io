@@ -1,7 +1,6 @@
 ---
 layout: post
 title: "Putting the web into WebApi"
-date: 2013-07-30 22:05
 comments: true
 categories: 
 ---
@@ -52,6 +51,13 @@ on sites like [ebay.com](http://ebay.com/), submit a form and find and manipulat
 resources without knowing anything ahead of time about what resources are there and
 what URLs are used to access them.
 
+----
+
+__Update:__ In the (long) time between drafting this post and publishing it, Microdata [has died](http://manu.sporny.org/2013/microdata-downward-spiral/). The spirit of this post remains intact, but I'll probably be looking into
+switching to [RDFa Lite](http://www.w3.org/TR/rdfa-lite/).
+
+----
+
 WebApi + Microdata
 ------------------
 
@@ -60,8 +66,8 @@ has pluggable support for different content types. On the other hand we
 have html5 and Microdata. Think they could be friends?
 
 I'm excited to announce HtmlMicrodataFormatter,
-a new open source (APL) project available
-on [nuget.org]()
+a new open source (Apache Public License) project available
+on [nuget.org](http://www.nuget.org/packages/AspNet.WebApi.HtmlMicrodataFormatter.WebActivator/)
 and hosted on [GitHub](https://github.com/themotleyfool/AspNet.WebApi.HtmlMicrodataFormatter).
 
 When you install this package into your WebApi project, it adds two
@@ -91,7 +97,9 @@ Obviously, getting a free html form generated for
 each action can be a productivity boon for developers who
 are tired of writing
 
-    curl -X POST -H 'Accept: application/json' --data 'param1=value1&param2=value2' http://localhost:49497/api/users/fred'
+    curl -X POST -H 'Accept: application/json' \
+      --data 'param1=value1&param2=value2' \
+      http://localhost:49497/api/users/fred'
     
 But it's more than that. Make your client project use html5
 and instead of hard-coding URLs for each thing the client
@@ -101,7 +109,7 @@ the response, along with links and forms, give the client
 the pieces it needs to drive state, just like Roy T. Fielding
 intended when ReST was first described.
 
-Do you have third party clients that consume your api? Now you
+Do you have third party developers who consume your api? Now you
 don't have to give them a separate document or website
 that describes (out of band) how to use your api. Just
 link them to `yourwebsite/api`, and they can read the
@@ -124,11 +132,11 @@ links and forms to the output of controller actions,
 or improving how xml documentation is collected and
 converted to html, or making it easier to link from
 resources to related resources with appropriate rel
-attributes, or, or, or…
+attributes. The list goes on.
 
 I hope you like HtmlMicrodataFormatter, and if you
 do, maybe get involved and help improve it by
-submitting feedback, bugs, enhancements or pull
+submitting feedback, bug reports, enhancements or pull
 requests to the GitHub project.
 
 Similar to Jon Moore's python based microdata
