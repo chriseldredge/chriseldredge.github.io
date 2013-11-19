@@ -9,8 +9,7 @@
   <meta name="author" content="Chris Eldredge">
 
   
-  <meta name="description" content="The IQueryable Conundrum So, you have a datasource you can access from .net and you thought, hey wouldn&#8217;t it be
-cool if I could wire this up &hellip;">
+  <meta name="description" content="Getting Started With Re-linq Mar 29th, 2012 The IQueryable Conundrum So, you have a datasource you can access from .net and you thought, hey wouldn &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -19,7 +18,11 @@ cool if I could wire this up &hellip;">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://chriseldredge.github.com/blog/2012/03/29/Getting-Started-With-Relinq/">
+
+  <script type="text/javascript" src="//use.typekit.net/wvv4pst.js"></script>
+  <script type="text/javascript">try{Typekit.load();}catch(e){}</script>
+
+  <link rel="canonical" href="http://chris.eldredge.io/blog/2012/03/29/Getting-Started-With-Relinq/">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <script src="/javascripts/modernizr-2.0.js"></script>
@@ -29,6 +32,7 @@ cool if I could wire this up &hellip;">
   <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
 <link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
 <link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="/webfonts/ss-social-circle.css" rel="stylesheet" />
 
   
   <script type="text/javascript">
@@ -46,36 +50,18 @@ cool if I could wire this up &hellip;">
 
 </head>
 
-<body   >
-  <header role="banner"><hgroup>
+<body   class="no-sidebar"  >
+  <header role="banner" id="page-header"><hgroup>
   <h1><a href="/">Chris Eldredge</a></h1>
+  
+    <h2>software development with a splash of bitters</h2>
   
 </hgroup>
 
 </header>
-  <nav role="navigation"><ul class="subscription" data-subscription="rss">
-  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
-  
-</ul>
-  
-<form action="http://google.com/search" method="get">
-  <fieldset role="search">
-    <input type="hidden" name="q" value="site:chriseldredge.github.com" />
-    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
-  </fieldset>
-</form>
-  
-<ul class="main-navigation">
-  <li><a href="/">Blog</a></li>
-  <li><a href="/about/">About</a></li>
-  <li><a href="/blog/archives">Archives</a></li>
-</ul>
-
-</nav>
   <div id="main">
     <div id="content">
-      <div>
-<article class="hentry" role="article">
+      <article class="hentry" role="article">
   
   <header>
     
@@ -95,14 +81,14 @@ cool if I could wire this up &hellip;">
   
 
 
-<time datetime="2012-03-29T00:00:00+00:00" pubdate data-updated="true">Mar 29<span>th</span>, 2012</time>
-        
+<time datetime="2012-03-29T00:00:00-04:00" pubdate data-updated="true" class="meta-date">Mar 29<span>th</span>, 2012</time>
       </p>
     
   </header>
 
 
-<div class="entry-content"><h2>The IQueryable Conundrum</h2>
+
+  <div class="entry-content"><h2>The IQueryable Conundrum</h2>
 
 <p>So, you have a datasource you can access from .net and you thought, hey wouldn&#8217;t it be
 cool if I could wire this up with LINQ?</p>
@@ -156,105 +142,58 @@ name besides &#8220;select&#8221;.  It just returns the entire collection of ite
 </div>
 
 
-  <footer>
-    <p class="meta">
-      
-  
 
-<span class="byline author vcard">Posted by <span class="fn">Chris Eldredge</span></span>
-
-      
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-03-29T00:00:00+00:00" pubdate data-updated="true">Mar 29<span>th</span>, 2012</time>
-      
-
-
-    </p>
     
       <div class="sharing">
   
-  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://chriseldredge.github.com/blog/2012/03/29/Getting-Started-With-Relinq/" data-via="creldredge" data-counturl="http://chriseldredge.github.com/blog/2012/03/29/Getting-Started-With-Relinq/" >Tweet</a>
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://chris.eldredge.io/blog/2012/03/29/Getting-Started-With-Relinq/" data-via="creldredge" data-counturl="http://chris.eldredge.io/blog/2012/03/29/Getting-Started-With-Relinq/" >Tweet</a>
   
   
   
 </div>
 
     
-    <p class="meta">
-      
-      
-        <a class="basic-alignment right" href="/blog/2012/04/19/Lucene-NumericField-Gotcha/" title="Next Post: Lucene NumericField Gotcha">Lucene NumericField Gotcha &raquo;</a>
-      
-    </p>
+
+  <footer class="page-footer">
+    <a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS" class="ss-icon rss">RSS</a>
+
+
+  <form action="http://google.com/search" method="get">
+    <input type="hidden" name="q" value="site:chris.eldredge.io" />
+    <input class="search ss-search" type="text" name="q" results="0" />
+  </form>
+
+
+
+
+    <a href="/blog/archives" class="see-more">archive</a>
+
+
+      | <a class="next-page" href="/blog/2012/04/19/Lucene-NumericField-Gotcha/" title="Next Post: Lucene NumericField Gotcha">next</a>
+
   </footer>
+
 </article>
 
-  <section>
-    <h1>Comments</h1>
-    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<section class="comments">
+  <h1>Comments</h1>
+  <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
 </div>
-  </section>
-
-</div>
-
-<aside class="sidebar">
-  
-    <section>
-  <h1>Recent Posts</h1>
-  <ul id="recent_posts">
-    
-      <li class="post">
-        <a href="/blog/2013/02/25/fun-with-nuget-rest-api/">Fun with NuGet Web Api</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2013/01/04/sitting-at-your-desk-is-killing-you/">Sitting at Your Desk is Killing You</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2012/09/21/ravendb-nuget-review/">RavenDB NuGet Review</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2012/09/06/how-the-motley-fool-uses-octopus-deploy/">How The Motley Fool Uses Octopus Deploy</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2012/08/20/how-the-motley-fool-uses-nuget-part-2/">How The Motley Fool Uses NuGet (Part 2)</a>
-      </li>
-    
-  </ul>
 </section>
-
-
-<section>
-<a class="twitter-timeline" data-dnt="true" href="https://twitter.com/creldredge" data-widget-id="362388405302214657">Tweets by @creldredge</a>
-<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
-</section>
-
-
-
-
-
-  
-</aside>
-
 
     </div>
   </div>
-  <footer role="contentinfo"><p>
-  Copyright &copy; 2013 - Chris Eldredge -
-  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+  <footer role="contentinfo" class="site-footer"><div class="bio">
+  <h3>Chris Eldredge</h3>
+  <p>I’m a software developer for <a href="http://www.fool.com/">The Motley Fool</a>. I tend to spend a lot of time on build and release tools. When I'm not hacking codes, I'm probably reading, cooking, drinking old-man drinks or studying Korean with <a href="http://ttmik.com/">TTMIK</a>.</p>
+</div>
+<ul class="social">
+  <li><a href="https://www.github.com/chriseldredge" class="ss-icon">octocat</a></li>
+  <li><a href="http://www.linkedin.com/pub/chris-eldredge/1/52b/520" class="ss-icon">linkedin</a></li>
+  <li><a href="http://www.twitter.com/creldredge" class="ss-icon">twitter</a></li>
+</ul>
+<p class="copyright">
+  Copyright &copy; 2013 - Chris Eldredge
 </p>
 
 </footer>
@@ -265,8 +204,8 @@ name besides &#8220;select&#8221;.  It just returns the entire collection of ite
       
         
         // var disqus_developer = 1;
-        var disqus_identifier = 'http://chriseldredge.github.com/blog/2012/03/29/Getting-Started-With-Relinq/';
-        var disqus_url = 'http://chriseldredge.github.com/blog/2012/03/29/Getting-Started-With-Relinq/';
+        var disqus_identifier = 'http://chris.eldredge.io/blog/2012/03/29/Getting-Started-With-Relinq/';
+        var disqus_url = 'http://chris.eldredge.io/blog/2012/03/29/Getting-Started-With-Relinq/';
         var disqus_script = 'embed.js';
       
     (function () {

@@ -2,10 +2,10 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
 
   <title><![CDATA[Chris Eldredge]]></title>
-  <link href="http://chriseldredge.github.com/atom.xml" rel="self"/>
-  <link href="http://chriseldredge.github.com/"/>
-  <updated>2013-07-31T21:26:08+00:00</updated>
-  <id>http://chriseldredge.github.com/</id>
+  <link href="http://chris.eldredge.io/atom.xml" rel="self"/>
+  <link href="http://chris.eldredge.io/"/>
+  <updated>2013-11-19T13:15:50-05:00</updated>
+  <id>http://chris.eldredge.io/</id>
   <author>
     <name><![CDATA[Chris Eldredge]]></name>
     
@@ -14,10 +14,158 @@
 
   
   <entry>
+    <title type="html"><![CDATA[Putting the web into WebApi]]></title>
+    <link href="http://chris.eldredge.io/blog/2013/07/30/putting-the-web-into-webapi/"/>
+    <updated>2013-07-30T00:00:00-04:00</updated>
+    <id>http://chris.eldredge.io/blog/2013/07/30/putting-the-web-into-webapi</id>
+    <content type="html"><![CDATA[<p>For .net api developers, the WebApi framework offers a compelling alternative
+to asp.net mvc for slinging json or (gasp) xml over http. One great feature
+you get out of the box is content negotiation, where WebApi will look at
+request headers to decide which format to use when processing a request
+body or sending back a response.</p>
+
+<p>WebApi also includes the concept of an <a href="http://msdn.microsoft.com/en-us/library/system.web.http.description.apiexplorer(v=vs.108).aspx">ApiExplorer</a>,
+a built in service that knows about all the routes, templates and parameters
+an application is configured to handle. It even supports attaching human friendly
+documentation.</p>
+
+<p>With these built in perks, WebApi gets you 95% of the way there. What it
+doesn&#8217;t do out of the box, unfortunately, is something that it says right
+on the box. It doesn&#8217;t do web.</p>
+
+<h2>HTTP, ReST and the Web</h2>
+
+<p>Writing an application that speaks json over http does not automatically give
+you something that can be called ReST. To get to ReST nirvana your api needs
+to speak using hypermedia, providing the client with not just data, but
+links and forms that can do stuff with the data.</p>
+
+<p>If you aren&#8217;t familiar with this distinction, here are some great resources:</p>
+
+<ul>
+<li><a href="http://martinfowler.com/articles/richardsonMaturityModel.html">Richardson Maturity Model</a></li>
+<li><a href="http://www.infoq.com/presentations/web-api-html">Building Hypermedia APIs with HTML</a> (talk by Jon Moore)</li>
+<li><a href="https://speakerdeck.com/stilkov">Slide decks by Stefan Tilkov</a></li>
+<li><a href="https://speakerdeck.com/ammeep/exist-in-the-web-not-on-it">Exist In the Web - Not on it</a> slide deck by Amy Palamountain</li>
+</ul>
+
+
+<h2>Microdata</h2>
+
+<p>Jon Moore&#8217;s work is particularly intriguing because he shows what
+you can already do with <a href="http://en.wikipedia.org/wiki/Microdata_(HTML)">Microdata</a>.</p>
+
+<p>Microdata boils down to 3 attributes that you stick on elements in your
+html5 markup, and they&#8217;re all you need to give semantic information
+to a client. You can nest properties into a scope, describe the type of data
+being represented, and even nest scopes with scopes recursively.</p>
+
+<p>Jon&#8217;s talks show how a web client that speaks Microdata can already start
+on sites like <a href="http://ebay.com/">ebay.com</a>, submit a form and find and manipulate
+resources without knowing anything ahead of time about what resources are there and
+what URLs are used to access them.</p>
+
+<hr />
+
+<p><strong>Update:</strong> In the (long) time between drafting this post and publishing it, Microdata <a href="http://manu.sporny.org/2013/microdata-downward-spiral/">has died</a>. The spirit of this post remains intact, but I&#8217;ll probably be looking into
+switching to <a href="http://www.w3.org/TR/rdfa-lite/">RDFa Lite</a>.</p>
+
+<hr />
+
+<h2>WebApi + Microdata</h2>
+
+<p>On the one hand we have a .net framework for writing HTTP apis that
+has pluggable support for different content types. On the other hand we
+have html5 and Microdata. Think they could be friends?</p>
+
+<p>I&#8217;m excited to announce HtmlMicrodataFormatter,
+a new open source (Apache Public License) project available
+on <a href="http://www.nuget.org/packages/AspNet.WebApi.HtmlMicrodataFormatter.WebActivator/">nuget.org</a>
+and hosted on <a href="https://github.com/themotleyfool/AspNet.WebApi.HtmlMicrodataFormatter">GitHub</a>.</p>
+
+<p>When you install this package into your WebApi project, it adds two
+features.</p>
+
+<p>First, if you enter the URL for one of your api methods into a web
+browser, you get (relatively) nice, human friendly html5 instead
+of the wall of xml you would otherwise be greeted with.</p>
+
+<p>Second, and perhaps more importantly, if you browse to ~/api,
+you will be greeted by an html5 page that includes links and
+forms for all the routes that are registered with ApiExplorer.</p>
+
+<p>You can fill in the inputs and submit forms to test them out
+right in the browser. If your routes are templated, a javascript
+event handler will process the URI template and update the form
+action just before the form is submitted.</p>
+
+<p>Turn on xml documentation for your project, rebuild, and now
+all the documentation comments you attach to your controllers
+and actions appear on the forms.</p>
+
+<h2>Why it Matters</h2>
+
+<p>Obviously, getting a free html form generated for
+each action can be a productivity boon for developers who
+are tired of writing</p>
+
+<pre><code>curl -X POST -H 'Accept: application/json' \
+  --data 'param1=value1&amp;param2=value2' \
+  http://localhost:49497/api/users/fred'
+</code></pre>
+
+<p>But it&#8217;s more than that. Make your client project use html5
+and instead of hard-coding URLs for each thing the client
+wants to do, the client starts at /api, finds the form it wants,
+fills it in and submits it. The Microdata attributes in
+the response, along with links and forms, give the client
+the pieces it needs to drive state, just like Roy T. Fielding
+intended when ReST was first described.</p>
+
+<p>Do you have third party developers who consume your api? Now you
+don&#8217;t have to give them a separate document or website
+that describes (out of band) how to use your api. Just
+link them to <code>yourwebsite/api</code>, and they can read the
+documentation and discover what they can do without
+guessing or following brittle conventions.</p>
+
+<p>Putting the web into WebApi removes the tight coupling
+between client and server. Now you can change your routes,
+rename parameters, add parameters, and the client will
+automatically see those changes reflected in the forms
+and links they get when they enter your api. No more <code>/api/v1/users</code>
+through <code>/api/v23/users</code>. No more api version headers.</p>
+
+<h2>Next Steps</h2>
+
+<p>HtmlMicrodataFormatter is pretty young and there are
+many ideas left to flesh out. For example, making it easy to add
+links and forms to the output of controller actions,
+or improving how xml documentation is collected and
+converted to html, or making it easier to link from
+resources to related resources with appropriate rel
+attributes. The list goes on.</p>
+
+<p>I hope you like HtmlMicrodataFormatter, and if you
+do, maybe get involved and help improve it by
+submitting feedback, bug reports, enhancements or pull
+requests to the GitHub project.</p>
+
+<p>Similar to Jon Moore&#8217;s python based microdata
+client, work has started on a .net dynamic
+client which I hope to share soon.</p>
+
+<hr />
+
+<p>Get the source and see examples at <a href="https://github.com/themotleyfool/AspNet.WebApi.HtmlMicrodataFormatter">https://github.com/themotleyfool/AspNet.WebApi.HtmlMicrodataFormatter</a>.</p>
+]]></content>
+  </entry>
+  
+  <entry>
     <title type="html"><![CDATA[Fun with NuGet Web Api]]></title>
-    <link href="http://chriseldredge.github.com/blog/2013/02/25/fun-with-nuget-rest-api/"/>
-    <updated>2013-02-25T10:57:00+00:00</updated>
-    <id>http://chriseldredge.github.com/blog/2013/02/25/fun-with-nuget-rest-api</id>
+    <link href="http://chris.eldredge.io/blog/2013/02/25/fun-with-nuget-rest-api/"/>
+    <updated>2013-02-25T10:57:00-05:00</updated>
+    <id>http://chris.eldredge.io/blog/2013/02/25/fun-with-nuget-rest-api</id>
     <content type="html"><![CDATA[<p>NuGet is a package management system for .net. Like most things these days, NuGet uses HTTP
 for client/server communication to enable search, download, upload and other operations.</p>
 
@@ -195,51 +343,95 @@ http://example.com/ then it will publish to http://example.com/api/v2/package.</
 <p>For my application, here are the routes I came up with that seem to keep
 the NuGet client happy, as long as you don&#8217;t deploy it as a child application:</p>
 
-<div><script src='https://gist.github.com/chriseldredge/5052423.js?file='></script>
-<noscript><pre><code>public static void MapApiRoutes(HttpRouteCollection routes)
-{
-    // Serves up HTML to browsers that accept text/html
-    routes.MapHttpRoute(RouteNames.Home,
-                        &quot;&quot;,
-                        new { controller = &quot;Home&quot; },
-                        new { acceptHeader = new AcceptHtmlConstraint() });
-
-    routes.MapHttpRoute(RouteNames.PackageDownload,
-                        &quot;api/v2/package/{id}/{version}/content&quot;,
-                        new { controller = &quot;Packages&quot;, action = &quot;DownloadPackage&quot; });
-
-    routes.MapHttpRoute(RouteNames.PackageInfo,
-                        &quot;api/v2/package/{id}/{version}&quot;,
-                        new {controller = &quot;Packages&quot;, action = &quot;GetPackageInfo&quot;, version = &quot;&quot;},
-                        new { httpMethod = new HttpMethodConstraint(HttpMethod.Get) });
-    
-    routes.MapHttpRoute(RouteNames.PackageApi,
-                        &quot;api/v2/package/{id}/{version}&quot;,
-                        new { controller = &quot;Packages&quot;, id = &quot;&quot;, version = &quot;&quot; },
-                        new { httpMethod = new HttpMethodConstraint(HttpMethod.Put, HttpMethod.Post, HttpMethod.Delete) });
-    
-    routes.MapHttpRoute(RouteNames.TabCompletionPackageIds,
-                        &quot;api/v2/package-ids&quot;,
-                        new { controller = &quot;TabCompletion&quot;, action = &quot;GetMatchingPackages&quot;, maxResults = 30, includePrerelease = false });
-
-    routes.MapHttpRoute(RouteNames.TabCompletionPackageVersions,
-                        &quot;api/v2/package-versions/{packageId}&quot;,
-                        new {controller = &quot;TabCompletion&quot;, action = &quot;GetPackageVersions&quot;, includePrerelease = false});
-}
-
-public static void MapDataServiceRoutes(RouteCollection routes)
-{
-    var dataServiceHostFactory = new DataServiceHostFactory();
-    
-    // Maps OData to root of application (NOT /api/v2)
-    var serviceRoute = new ServiceRoute(&quot;&quot;, dataServiceHostFactory, typeof(PackageDataService))
-        {
-            Defaults = RouteNames.PackageFeedRouteValues,
-            Constraints = RouteNames.PackageFeedRouteValues
-        };
-    
-    routes.Add(RouteNames.PackageFeed, serviceRoute);
-}</code></pre></noscript></div>
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+</pre></td><td class='code'><pre><code class='c#'><span class='line'><span class="k">public</span> <span class="k">static</span> <span class="k">void</span> <span class="nf">MapApiRoutes</span><span class="p">(</span><span class="n">HttpRouteCollection</span> <span class="n">routes</span><span class="p">)</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>    <span class="c1">// Serves up HTML to browsers that accept text/html</span>
+</span><span class='line'>    <span class="n">routes</span><span class="p">.</span><span class="n">MapHttpRoute</span><span class="p">(</span><span class="n">RouteNames</span><span class="p">.</span><span class="n">Home</span><span class="p">,</span>
+</span><span class='line'>                        <span class="s">&quot;&quot;</span><span class="p">,</span>
+</span><span class='line'>                        <span class="k">new</span> <span class="p">{</span> <span class="n">controller</span> <span class="p">=</span> <span class="s">&quot;Home&quot;</span> <span class="p">},</span>
+</span><span class='line'>                        <span class="k">new</span> <span class="p">{</span> <span class="n">acceptHeader</span> <span class="p">=</span> <span class="k">new</span> <span class="n">AcceptHtmlConstraint</span><span class="p">()</span> <span class="p">});</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">routes</span><span class="p">.</span><span class="n">MapHttpRoute</span><span class="p">(</span><span class="n">RouteNames</span><span class="p">.</span><span class="n">PackageDownload</span><span class="p">,</span>
+</span><span class='line'>                        <span class="s">&quot;api/v2/package/{id}/{version}/content&quot;</span><span class="p">,</span>
+</span><span class='line'>                        <span class="k">new</span> <span class="p">{</span> <span class="n">controller</span> <span class="p">=</span> <span class="s">&quot;Packages&quot;</span><span class="p">,</span> <span class="n">action</span> <span class="p">=</span> <span class="s">&quot;DownloadPackage&quot;</span> <span class="p">});</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">routes</span><span class="p">.</span><span class="n">MapHttpRoute</span><span class="p">(</span><span class="n">RouteNames</span><span class="p">.</span><span class="n">PackageInfo</span><span class="p">,</span>
+</span><span class='line'>                        <span class="s">&quot;api/v2/package/{id}/{version}&quot;</span><span class="p">,</span>
+</span><span class='line'>                        <span class="k">new</span> <span class="p">{</span><span class="n">controller</span> <span class="p">=</span> <span class="s">&quot;Packages&quot;</span><span class="p">,</span> <span class="n">action</span> <span class="p">=</span> <span class="s">&quot;GetPackageInfo&quot;</span><span class="p">,</span> <span class="n">version</span> <span class="p">=</span> <span class="s">&quot;&quot;</span><span class="p">},</span>
+</span><span class='line'>                        <span class="k">new</span> <span class="p">{</span> <span class="n">httpMethod</span> <span class="p">=</span> <span class="k">new</span> <span class="n">HttpMethodConstraint</span><span class="p">(</span><span class="n">HttpMethod</span><span class="p">.</span><span class="n">Get</span><span class="p">)</span> <span class="p">});</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">routes</span><span class="p">.</span><span class="n">MapHttpRoute</span><span class="p">(</span><span class="n">RouteNames</span><span class="p">.</span><span class="n">PackageApi</span><span class="p">,</span>
+</span><span class='line'>                        <span class="s">&quot;api/v2/package/{id}/{version}&quot;</span><span class="p">,</span>
+</span><span class='line'>                        <span class="k">new</span> <span class="p">{</span> <span class="n">controller</span> <span class="p">=</span> <span class="s">&quot;Packages&quot;</span><span class="p">,</span> <span class="n">id</span> <span class="p">=</span> <span class="s">&quot;&quot;</span><span class="p">,</span> <span class="n">version</span> <span class="p">=</span> <span class="s">&quot;&quot;</span> <span class="p">},</span>
+</span><span class='line'>                        <span class="k">new</span> <span class="p">{</span> <span class="n">httpMethod</span> <span class="p">=</span> <span class="k">new</span> <span class="n">HttpMethodConstraint</span><span class="p">(</span><span class="n">HttpMethod</span><span class="p">.</span><span class="n">Put</span><span class="p">,</span> <span class="n">HttpMethod</span><span class="p">.</span><span class="n">Post</span><span class="p">,</span> <span class="n">HttpMethod</span><span class="p">.</span><span class="n">Delete</span><span class="p">)</span> <span class="p">});</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">routes</span><span class="p">.</span><span class="n">MapHttpRoute</span><span class="p">(</span><span class="n">RouteNames</span><span class="p">.</span><span class="n">TabCompletionPackageIds</span><span class="p">,</span>
+</span><span class='line'>                        <span class="s">&quot;api/v2/package-ids&quot;</span><span class="p">,</span>
+</span><span class='line'>                        <span class="k">new</span> <span class="p">{</span> <span class="n">controller</span> <span class="p">=</span> <span class="s">&quot;TabCompletion&quot;</span><span class="p">,</span> <span class="n">action</span> <span class="p">=</span> <span class="s">&quot;GetMatchingPackages&quot;</span><span class="p">,</span> <span class="n">maxResults</span> <span class="p">=</span> <span class="m">30</span><span class="p">,</span> <span class="n">includePrerelease</span> <span class="p">=</span> <span class="k">false</span> <span class="p">});</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">routes</span><span class="p">.</span><span class="n">MapHttpRoute</span><span class="p">(</span><span class="n">RouteNames</span><span class="p">.</span><span class="n">TabCompletionPackageVersions</span><span class="p">,</span>
+</span><span class='line'>                        <span class="s">&quot;api/v2/package-versions/{packageId}&quot;</span><span class="p">,</span>
+</span><span class='line'>                        <span class="k">new</span> <span class="p">{</span><span class="n">controller</span> <span class="p">=</span> <span class="s">&quot;TabCompletion&quot;</span><span class="p">,</span> <span class="n">action</span> <span class="p">=</span> <span class="s">&quot;GetPackageVersions&quot;</span><span class="p">,</span> <span class="n">includePrerelease</span> <span class="p">=</span> <span class="k">false</span><span class="p">});</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">public</span> <span class="k">static</span> <span class="k">void</span> <span class="nf">MapDataServiceRoutes</span><span class="p">(</span><span class="n">RouteCollection</span> <span class="n">routes</span><span class="p">)</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>    <span class="kt">var</span> <span class="n">dataServiceHostFactory</span> <span class="p">=</span> <span class="k">new</span> <span class="n">DataServiceHostFactory</span><span class="p">();</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">// Maps OData to root of application (NOT /api/v2)</span>
+</span><span class='line'>    <span class="kt">var</span> <span class="n">serviceRoute</span> <span class="p">=</span> <span class="k">new</span> <span class="n">ServiceRoute</span><span class="p">(</span><span class="s">&quot;&quot;</span><span class="p">,</span> <span class="n">dataServiceHostFactory</span><span class="p">,</span> <span class="k">typeof</span><span class="p">(</span><span class="n">PackageDataService</span><span class="p">))</span>
+</span><span class='line'>        <span class="p">{</span>
+</span><span class='line'>            <span class="n">Defaults</span> <span class="p">=</span> <span class="n">RouteNames</span><span class="p">.</span><span class="n">PackageFeedRouteValues</span><span class="p">,</span>
+</span><span class='line'>            <span class="n">Constraints</span> <span class="p">=</span> <span class="n">RouteNames</span><span class="p">.</span><span class="n">PackageFeedRouteValues</span>
+</span><span class='line'>        <span class="p">};</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">routes</span><span class="p">.</span><span class="n">Add</span><span class="p">(</span><span class="n">RouteNames</span><span class="p">.</span><span class="n">PackageFeed</span><span class="p">,</span> <span class="n">serviceRoute</span><span class="p">);</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
 
 
 <h2>Next</h2>
@@ -252,9 +444,9 @@ how eager I&#8217;ll be in trying to bring about this change.</p>
   
   <entry>
     <title type="html"><![CDATA[Sitting at Your Desk is Killing You]]></title>
-    <link href="http://chriseldredge.github.com/blog/2013/01/04/sitting-at-your-desk-is-killing-you/"/>
-    <updated>2013-01-04T10:44:00+00:00</updated>
-    <id>http://chriseldredge.github.com/blog/2013/01/04/sitting-at-your-desk-is-killing-you</id>
+    <link href="http://chris.eldredge.io/blog/2013/01/04/sitting-at-your-desk-is-killing-you/"/>
+    <updated>2013-01-04T10:44:00-05:00</updated>
+    <id>http://chris.eldredge.io/blog/2013/01/04/sitting-at-your-desk-is-killing-you</id>
     <content type="html"><![CDATA[<p>Since we&#8217;re starting a new year and health &amp; fitness are on the mind, here&#8217;s how I attempt
 to combat the negative affects of the sedentary lifestyle of the professional programmer.</p>
 
@@ -331,9 +523,9 @@ Twice an hour, get up and move around. It&#8217;s good for your health and produ
   
   <entry>
     <title type="html"><![CDATA[RavenDB NuGet Review]]></title>
-    <link href="http://chriseldredge.github.com/blog/2012/09/21/ravendb-nuget-review/"/>
-    <updated>2012-09-21T15:25:00+00:00</updated>
-    <id>http://chriseldredge.github.com/blog/2012/09/21/ravendb-nuget-review</id>
+    <link href="http://chris.eldredge.io/blog/2012/09/21/ravendb-nuget-review/"/>
+    <updated>2012-09-21T15:25:00-04:00</updated>
+    <id>http://chris.eldredge.io/blog/2012/09/21/ravendb-nuget-review</id>
     <content type="html"><![CDATA[<p><a href="http://ayende.com/blog">Ayende</a> has been doing a series of posts about how simple and fast RavenDB is, using NuGet
 as an example and pointing out some <a href="http://blog.nuget.org/20120824/nuget-feed-performance-update.html">complex, poorly performing queries</a>
 that have been bogging down nuget.org recently.</p>
@@ -455,9 +647,9 @@ and maybe do a load test of my own of our <a href="https://github.com/themotleyf
   
   <entry>
     <title type="html"><![CDATA[How The Motley Fool Uses Octopus Deploy]]></title>
-    <link href="http://chriseldredge.github.com/blog/2012/09/06/how-the-motley-fool-uses-octopus-deploy/"/>
-    <updated>2012-09-06T11:23:00+00:00</updated>
-    <id>http://chriseldredge.github.com/blog/2012/09/06/how-the-motley-fool-uses-octopus-deploy</id>
+    <link href="http://chris.eldredge.io/blog/2012/09/06/how-the-motley-fool-uses-octopus-deploy/"/>
+    <updated>2012-09-06T11:23:00-04:00</updated>
+    <id>http://chris.eldredge.io/blog/2012/09/06/how-the-motley-fool-uses-octopus-deploy</id>
     <content type="html"><![CDATA[<p>I&#8217;ve mentioned a few times that my team has been using <a href="http://octopusdeploy.com/">Octopus Deploy</a> in a few of my posts.
 Now I&#8217;ll describe in more detail some of the ways we&#8217;ve integrated with Octopus that may help others.</p>
 
@@ -634,10 +826,10 @@ iteratively and predictably.</p>
   
   <entry>
     <title type="html"><![CDATA[How The Motley Fool Uses NuGet (Part 2)]]></title>
-    <link href="http://chriseldredge.github.com/blog/2012/08/20/how-the-motley-fool-uses-nuget-part-2/"/>
-    <updated>2012-08-20T13:56:00+00:00</updated>
-    <id>http://chriseldredge.github.com/blog/2012/08/20/how-the-motley-fool-uses-nuget-part-2</id>
-    <content type="html"><![CDATA[<p><a href="http://chriseldredge.github.com/blog/2012/08/07/how-the-motley-fool-uses-nuget/">Last time</a>
+    <link href="http://chris.eldredge.io/blog/2012/08/20/how-the-motley-fool-uses-nuget-part-2/"/>
+    <updated>2012-08-20T13:56:00-04:00</updated>
+    <id>http://chris.eldredge.io/blog/2012/08/20/how-the-motley-fool-uses-nuget-part-2</id>
+    <content type="html"><![CDATA[<p><a href="http://chris.eldredge.io/blog/2012/08/07/how-the-motley-fool-uses-nuget/">Last time</a>
 I talked about how my development team progressed from having all
 of our .net code in a single repository with a single solution to using a more
 modular architecture complete with encapsulated domains.</p>
@@ -742,7 +934,7 @@ I started optimizing NuGet.Server. This project ended up taking quite
 a while, but the good news is that the fruits of the labor are now
 open source on GitHub at <a href="https://github.com/themotleyfool/NuGet">https://github.com/themotleyfool/NuGet</a>.</p>
 
-<p>For more information about that project, see my <a href="http://chriseldredge.github.com/blog/2012/07/03/Speeding-Up-NuGet-Server/">previous post</a>.</p>
+<p>For more information about that project, see my <a href="http://chris.eldredge.io/blog/2012/07/03/Speeding-Up-NuGet-Server/">previous post</a>.</p>
 
 <h3>Refactoring Applications and Shared Code</h3>
 
@@ -779,9 +971,9 @@ develop them.</p>
   
   <entry>
     <title type="html"><![CDATA[How The Motley Fool uses NuGet (part 1)]]></title>
-    <link href="http://chriseldredge.github.com/blog/2012/08/07/how-the-motley-fool-uses-nuget/"/>
-    <updated>2012-08-07T14:25:00+00:00</updated>
-    <id>http://chriseldredge.github.com/blog/2012/08/07/how-the-motley-fool-uses-nuget</id>
+    <link href="http://chris.eldredge.io/blog/2012/08/07/how-the-motley-fool-uses-nuget/"/>
+    <updated>2012-08-07T14:25:00-04:00</updated>
+    <id>http://chris.eldredge.io/blog/2012/08/07/how-the-motley-fool-uses-nuget</id>
     <content type="html"><![CDATA[<p>This post describes how we came to using binary package management. In the next part I&#8217;ll get into NuGet.</p>
 
 <p>In the beginning, there was one repository and it held all the projects for The Motley Fool, and it was good.
@@ -875,9 +1067,9 @@ at this point we started to look at binary package management.</p>
   
   <entry>
     <title type="html"><![CDATA[MSBuild, Visual Studio & NuGet Hackery]]></title>
-    <link href="http://chriseldredge.github.com/blog/2012/07/26/MSBuild-NuGet-Visual-Studio-Hackery/"/>
-    <updated>2012-07-26T00:00:00+00:00</updated>
-    <id>http://chriseldredge.github.com/blog/2012/07/26/MSBuild-NuGet-Visual-Studio-Hackery</id>
+    <link href="http://chris.eldredge.io/blog/2012/07/26/MSBuild-NuGet-Visual-Studio-Hackery/"/>
+    <updated>2012-07-26T00:00:00-04:00</updated>
+    <id>http://chris.eldredge.io/blog/2012/07/26/MSBuild-NuGet-Visual-Studio-Hackery</id>
     <content type="html"><![CDATA[<p>My team at work recently switched to using NuGet. We have a fair amount of shared code that used to be in a
 monolithic code base with all the problems that came with it. Slow builds, no concept of versions, tight coupling, etc.
 To address these issues we started migrating to a new layout where we split Framework Projects out into seperate
@@ -1206,9 +1398,9 @@ and SpecificVersion.</p>
   
   <entry>
     <title type="html"><![CDATA[Unit of Work & Eventual Consistency]]></title>
-    <link href="http://chriseldredge.github.com/blog/2012/07/24/Unit-of-Work-and-Eventual-Consistency/"/>
-    <updated>2012-07-24T00:00:00+00:00</updated>
-    <id>http://chriseldredge.github.com/blog/2012/07/24/Unit-of-Work-and-Eventual-Consistency</id>
+    <link href="http://chris.eldredge.io/blog/2012/07/24/Unit-of-Work-and-Eventual-Consistency/"/>
+    <updated>2012-07-24T00:00:00-04:00</updated>
+    <id>http://chris.eldredge.io/blog/2012/07/24/Unit-of-Work-and-Eventual-Consistency</id>
     <content type="html"><![CDATA[<p><em>Lucene.Net.Linq is available on the NuGet Gallery at <a href="http://nuget.org/packages/Lucene.Net.Linq">http://nuget.org/packages/Lucene.Net.Linq</a>.</em></p>
 
 <p>Recent versions of Lucene.Net.Linq added support for the <a href="http://martinfowler.com/eaaCatalog/unitOfWork.html">Unit of Work</a> pattern.</p>
@@ -1347,9 +1539,9 @@ appear atomically. Knowing the details of when staged changes become visible wil
   
   <entry>
     <title type="html"><![CDATA[Speeding Up NuGet.Server]]></title>
-    <link href="http://chriseldredge.github.com/blog/2012/07/03/Speeding-Up-NuGet-Server/"/>
-    <updated>2012-07-03T00:00:00+00:00</updated>
-    <id>http://chriseldredge.github.com/blog/2012/07/03/Speeding-Up-NuGet-Server</id>
+    <link href="http://chris.eldredge.io/blog/2012/07/03/Speeding-Up-NuGet-Server/"/>
+    <updated>2012-07-03T00:00:00-04:00</updated>
+    <id>http://chris.eldredge.io/blog/2012/07/03/Speeding-Up-NuGet-Server</id>
     <content type="html"><![CDATA[<p><em>(Get the source code at <a href="https://github.com/themotleyfool/NuGet">https://github.com/themotleyfool/NuGet</a>)</em></p>
 
 <p>Last time I wrote about creating a LINQ provider for Lucene.Net, and today I&#8217;ll talk about integrating that provider
@@ -1437,9 +1629,9 @@ OSS projects that attempt to do what it does, but I think it is already one of t
   
   <entry>
     <title type="html"><![CDATA[Introducing LINQ to Lucene]]></title>
-    <link href="http://chriseldredge.github.com/blog/2012/05/08/Introducing-Linq-to-Lucene/"/>
-    <updated>2012-05-08T00:00:00+00:00</updated>
-    <id>http://chriseldredge.github.com/blog/2012/05/08/Introducing-Linq-to-Lucene</id>
+    <link href="http://chris.eldredge.io/blog/2012/05/08/Introducing-Linq-to-Lucene/"/>
+    <updated>2012-05-08T00:00:00-04:00</updated>
+    <id>http://chris.eldredge.io/blog/2012/05/08/Introducing-Linq-to-Lucene</id>
     <content type="html"><![CDATA[<p><em>(Get the source code at <a href="https://github.com/themotleyfool/Lucene.Net.Linq">https://github.com/themotleyfool/Lucene.Net.Linq</a>)</em></p>
 
 <p>For the last several weeks I&#8217;ve been working with <a href="http://octopusdeploy.com/">OctopusDeploy</a>, a new one-click deployment
@@ -1568,9 +1760,9 @@ and <a href="http://www.apache.org/licenses/LICENSE-2.0">Apache License</a>.</p>
   
   <entry>
     <title type="html"><![CDATA[Lucene NumericField Gotcha]]></title>
-    <link href="http://chriseldredge.github.com/blog/2012/04/19/Lucene-NumericField-Gotcha/"/>
-    <updated>2012-04-19T00:00:00+00:00</updated>
-    <id>http://chriseldredge.github.com/blog/2012/04/19/Lucene-NumericField-Gotcha</id>
+    <link href="http://chris.eldredge.io/blog/2012/04/19/Lucene-NumericField-Gotcha/"/>
+    <updated>2012-04-19T00:00:00-04:00</updated>
+    <id>http://chris.eldredge.io/blog/2012/04/19/Lucene-NumericField-Gotcha</id>
     <content type="html"><![CDATA[<p>Today I ran into an interesting problem using
 <a href="https://svn.apache.org/repos/asf/incubator/lucene.net/trunk/src/core/Document/NumericField.cs">NumericField</a>.</p>
 
@@ -1590,9 +1782,9 @@ any NumericFields before adding the document back to the index, even if they did
   
   <entry>
     <title type="html"><![CDATA[Getting Started with Re-linq]]></title>
-    <link href="http://chriseldredge.github.com/blog/2012/03/29/Getting-Started-With-Relinq/"/>
-    <updated>2012-03-29T00:00:00+00:00</updated>
-    <id>http://chriseldredge.github.com/blog/2012/03/29/Getting-Started-With-Relinq</id>
+    <link href="http://chris.eldredge.io/blog/2012/03/29/Getting-Started-With-Relinq/"/>
+    <updated>2012-03-29T00:00:00-04:00</updated>
+    <id>http://chris.eldredge.io/blog/2012/03/29/Getting-Started-With-Relinq</id>
     <content type="html"><![CDATA[<h2>The IQueryable Conundrum</h2>
 
 <p>So, you have a datasource you can access from .net and you thought, hey wouldn&#8217;t it be
