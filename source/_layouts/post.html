@@ -21,7 +21,15 @@ sidebar: false
   </form>
 {% endif %}
 
-    <a href="/blog/archives" class="see-more">see older entries</a>
+{% if page.previous.url %}
+      <a class="prev-page" href="{{page.previous.url}}" title="Previous Post: {{page.previous.title}}">previous</a> |
+{% endif %}
+
+    <a href="/blog/archives" class="see-more">archive</a>
+
+{% if page.next.url %}
+      | <a class="next-page" href="{{page.next.url}}" title="Next Post: {{page.next.title}}">next</a>
+{% endif %}
   </footer>
 
 </article>

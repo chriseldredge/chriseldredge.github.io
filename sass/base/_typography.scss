@@ -211,8 +211,19 @@ blockquote {
 
 .see-more {
   font-family: $serif;
-  font-size: 18px;
+  font-size: 16px;
   font-style: italic;
+}
+
+.prev-page {
+  @extend .see-more;
+  &:before {
+    content: "\00ab\00a0";
+  }
+}
+
+.next-page {
+  @extend .see-more;
   &:after {
     content: " \00bb";
   }
