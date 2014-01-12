@@ -4,7 +4,7 @@
   <title><![CDATA[Chris Eldredge]]></title>
   <link href="http://chris.eldredge.io/atom.xml" rel="self"/>
   <link href="http://chris.eldredge.io/"/>
-  <updated>2013-11-19T13:15:50-05:00</updated>
+  <updated>2014-01-12T15:52:23-05:00</updated>
   <id>http://chris.eldredge.io/</id>
   <author>
     <name><![CDATA[Chris Eldredge]]></name>
@@ -12,6 +12,234 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Cross-NuGet Development With Slimjim]]></title>
+    <link href="http://chris.eldredge.io/blog/2014/01/07/cross-nuget-development-with-slimjim/"/>
+    <updated>2014-01-07T21:50:00-05:00</updated>
+    <id>http://chris.eldredge.io/blog/2014/01/07/cross-nuget-development-with-slimjim</id>
+    <content type="html"><![CDATA[<p>Last week Phil Haack observed:</p>
+
+<div class='embed tweet'><blockquote class="twitter-tweet"><p>Submodules and NuGet don&#39;t play well together. :(</p>&mdash; Phil Haack (@haacked) <a href="https://twitter.com/haacked/statuses/421160899856969728">January 9, 2014</a></blockquote>
+<script async src="http://chris.eldredge.io//platform.twitter.com/widgets.js" charset="utf-8"></script></div>
+
+
+<p>I think Phil is trying to solve the same problem lots of .NET developers
+run into. Let&#8217;s say you have a web project that is using the wonderful
+<a href="https://github.com/themotleyfool/Lucene.Net.Linq/">Lucene.Net.Linq package</a>
+and you want to fix a bug or add a feature to the library, and test
+it in your web project without needing to manually copy DLLs around
+from one solution to another.</p>
+
+<p>This is a workflow I use constantly, and the tool I use to minimize
+friction during development is <a href="https://github.com/themotleyfool/Slimjim">Slimjim</a>.</p>
+
+<p>Slimjim, in a nut, is a command line tool that generates Visual Studio solution
+files. The killer feature is that it will also modify csproj files
+to replace assembly references with project references. This way
+you can have a solution with all the projects you want to work with,
+and when you hit &lt;ctrl>+&lt;shift>+B to build the solution, everything
+builds in the right order and your top level project gets the
+newly compiled code without you needing to do any extra work.</p>
+
+<h2>An Example</h2>
+
+<p>Most of my open source work recently has been on <a href="https://github.com/themotleyfool/Klondike">Klondike</a>,
+a fast NuGet package server you can host on your private network.</p>
+
+<p>This project has actually exploded into lots of sub-projects,
+each of which correlates to one or more NuGet packages available
+on nuget.org.</p>
+
+<h3>Getting the Source</h3>
+
+<p>First, we need to clone all of the repositories that have code
+we want to work on.</p>
+
+<pre><code>mkdir workspace
+cd workspace
+git clone https://github.com/themotleyfool/Klondike
+git clone https://github.com/themotleyfool/NuGet.Lucene
+git clone https://github.com/themotleyfool/Lucene.Net.Linq
+git clone https://github.com/themotleyfool/AspNet.WebApi.HtmlMicrodataFormatter
+</code></pre>
+
+<p>I said there were a lot of projects right? For fun let&#8217;s pull in some 3rd party
+open source code too. That way we can get debug builds and browse the code
+to better understand it.</p>
+
+<pre><code>git clone https://git01.codeplex.com/nuget
+svn checkout https://svn.apache.org/repos/asf/lucene.net/tags/Lucene.Net_3_0_3_RC2_final/ Lucene.Net
+</code></pre>
+
+<p>And note in some cases you may want to checkout a tag or branch other
+than master. For nuget:</p>
+
+<pre><code>cd nuget
+git checkout Release-2.7.2
+cd ..
+</code></pre>
+
+<h3>Getting Slimjim</h3>
+
+<p>Slimjim is on nuget.org, so you can install it locally by doing:</p>
+
+<pre><code>nuget install slimjim
+</code></pre>
+
+<p>And now we have our utility in ./Slimjim.1.0.3/tools/Slimjim.exe</p>
+
+<h3>Generating a Solution</h3>
+
+<p>Running Slimjim without any flags will create a Solution that includes
+all csproj projects found under the current directory.</p>
+
+<p>There may be projects you don&#8217;t care about that you don&#8217;t want
+cluttering your workspace. For example, Nuget has lots of projects and
+I only depend on Nuget.Core.</p>
+
+<p>Since I&#8217;m working on Klondike, I&#8217;ll tell Slimjim to target that project
+and include anything it depends on, recursively.</p>
+
+<pre><code>./Slimjim.1.0.3/tools/Slimjim.exe -t Klondike -a -c
+</code></pre>
+
+<p>The <code>-a</code> switch says to include efferent dependencies, and the <code>-c</code> switch
+says to modify the csproj files to convert assembly references to project
+references.</p>
+
+<p>If we look at one of the csproj files, we can see an example of this:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+</pre></td><td class='code'><pre><code class='diff'><span class='line'><span class="gh">diff --git a/source/Klondike/Klondike.csproj b/source/Klondike/Klondike.csproj</span>
+</span><span class='line'><span class="gh">index 049d8eb..df61e4b 100644</span>
+</span><span class='line'><span class="gd">--- a/source/Klondike/Klondike.csproj</span>
+</span><span class='line'><span class="gi">+++ b/source/Klondike/Klondike.csproj</span>
+</span><span class='line'><span class="gu">@@ -45,10 +45,16 @@</span>
+</span><span class='line'>       &lt;SpecificVersion&gt;False&lt;/SpecificVersion&gt;
+</span><span class='line'>       &lt;HintPath&gt;..\packages\Antlr.3.5.0.2\lib\Antlr3.Runtime.dll&lt;/HintPath&gt;
+</span><span class='line'>     &lt;/Reference&gt;
+</span><span class='line'><span class="gd">-    &lt;Reference Include=&quot;AspNet.WebApi.HtmlMicrodataFormatter, Version=2.0.0.0, Culture=neutral, processorArchitecture=MSIL&quot;&gt;</span>
+</span><span class='line'><span class="gd">-      &lt;SpecificVersion&gt;False&lt;/SpecificVersion&gt;</span>
+</span><span class='line'><span class="gd">-      &lt;HintPath&gt;..\packages\AspNet.WebApi.HtmlMicrodataFormatter.2.0.0\lib\net40\AspNet.WebApi.HtmlMicrodataFormatter.dll&lt;/HintPath&gt;</span>
+</span><span class='line'><span class="gd">-    &lt;/Reference&gt;</span>
+</span><span class='line'><span class="gi">+    &lt;ProjectReference Include=&quot;C:\Projects\workspace\AspNet.WebApi.HtmlMicrodataFormatter\source\AspNet.WebApi.HtmlMicrodataFormatter\AspNet.WebApi.HtmlMicrodataFormatt+      &lt;Project&gt;{794ACAF9-D25C-4571-B801-9FC2CF86C1B4}&lt;/Project&gt;</span>
+</span><span class='line'><span class="gi">+      &lt;Name&gt;AspNet.WebApi.HtmlMicrodataFormatter&lt;/Name&gt;</span>
+</span><span class='line'><span class="gi">+      &lt;SlimJimReplacedReference&gt;</span>
+</span><span class='line'><span class="gi">+        &lt;Reference Include=&quot;AspNet.WebApi.HtmlMicrodataFormatter, Version=2.0.0.0, Culture=neutral, processorArchitecture=MSIL&quot;&gt;</span>
+</span><span class='line'><span class="gi">+          &lt;SpecificVersion&gt;False&lt;/SpecificVersion&gt;</span>
+</span><span class='line'><span class="gi">+          &lt;HintPath&gt;..\packages\AspNet.WebApi.HtmlMicrodataFormatter.2.0.0\lib\net40\AspNet.WebApi.HtmlMicrodataFormatter.dll&lt;/HintPath&gt;</span>
+</span><span class='line'><span class="gi">+        &lt;/Reference&gt;</span>
+</span><span class='line'><span class="gi">+      &lt;/SlimJimReplacedReference&gt;</span>
+</span><span class='line'><span class="gi">+    &lt;/ProjectReference&gt;</span>
+</span><span class='line'>     &lt;Reference Include=&quot;Common.Logging, Version=2.1.2.0, Culture=neutral, PublicKeyToken=af08829b84f0328e, processorArchitecture=MSIL&quot;&gt;
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Remember not to commit this or you&#8217;ll have a bad time!</p>
+
+<h3>Fixing some NuGet things</h3>
+
+<p>This is where we&#8217;ll hit some friction. I&#8217;d like to improve Slimjim to handle
+some of these problems, but the good news is you only have to do this once.</p>
+
+<p>If any of your projects are using NuGet&#8217;s package restore feature, your newly
+generated solution probably won&#8217;t build. This is because NuGet expects to have
+some resources available relative to the <code>$(SolutionDir)</code> property, and
+our Solution file is in a directory that doesn&#8217;t have these tools.</p>
+
+<p>I usually copy them from one of the projects:</p>
+
+<pre><code>cp -R Klondike/source/.nuget .
+</code></pre>
+
+<p>Additionally, assembly hint paths are hard-coded in the csproj files, usually like:</p>
+
+<pre><code>&lt;HintPath&gt;..\packages\SomeLib.1.0\lib\net40\SomeLib.dll&lt;/HintPath&gt;
+</code></pre>
+
+<p>However, when you build from the solution file in workspace, NuGet will restore packages
+relative to this directory, so the csproj files won&#8217;t be able to see them.</p>
+
+<p>The simple fix is to build each project individually so it will restore packages
+to the right place. After each individual repo&#8217;s solution builds, we&#8217;ll be able
+to build from our Slimjim solution.</p>
+
+<p>The more complex solution is to use NTFS junctions to make sure each repo is
+using the same package directory.</p>
+
+<pre><code>mkdir packages
+cd Lucene.Net.Linq/source
+mklink /j packages ..\..\packages
+</code></pre>
+
+<h3>Doing actual work</h3>
+
+<p>Now we have a Solution with the projects we want to work on and it should
+build successfully from the command line using msbuild.exe.</p>
+
+<p>We can open the Solution in Visual Studio, write code, build, test with IIS
+or IIS Express, run unit tests, write more unit tests, and all the other good
+stuff we like doing.</p>
+
+<h3>Releasing</h3>
+
+<p>Once we&#8217;ve made changes we&#8217;re happy with, we have to undo the changes Slimjim
+made to our csproj files before we can commit:</p>
+
+<pre><code>./Slimjim.1.0.3/tools/Slimjim.exe -t Klondike -a -u
+</code></pre>
+
+<p>The <code>-u</code> switch is the correlary to <code>-c</code>, restoring assembly references that
+we had turned into project references before.</p>
+
+<p>Now we can commit/push/pull request, push packages to nuget.org, then
+update packages in the projects that need them.</p>
+
+<h3>Looking ahead</h3>
+
+<p>This workflow is not perfect. It requires some manual setup and upkeep
+whenever we want to pull changes and keep everything in sync. It introduces
+a danger in that you might accidentally commit stuff to your csproj. If
+you update any nuget packages while working in your generated Solution,
+the hint paths will point to the wrong packages folder.</p>
+
+<p>I&#8217;d like to explore how Slimjim can address some of these problems.
+It would also be nice if nuget was a little more dynamic about hint paths.</p>
+
+<p>In the mean time, Slimjim makes it possible to write features across
+disparate projects without needing to push new binaries or manually
+copy DLL files around.</p>
+
+<h3>Git submodules</h3>
+
+<p>Coming back to what @haacked wanted to do, it would be possible to
+treat your workspace folder as a new git repo and include each repo
+within as a submodule. This could reduce some friction for teams
+that want to work using a shared pattern.</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Putting the web into WebApi]]></title>
