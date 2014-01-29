@@ -144,8 +144,8 @@ of Package Restore?</p>
 <span class='line-number'>4</span>
 <span class='line-number'>5</span>
 </pre></td><td class='code'><pre><code class=''><span class='line'>project/
-</span><span class='line'>project/NuGet.targets
 </span><span class='line'>project/IntegratedBuild.proj
+</span><span class='line'>project/NuGet.targets
 </span><span class='line'>project/source/
 </span><span class='line'>project/source/Foo.sln</span></code></pre></td></tr></table></div></figure>
 
@@ -302,7 +302,7 @@ of Package Restore?</p>
 
 <hr />
 
-<p>Lastly, add NuGet.exe to your .gitignore or equivalent scm configuration.</p>
+<p>Make sure to add NuGet.exe to your .gitignore or equivalent scm configuration.</p>
 
 <p>It&#8217;s a little unfortunate that this boilerplate has to be copied from one project to another.
 However, since we&#8217;re bootstrapping NuGet we have a chicken and egg problem that prevents
@@ -315,6 +315,22 @@ date.</p>
 <p>This won&#8217;t work with xbuild on Mono since it does not support CodeTaskFactory, but if
 you are using mono you could add an alternate target that uses curl or wget to perform
 the download. Assuming curl or wget are already on your PATH. Sigh.</p>
+
+<hr />
+
+<p>A simpler approach if you know curl is on the system is to use a different scripting
+language, that effectively does</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='xml'><span class='line'>curl -o nuget.exe https://www.nuget.org/nuget.exe
+</span><span class='line'>./nuget.exe restore source -NonInteractive
+</span><span class='line'>msbuild source\*.sln
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>But why use 3 lines of script when you can have a 100 lines of XML?</p>
 </div>
   
   
