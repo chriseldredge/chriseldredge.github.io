@@ -50,8 +50,8 @@ First, layout:
 
 ```
 project/
-project/NuGet.targets
 project/IntegratedBuild.proj
+project/NuGet.targets
 project/source/
 project/source/Foo.sln
 ```
@@ -138,7 +138,7 @@ project/source/Foo.sln
 
 ---
 
-Lastly, add NuGet.exe to your .gitignore or equivalent scm configuration.
+Make sure to add NuGet.exe to your .gitignore or equivalent scm configuration.
 
 It's a little unfortunate that this boilerplate has to be copied from one project to another.
 However, since we're bootstrapping NuGet we have a chicken and egg problem that prevents
@@ -151,6 +151,19 @@ date.
 This won't work with xbuild on Mono since it does not support CodeTaskFactory, but if
 you are using mono you could add an alternate target that uses curl or wget to perform
 the download. Assuming curl or wget are already on your PATH. Sigh.
+
+---
+
+A simpler approach if you know curl is on the system is to use a different scripting
+language, that effectively does
+
+```
+curl -o nuget.exe https://www.nuget.org/nuget.exe
+./nuget.exe restore source -NonInteractive
+msbuild source\*.sln
+```
+
+But why use 3 lines of script when you can have a 100 lines of XML?
 
 [1]: http://docs.nuget.org/docs/reference/package-restore
 [2]: http://nuget.codeplex.com/SourceControl/latest#src/Build/NuGet.targets
