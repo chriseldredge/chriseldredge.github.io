@@ -4,7 +4,7 @@
   <title><![CDATA[Chris Eldredge]]></title>
   <link href="http://chris.eldredge.io/atom.xml" rel="self"/>
   <link href="http://chris.eldredge.io/"/>
-  <updated>2014-01-12T16:10:38-05:00</updated>
+  <updated>2014-01-29T14:15:07-05:00</updated>
   <id>http://chris.eldredge.io/</id>
   <author>
     <name><![CDATA[Chris Eldredge]]></name>
@@ -12,6 +12,236 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[The newer new NuGet Package Restore]]></title>
+    <link href="http://chris.eldredge.io/blog/2014/01/29/the-newer-new-nuget-package-restore/"/>
+    <updated>2014-01-29T13:01:00-05:00</updated>
+    <id>http://chris.eldredge.io/blog/2014/01/29/the-newer-new-nuget-package-restore</id>
+    <content type="html"><![CDATA[<p>When NuGet 2.7 was released, the topic of how to manage packages in your source
+repository was <a href="http://docs.nuget.org/docs/reference/package-restore">revisited</a> and the waters were muddied.</p>
+
+<p>The new guidance is to not use the &#8220;Enable NuGet Package Restore&#8221; option in
+Visual Studio, but instead to let it happen automatically.</p>
+
+<p>Unfortunately, many developers will probably miss this guidance if they&#8217;re already
+used to restoring packages as part of their workflow.</p>
+
+<p>The option offerend when right-clicking the Solution in Visual Studio gives no
+indication that the option is deprecated, and the text implies that if you don&#8217;t
+activate the option, packge restore will not be enabled.</p>
+
+<p>These are minor annoyances that will hopefully be addressed as more users
+adopt NuGet 2.7 and later clients.</p>
+
+<hr />
+
+<p>One thing the guidance fails to address completely is how an automated build
+system, like a Continuous Integration server, should approach restoring packages.</p>
+
+<p>The section that covers this topic explains how packages can be restored using
+the NuGet comand line client prior to building the solution, but where are
+you supposed to get nuget.exe from?</p>
+
+<p>There are 3 approaches you can take to address this:</p>
+
+<ol>
+<li>Assume the build server is configured to have a recent nuget.exe on the PATH</li>
+<li>Check nuget.exe into your source repository</li>
+<li>Fetch the latest nuget.exe from nuget.org on the fly.</li>
+</ol>
+
+
+<p>The now obsolete &#8220;Enable NuGet Package Restore&#8221; option did a mix of (2) and (3).
+It would look for nuget.exe in the .nuget folder, and if it isn&#8217;t found and some
+options are enabled, it will download it from the web.</p>
+
+<p>How can we continue using this feature while moving towards the new One True Way
+of Package Restore?</p>
+
+<p>We can do it by co-opting parts of <a href="http://nuget.codeplex.com/SourceControl/latest#src/Build/NuGet.targets">NuGet.targets</a> in our own build script.</p>
+
+<p>First, layout:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>project/
+</span><span class='line'>project/NuGet.targets
+</span><span class='line'>project/IntegratedBuild.proj
+</span><span class='line'>project/source/
+</span><span class='line'>project/source/Foo.sln</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>IntegratedBuild.proj</h2>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+</pre></td><td class='code'><pre><code class='xml'><span class='line'><span class="cp">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;</span>
+</span><span class='line'><span class="nt">&lt;Project</span> <span class="na">ToolsVersion=</span><span class="s">&quot;12.0&quot;</span> <span class="na">DefaultTargets=</span><span class="s">&quot;Build&quot;</span> <span class="na">xmlns=</span><span class="s">&quot;http://schemas.microsoft.com/developer/msbuild/2003&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;PropertyGroup&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;SolutionDir&gt;</span>$(MSBuildProjectDirectory)\source\<span class="nt">&lt;/SolutionDir&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;/PropertyGroup&gt;</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="nt">&lt;ItemGroup&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;Solution</span> <span class="na">Include=</span><span class="s">&quot;$(SolutionDir)*.sln&quot;</span><span class="nt">/&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;/ItemGroup&gt;</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="nt">&lt;Target</span> <span class="na">Name=</span><span class="s">&quot;Build&quot;</span> <span class="na">DependsOnTargets=</span><span class="s">&quot;RestoreSolutionPackages;BuildSolution&quot;</span><span class="nt">/&gt;</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="nt">&lt;Target</span> <span class="na">Name=</span><span class="s">&quot;RestoreSolutionPackages&quot;</span> <span class="na">DependsOnTargets=</span><span class="s">&quot;DownloadNuGetCommandLineClient&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;Exec</span> <span class="na">Command=</span><span class="s">&quot;$(NuGetCommand) restore $(SolutionDir) -NonInteractive -Source http://www.nuget.org/api/v2/&quot;</span><span class="nt">/&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;/Target&gt;</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="nt">&lt;Target</span> <span class="na">Name=</span><span class="s">&quot;BuildSolution&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;MSBuild</span> <span class="na">Projects=</span><span class="s">&quot;@(Solution)&quot;</span><span class="nt">/&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;/Target&gt;</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="nt">&lt;Import</span> <span class="na">Project=</span><span class="s">&quot;NuGet.targets&quot;</span><span class="nt">/&gt;</span>
+</span><span class='line'><span class="nt">&lt;/Project&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>NuGet.targets</h2>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+</pre></td><td class='code'><pre><code class='xml'><span class='line'><span class="cp">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;</span>
+</span><span class='line'><span class="nt">&lt;Project</span> <span class="na">ToolsVersion=</span><span class="s">&quot;4.0&quot;</span> <span class="na">xmlns=</span><span class="s">&quot;http://schemas.microsoft.com/developer/msbuild/2003&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;PropertyGroup&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;NuGetToolsPath&gt;</span>$(MSBuildThisFileDirectory)<span class="nt">&lt;/NuGetToolsPath&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;/PropertyGroup&gt;</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="nt">&lt;PropertyGroup&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;NuGetExePath</span> <span class="na">Condition=</span><span class="s">&quot; &#39;$(NuGetExePath)&#39; == &#39;&#39; &quot;</span><span class="nt">&gt;</span>$(NuGetToolsPath)\NuGet.exe<span class="nt">&lt;/NuGetExePath&gt;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="nt">&lt;NuGetCommand</span> <span class="na">Condition=</span><span class="s">&quot; &#39;$(OS)&#39; == &#39;Windows_NT&#39;&quot;</span><span class="nt">&gt;</span>&quot;$(NuGetExePath)&quot;<span class="nt">&lt;/NuGetCommand&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;NuGetCommand</span> <span class="na">Condition=</span><span class="s">&quot; &#39;$(OS)&#39; != &#39;Windows_NT&#39; &quot;</span><span class="nt">&gt;</span>mono --runtime=v4.0.30319 $(NuGetExePath)<span class="nt">&lt;/NuGetCommand&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;/PropertyGroup&gt;</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="nt">&lt;Target</span> <span class="na">Name=</span><span class="s">&quot;DownloadNuGetCommandLineClient&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;DownloadNuGet</span> <span class="na">OutputFilename=</span><span class="s">&quot;$(NuGetExePath)&quot;</span> <span class="na">Condition=</span><span class="s">&quot; !Exists(&#39;$(NuGetExePath)&#39;)&quot;</span> <span class="nt">/&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;/Target&gt;</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="nt">&lt;UsingTask</span> <span class="na">TaskName=</span><span class="s">&quot;DownloadNuGet&quot;</span> <span class="na">TaskFactory=</span><span class="s">&quot;CodeTaskFactory&quot;</span> <span class="na">AssemblyFile=</span><span class="s">&quot;$(MSBuildToolsPath)\Microsoft.Build.Tasks.v4.0.dll&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;ParameterGroup&gt;</span>
+</span><span class='line'>      <span class="nt">&lt;OutputFilename</span> <span class="na">ParameterType=</span><span class="s">&quot;System.String&quot;</span> <span class="na">Required=</span><span class="s">&quot;true&quot;</span> <span class="nt">/&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;/ParameterGroup&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;Task&gt;</span>
+</span><span class='line'>      <span class="nt">&lt;Reference</span> <span class="na">Include=</span><span class="s">&quot;System.Core&quot;</span> <span class="nt">/&gt;</span>
+</span><span class='line'>      <span class="nt">&lt;Using</span> <span class="na">Namespace=</span><span class="s">&quot;System&quot;</span> <span class="nt">/&gt;</span>
+</span><span class='line'>      <span class="nt">&lt;Using</span> <span class="na">Namespace=</span><span class="s">&quot;System.IO&quot;</span> <span class="nt">/&gt;</span>
+</span><span class='line'>      <span class="nt">&lt;Using</span> <span class="na">Namespace=</span><span class="s">&quot;System.Net&quot;</span> <span class="nt">/&gt;</span>
+</span><span class='line'>      <span class="nt">&lt;Using</span> <span class="na">Namespace=</span><span class="s">&quot;Microsoft.Build.Framework&quot;</span> <span class="nt">/&gt;</span>
+</span><span class='line'>      <span class="nt">&lt;Using</span> <span class="na">Namespace=</span><span class="s">&quot;Microsoft.Build.Utilities&quot;</span> <span class="nt">/&gt;</span>
+</span><span class='line'>      <span class="nt">&lt;Code</span> <span class="na">Type=</span><span class="s">&quot;Fragment&quot;</span> <span class="na">Language=</span><span class="s">&quot;cs&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>          <span class="cp">&lt;![CDATA[</span>
+</span><span class='line'><span class="cp">          try {</span>
+</span><span class='line'><span class="cp">              OutputFilename = Path.GetFullPath(OutputFilename);</span>
+</span><span class='line'>
+</span><span class='line'><span class="cp">              Log.LogMessage(&quot;Downloading latest version of NuGet.exe...&quot;);</span>
+</span><span class='line'><span class="cp">              WebClient webClient = new WebClient();</span>
+</span><span class='line'><span class="cp">              webClient.DownloadFile(&quot;https://www.nuget.org/nuget.exe&quot;, OutputFilename);</span>
+</span><span class='line'>
+</span><span class='line'><span class="cp">              return true;</span>
+</span><span class='line'><span class="cp">          }</span>
+</span><span class='line'><span class="cp">          catch (Exception ex) {</span>
+</span><span class='line'><span class="cp">              Log.LogErrorFromException(ex);</span>
+</span><span class='line'><span class="cp">              return false;</span>
+</span><span class='line'><span class="cp">          }</span>
+</span><span class='line'><span class="cp">      ]]&gt;</span>
+</span><span class='line'>      <span class="nt">&lt;/Code&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;/Task&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;/UsingTask&gt;</span>
+</span><span class='line'><span class="nt">&lt;/Project&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<hr />
+
+<p>Lastly, add NuGet.exe to your .gitignore or equivalent scm configuration.</p>
+
+<p>It&#8217;s a little unfortunate that this boilerplate has to be copied from one project to another.
+However, since we&#8217;re bootstrapping NuGet we have a chicken and egg problem that prevents
+the targets from being shared in a package.</p>
+
+<p>I hope this helps developers get the most out of NuGet&#8217;s latest approach to restoring
+packages while avoiding needing to check NuGet.exe into source control and keep it up to
+date.</p>
+
+<p>This won&#8217;t work with xbuild on Mono since it does not support CodeTaskFactory, but if
+you are using mono you could add an alternate target that uses curl or wget to perform
+the download. Assuming curl or wget are already on your PATH. Sigh.</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Cross-NuGet Development With Slimjim]]></title>
