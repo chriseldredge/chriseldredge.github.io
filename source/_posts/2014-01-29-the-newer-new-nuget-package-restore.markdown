@@ -15,7 +15,7 @@ Visual Studio, but instead to let it happen automatically.
 Unfortunately, many developers will probably miss this guidance if they're already
 used to restoring packages as part of their workflow.
 
-The option offerend when right-clicking the Solution in Visual Studio gives no
+The option offered when right-clicking the Solution in Visual Studio gives no
 indication that the option is deprecated, and the text implies that if you don't
 activate the option, packge restore will not be enabled.
 
