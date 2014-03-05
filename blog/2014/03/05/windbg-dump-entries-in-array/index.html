@@ -5,7 +5,7 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>Chris Eldredge</title>
+  <title>WinDbg: Dump entries in array - Chris Eldredge</title>
   <meta name="author" content="Chris Eldredge">
 
   
@@ -23,7 +23,7 @@ today and used this recipe to dump the &hellip;">
   <script type="text/javascript" src="//use.typekit.net/wvv4pst.js"></script>
   <script type="text/javascript">try{Typekit.load();}catch(e){}</script>
 
-  <link rel="canonical" href="http://chris.eldredge.io/">
+  <link rel="canonical" href="http://chris.eldredge.io/blog/2014/03/05/windbg-dump-entries-in-array/">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <script src="/javascripts/modernizr-2.0.js"></script>
@@ -62,15 +62,11 @@ today and used this recipe to dump the &hellip;">
 </header>
   <div id="main">
     <div id="content">
-      <div class="blog-index">
+      <article class="hentry" role="article">
   
-  
-  
-    <article>
-      
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2014/03/05/windbg-dump-entries-in-array/">WinDbg: Dump Entries in Array</a></h1>
+      <h1 class="entry-title">WinDbg: Dump Entries in Array</h1>
     
     
       <p class="meta">
@@ -127,8 +123,19 @@ selects array item addresses from the output.</p>
 <p>Inside the foreach block, I check that the address is not <code>null</code>,
 then dump the fields at offsets 8 and 16 (0x10 in hex).</p>
 </div>
+
+
+
+    
+      <div class="sharing">
+  
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://chris.eldredge.io/blog/2014/03/05/windbg-dump-entries-in-array/" data-via="creldredge" data-counturl="http://chris.eldredge.io/blog/2014/03/05/windbg-dump-entries-in-array/" >Tweet</a>
   
   
+  
+</div>
+
+    
 
   <footer class="page-footer">
     <a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS" class="ss-icon rss">RSS</a>
@@ -139,13 +146,23 @@ then dump the fields at offsets 8 and 16 (0x10 in hex).</p>
     <input class="search ss-search" type="text" name="q" results="0" />
   </form>
 
-    
+
+
+      <a class="prev-page" href="/blog/2014/01/29/the-newer-new-nuget-package-restore/" title="Previous Post: The newer new NuGet Package Restore">previous</a> |
+
+
     <a href="/blog/archives" class="see-more">archive</a>
+
+
   </footer>
 
+</article>
 
-    </article>
+<section class="comments">
+  <h1>Comments</h1>
+  <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
 </div>
+</section>
 
     </div>
   </div>
@@ -169,7 +186,10 @@ then dump the fields at offsets 8 and 16 (0x10 in hex).</p>
       var disqus_shortname = 'chriseldredge';
       
         
-        var disqus_script = 'count.js';
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://chris.eldredge.io/blog/2014/03/05/windbg-dump-entries-in-array/';
+        var disqus_url = 'http://chris.eldredge.io/blog/2014/03/05/windbg-dump-entries-in-array/';
+        var disqus_script = 'embed.js';
       
     (function () {
       var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;

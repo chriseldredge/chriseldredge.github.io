@@ -5,12 +5,11 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>Chris Eldredge</title>
+  <title>Category: windbg - Chris Eldredge</title>
   <meta name="author" content="Chris Eldredge">
 
   
-  <meta name="description" content="WinDbg: Dump Entries in Array Mar 5th, 2014 I was debugging a stack overflow exception in some c# code
-today and used this recipe to dump the &hellip;">
+  <meta name="description" content="Category: windbg">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -23,7 +22,7 @@ today and used this recipe to dump the &hellip;">
   <script type="text/javascript" src="//use.typekit.net/wvv4pst.js"></script>
   <script type="text/javascript">try{Typekit.load();}catch(e){}</script>
 
-  <link rel="canonical" href="http://chris.eldredge.io/">
+  <link rel="canonical" href="http://chris.eldredge.ioblog/categories/windbg/">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <script src="/javascripts/modernizr-2.0.js"></script>
@@ -62,72 +61,35 @@ today and used this recipe to dump the &hellip;">
 </header>
   <div id="main">
     <div id="content">
-      <div class="blog-index">
+      <article role="article" class="page">
+
   
-  
-  
-    <article>
-      
   <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/03/05/windbg-dump-entries-in-array/">WinDbg: Dump Entries in Array</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-03-05T11:47:00-05:00" pubdate data-updated="true" class="meta-date">Mar 5<span>th</span>, 2014</time>
-      </p>
-    
+    <h1 class="entry-title">Category: Windbg</h1>
   </header>
-
-
-
-  <div class="entry-content"><p>I was debugging a stack overflow exception in some c# code
-today and used this recipe to dump the request headers
-associated with the offending thread.</p>
-
-<p>I&#8217;m leaving it here for my own reference.</p>
-
-<p>This recipe dumps the key and value fields in an array of
-NameObjectCollectionBase+NameObjectEntry, though it would
-probably work with similar key/value tuples.</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>.foreach /pS 16 /ps 1 (addr {!da 3ffc0c460}) {
-</span><span class='line'>  .if ($sicmp("${addr}", "null") != 0) {
-</span><span class='line'>    !do poi(${addr}+8); !do poi(${addr}+10)
-</span><span class='line'>  }
-</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
-
-
-<p><em>Note: the sample code above is formatted for readability. Remove
-line breaks before using it in windbg, which doesn&#8217;t seem to handle
-line breaks in commands well.</em></p>
-
-<p>The DumpArray command in SOS does not have a <code>-short</code> flag like
-DumpHeap does, so the foreach skips the first 16 tokens, then
-skips a single token for each item processed. This effectively
-selects array item addresses from the output.</p>
-
-<p>Inside the foreach block, I check that the address is not <code>null</code>,
-then dump the fields at offsets 8 and 16 (0x10 in hex).</p>
-</div>
   
+
+  <ul id="blog-archives" class="category archives-list">
+
+  <li class="archives-item">
+    
+<div class="meta">
+  <time datetime="2014-03-05T11:47:00-05:00" pubdate class="meta-date">Mar 05 2014</time>
+</div>
+
+<h1 class="archive-post-title"><a href="/blog/2014/03/05/windbg-dump-entries-in-array/">WinDbg: Dump entries in array</a></h1>
+
+
+<footer>
+  <span class="categories">posted in <a class='category' href='/blog/categories/windbg/'>windbg</a></span>
+</footer>
+
+
+  </li>
+
+</ul>
+
+
   
 
   <footer class="page-footer">
@@ -139,13 +101,11 @@ then dump the fields at offsets 8 and 16 (0x10 in hex).</p>
     <input class="search ss-search" type="text" name="q" results="0" />
   </form>
 
-    
+
     <a href="/blog/archives" class="see-more">archive</a>
   </footer>
 
-
-    </article>
-</div>
+</article>
 
     </div>
   </div>
