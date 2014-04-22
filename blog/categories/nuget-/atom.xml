@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: nuget, | Chris Eldredge]]></title>
+  <link href="http://chris.eldredge.io/blog/categories/nuget-/atom.xml" rel="self"/>
+  <link href="http://chris.eldredge.io/"/>
+  <updated>2014-04-22T16:58:04-04:00</updated>
+  <id>http://chris.eldredge.io/</id>
+  <author>
+    <name><![CDATA[Chris Eldredge]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[NuGet Feed with WebApi OData]]></title>
+    <link href="http://chris.eldredge.io/blog/2014/04/22/NuGet-Feed-with-WebApi-OData/"/>
+    <updated>2014-04-22T10:25:00-04:00</updated>
+    <id>http://chris.eldredge.io/blog/2014/04/22/NuGet-Feed-with-WebApi-OData</id>
+    <content type="html"><![CDATA[<p>NuGet uses OData to provide package data to its clients. In
+<a href="/blog/2012/03/29/Getting-Started-With-Relinq/">previous posts</a>
+I've written about implementing Lucene.Net.Linq and the difficulty
+of implementing <code>IQueryable&lt;T&gt;</code>, leaky abstractions and such.</p>
+
+<p>The NuGet core team has more or less acknowledged that OData is overkill
+for the types of operations the client needs (list, search, find updates),
+and they're even <a href="https://github.com/NuGet/NuGetGallery/issues/595">planning</a>
+on migrating away from OData in v3 of their HTTP api.</p>
+
+<p>Unfortunately (or fortunately?) NuGet has acheived wide adoption using
+the existing api, so it will take years for everyone to update their clients
+once this new api has shipped.</p>
+
+<p>In the mean time, we're stuck with OData.</p>
+
+<p>To make the most of the situation, I wanted to try out the new WebApi
+integrated OData packages. These allow us to use the same base classes
+and infrastructure as regular WebApi controllers and enable self hosting.</p>
+
+<p>WebApi OData has seen lots of features get implemented and adds supports
+for newer protocol versions of OData. However, there are a few things that
+the NuGet clients require that are not built in. This series will
+go over configuring WebApi OData to create a NuGet compatible package feed.</p>
+
+<h2>Required Features</h2>
+
+<p>OData is a huge standard and NuGet uses only a subset of capabilities.
+Here's a list of what we'll need to support:</p>
+
+<ul>
+<li>Entity Sets</li>
+<li>Composite Keys</li>
+<li>Actions</li>
+<li>Default Streams</li>
+<li>$count meta-action</li>
+<li>$filter</li>
+<li>$orderby</li>
+<li>Paging with $top and $skip</li>
+</ul>
+
+
+<p>Most of these capabilities are built into WebApi OData.</p>
+
+<p>The ones that aren't will be covered in the following articles.</p>
+]]></content>
+  </entry>
+  
+</feed>

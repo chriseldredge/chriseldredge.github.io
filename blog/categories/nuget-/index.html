@@ -5,13 +5,11 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>Chris Eldredge</title>
+  <title>Category: nuget, - Chris Eldredge</title>
   <meta name="author" content="Chris Eldredge">
 
   
-  <meta name="description" content="NuGet Feed With WebApi OData Apr 22nd, 2014 NuGet uses OData to provide package data to its clients. In
-previous posts
-I&#8217;ve written about &hellip;">
+  <meta name="description" content="Category: nuget,">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -24,7 +22,7 @@ I&#8217;ve written about &hellip;">
   <script type="text/javascript" src="//use.typekit.net/wvv4pst.js"></script>
   <script type="text/javascript">try{Typekit.load();}catch(e){}</script>
 
-  <link rel="canonical" href="http://chris.eldredge.io/">
+  <link rel="canonical" href="http://chris.eldredge.ioblog/categories/nuget-/">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <script src="/javascripts/modernizr-2.0.js"></script>
@@ -63,84 +61,35 @@ I&#8217;ve written about &hellip;">
 </header>
   <div id="main">
     <div id="content">
-      <div class="blog-index">
+      <article role="article" class="page">
+
   
-  
-  
-    <article>
-      
   <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/04/22/NuGet-Feed-with-WebApi-OData/">NuGet Feed With WebApi OData</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
+    <h1 class="entry-title">Category: Nuget,</h1>
+  </header>
   
 
+  <ul id="blog-archives" class="category archives-list">
 
-<time datetime="2014-04-22T10:25:00-04:00" pubdate data-updated="true" class="meta-date">Apr 22<span>nd</span>, 2014</time>
-      </p>
+  <li class="archives-item">
     
-  </header>
+<div class="meta">
+  <time datetime="2014-04-22T10:25:00-04:00" pubdate class="meta-date">Apr 22 2014</time>
+</div>
+
+<h1 class="archive-post-title"><a href="/blog/2014/04/22/NuGet-Feed-with-WebApi-OData/">NuGet Feed with WebApi OData</a></h1>
 
 
+<footer>
+  <span class="categories">posted in <a class='category' href='/blog/categories/nuget-/'>nuget,</a>, <a class='category' href='/blog/categories/odata/'>odata</a></span>
+</footer>
 
-  <div class="entry-content"><p>NuGet uses OData to provide package data to its clients. In
-<a href="/blog/2012/03/29/Getting-Started-With-Relinq/">previous posts</a>
-I&#8217;ve written about implementing Lucene.Net.Linq and the difficulty
-of implementing <code>IQueryable&lt;T&gt;</code>, leaky abstractions and such.</p>
 
-<p>The NuGet core team has more or less acknowledged that OData is overkill
-for the types of operations the client needs (list, search, find updates),
-and they&#8217;re even <a href="https://github.com/NuGet/NuGetGallery/issues/595">planning</a>
-on migrating away from OData in v3 of their HTTP api.</p>
+  </li>
 
-<p>Unfortunately (or fortunately?) NuGet has acheived wide adoption using
-the existing api, so it will take years for everyone to update their clients
-once this new api has shipped.</p>
-
-<p>In the mean time, we&#8217;re stuck with OData.</p>
-
-<p>To make the most of the situation, I wanted to try out the new WebApi
-integrated OData packages. These allow us to use the same base classes
-and infrastructure as regular WebApi controllers and enable self hosting.</p>
-
-<p>WebApi OData has seen lots of features get implemented and adds supports
-for newer protocol versions of OData. However, there are a few things that
-the NuGet clients require that are not built in. This series will
-go over configuring WebApi OData to create a NuGet compatible package feed.</p>
-
-<h2>Required Features</h2>
-
-<p>OData is a huge standard and NuGet uses only a subset of capabilities.
-Here&#8217;s a list of what we&#8217;ll need to support:</p>
-
-<ul>
-<li>Entity Sets</li>
-<li>Composite Keys</li>
-<li>Actions</li>
-<li>Default Streams</li>
-<li>$count meta-action</li>
-<li>$filter</li>
-<li>$orderby</li>
-<li>Paging with $top and $skip</li>
 </ul>
 
 
-<p>Most of these capabilities are built into WebApi OData.</p>
-
-<p>The ones that aren&#8217;t will be covered in the following articles.</p>
-</div>
-  
   
 
   <footer class="page-footer">
@@ -152,13 +101,11 @@ Here&#8217;s a list of what we&#8217;ll need to support:</p>
     <input class="search ss-search" type="text" name="q" results="0" />
   </form>
 
-    
+
     <a href="/blog/archives" class="see-more">archive</a>
   </footer>
 
-
-    </article>
-</div>
+</article>
 
     </div>
   </div>
