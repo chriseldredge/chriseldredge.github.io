@@ -4,7 +4,7 @@
   <title><![CDATA[Chris Eldredge]]></title>
   <link href="http://chris.eldredge.io/atom.xml" rel="self"/>
   <link href="http://chris.eldredge.io/"/>
-  <updated>2014-04-22T17:26:48-04:00</updated>
+  <updated>2014-04-23T11:39:56-04:00</updated>
   <id>http://chris.eldredge.io/</id>
   <author>
     <name><![CDATA[Chris Eldredge]]></name>
@@ -12,6 +12,210 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Basic WebApi OData]]></title>
+    <link href="http://chris.eldredge.io/blog/2014/04/23/Basic-WebApi-OData/"/>
+    <updated>2014-04-23T11:28:00-04:00</updated>
+    <id>http://chris.eldredge.io/blog/2014/04/23/Basic-WebApi-OData</id>
+    <content type="html"><![CDATA[<p>Getting started on making a NuGet compatible OData feed with WebApi OData,
+we&#8217;ll start with the simplest parts to get on our feet.</p>
+
+<h2>OData Controller</h2>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='c#'><span class='line'><span class="k">public</span> <span class="k">class</span> <span class="nc">PackagesODataController</span> <span class="p">:</span> <span class="n">ODataController</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>    <span class="k">public</span> <span class="n">IMirroringPackageRepository</span> <span class="n">Repository</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="k">set</span><span class="p">;</span> <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="na">    [Queryable(PageSize = 100, HandleNullPropagation = HandleNullPropagationOption.False)]</span>
+</span><span class='line'>    <span class="k">public</span> <span class="n">IQueryable</span><span class="p">&lt;</span><span class="n">ODataPackage</span><span class="p">&gt;</span> <span class="n">Get</span><span class="p">()</span>
+</span><span class='line'>    <span class="p">{</span>
+</span><span class='line'>        <span class="k">return</span> <span class="n">Repository</span><span class="p">.</span><span class="n">GetPackages</span><span class="p">().</span><span class="n">Select</span><span class="p">(</span><span class="n">p</span> <span class="p">=&gt;</span> <span class="n">p</span><span class="p">.</span><span class="n">ToODataPackage</span><span class="p">()).</span><span class="n">AsQueryable</span><span class="p">();</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>This controller exposes an entity set of package metadata. The underlying
+entity type <code>IPackage</code> has some complex types that OData doesn&#8217;t play well
+with, so the types are decorated with <code>ToODataPackage</code> which flattens
+and simplifies the metadata into primitive types like strings, bools
+and ints.</p>
+
+<p>The <code>QueryableAttribute</code> exposes some very useful settings that allow us to
+enable or disable advanced querying options like <code>$select</code>, <code>$expand</code>,
+<code>$orderby</code> and others that can be used to lock down the endpoint to avoid
+overly expensive or invalid queries from being executed.</p>
+
+<p><code>HandleNullPropagation</code> is a much welcomed offering that wasn&#8217;t easily
+tweakable before. It tells the engine whether or not the underlying query
+execution engine can handle null values in expressions. The default is
+to modify query expressions dynamically to put null-check conditions around
+all comparisons and operations like <code>ToLowerCase()</code>, <code>Contains()</code> and such.
+This is necessary for LINQ to Collections, but generally not necessary for
+other LINQ implementations.</p>
+
+<p>Null Propagation seems like a prudent default,
+but it can cause performance problems. David Ebbo <a href="http://blog.davidebbo.com/2011/08/how-odata-quirk-killed-nuget-server.html">wrote</a>
+about an issue the NuGet Gallery team encountered. If your LINQ provider
+doesn&#8217;t need it, you should definitely turn it off.</p>
+
+<h2>Configuration</h2>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+</pre></td><td class='code'><pre><code class='c#'><span class='line'><span class="k">public</span> <span class="k">void</span> <span class="nf">MapDataServiceRoutes</span><span class="p">(</span><span class="n">HttpConfiguration</span> <span class="n">config</span><span class="p">)</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>    <span class="kt">var</span> <span class="n">builder</span> <span class="p">=</span> <span class="k">new</span> <span class="n">ODataConventionModelBuilder</span><span class="p">();</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kt">var</span> <span class="n">entity</span> <span class="p">=</span> <span class="n">builder</span><span class="p">.</span><span class="n">EntitySet</span><span class="p">&lt;</span><span class="n">ODataPackage</span><span class="p">&gt;(</span><span class="s">&quot;Packages&quot;</span><span class="p">);</span>
+</span><span class='line'>    <span class="n">entity</span><span class="p">.</span><span class="n">EntityType</span><span class="p">.</span><span class="n">HasKey</span><span class="p">(</span><span class="n">pkg</span> <span class="p">=&gt;</span> <span class="n">pkg</span><span class="p">.</span><span class="n">Id</span><span class="p">);</span>
+</span><span class='line'>    <span class="n">entity</span><span class="p">.</span><span class="n">EntityType</span><span class="p">.</span><span class="n">HasKey</span><span class="p">(</span><span class="n">pkg</span> <span class="p">=&gt;</span> <span class="n">pkg</span><span class="p">.</span><span class="n">Version</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kt">var</span> <span class="n">conventions</span> <span class="p">=</span> <span class="n">ODataRoutingConventions</span><span class="p">.</span><span class="n">CreateDefault</span><span class="p">()</span>
+</span><span class='line'>        <span class="p">.</span><span class="n">Select</span><span class="p">(</span><span class="n">c</span> <span class="p">=&gt;</span> <span class="p">(</span><span class="n">IODataRoutingConvention</span><span class="p">)</span>
+</span><span class='line'>          <span class="k">new</span> <span class="nf">ControllerAliasingODataRoutingConvention</span><span class="p">(</span>
+</span><span class='line'>            <span class="n">c</span><span class="p">,</span> <span class="s">&quot;Packages&quot;</span><span class="p">,</span> <span class="s">&quot;PackagesOData&quot;</span><span class="p">));</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">config</span><span class="p">.</span><span class="n">Routes</span><span class="p">.</span><span class="n">MapODataRoute</span><span class="p">(</span>
+</span><span class='line'>        <span class="n">RouteNames</span><span class="p">.</span><span class="n">Packages</span><span class="p">.</span><span class="n">Feed</span><span class="p">,</span>
+</span><span class='line'>        <span class="n">ODataRoutePath</span><span class="p">,</span>
+</span><span class='line'>        <span class="n">builder</span><span class="p">.</span><span class="n">GetEdmModel</span><span class="p">(),</span>
+</span><span class='line'>        <span class="k">new</span> <span class="nf">DefaultODataPathHandler</span><span class="p">(),</span>
+</span><span class='line'>        <span class="n">conventions</span><span class="p">);</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>This is mostly a vanilla configuration but already there are two modifications.</p>
+
+<p>First, the <code>Packages</code> entity set has a composite key that uniquely identifies
+each entity instance, comprised of a package ID and version.</p>
+
+<p>The next tweak is that we&#8217;re customizing the default list of OData routing
+conventions, wrapping each one with <code>ControllerAliasingODataRoutingConvention</code>.</p>
+
+<p>My project already has a <code>PackagesController</code> that inherits from <code>ApiController</code>.
+I wanted to put OData related methods in a separate controller and name it
+<code>PackagesODataController</code>, but still have my entity set be named <code>Packages</code>.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+</pre></td><td class='code'><pre><code class='c#'><span class='line'><span class="k">public</span> <span class="k">class</span> <span class="nc">ControllerAliasingODataRoutingConvention</span> <span class="p">:</span> <span class="n">IODataRoutingConvention</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>    <span class="k">private</span> <span class="k">readonly</span> <span class="n">IODataRoutingConvention</span> <span class="n">delegateRoutingConvention</span><span class="p">;</span>
+</span><span class='line'>    <span class="k">private</span> <span class="k">readonly</span> <span class="kt">string</span> <span class="n">controllerAlias</span><span class="p">;</span>
+</span><span class='line'>    <span class="k">private</span> <span class="k">readonly</span> <span class="kt">string</span> <span class="n">targetControllerName</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">public</span> <span class="nf">ControllerAliasingODataRoutingConvention</span><span class="p">(</span>
+</span><span class='line'>        <span class="n">IODataRoutingConvention</span> <span class="n">delegateRoutingConvention</span><span class="p">,</span>
+</span><span class='line'>        <span class="kt">string</span> <span class="n">controllerAlias</span><span class="p">,</span>
+</span><span class='line'>        <span class="kt">string</span> <span class="n">targetControllerName</span><span class="p">)</span>
+</span><span class='line'>    <span class="p">{</span>
+</span><span class='line'>        <span class="k">this</span><span class="p">.</span><span class="n">delegateRoutingConvention</span> <span class="p">=</span> <span class="n">delegateRoutingConvention</span><span class="p">;</span>
+</span><span class='line'>        <span class="k">this</span><span class="p">.</span><span class="n">controllerAlias</span> <span class="p">=</span> <span class="n">controllerAlias</span><span class="p">;</span>
+</span><span class='line'>        <span class="k">this</span><span class="p">.</span><span class="n">targetControllerName</span> <span class="p">=</span> <span class="n">targetControllerName</span><span class="p">;</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">public</span> <span class="kt">string</span> <span class="nf">SelectController</span><span class="p">(</span><span class="n">ODataPath</span> <span class="n">odataPath</span><span class="p">,</span> <span class="n">HttpRequestMessage</span> <span class="n">request</span><span class="p">)</span>
+</span><span class='line'>    <span class="p">{</span>
+</span><span class='line'>        <span class="kt">var</span> <span class="n">controller</span> <span class="p">=</span> <span class="n">delegateRoutingConvention</span><span class="p">.</span><span class="n">SelectController</span><span class="p">(</span><span class="n">odataPath</span><span class="p">,</span> <span class="n">request</span><span class="p">);</span>
+</span><span class='line'>        <span class="k">return</span> <span class="kt">string</span><span class="p">.</span><span class="n">Equals</span><span class="p">(</span><span class="n">controller</span><span class="p">,</span> <span class="n">controllerAlias</span><span class="p">,</span>
+</span><span class='line'>                <span class="n">StringComparison</span><span class="p">.</span><span class="n">OrdinalIgnoreCase</span><span class="p">)</span>
+</span><span class='line'>            <span class="p">?</span> <span class="n">targetControllerName</span>
+</span><span class='line'>            <span class="p">:</span> <span class="n">controller</span><span class="p">;</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">public</span> <span class="kt">string</span> <span class="nf">SelectAction</span><span class="p">(</span>
+</span><span class='line'>        <span class="n">ODataPath</span> <span class="n">odataPath</span><span class="p">,</span>
+</span><span class='line'>        <span class="n">HttpControllerContext</span> <span class="n">controllerContext</span><span class="p">,</span>
+</span><span class='line'>        <span class="n">ILookup</span><span class="p">&lt;</span><span class="kt">string</span><span class="p">,</span> <span class="n">HttpActionDescriptor</span><span class="p">&gt;</span> <span class="n">actionMap</span><span class="p">)</span>
+</span><span class='line'>    <span class="p">{</span>
+</span><span class='line'>        <span class="k">return</span> <span class="n">delegateRoutingConvention</span><span class="p">.</span><span class="n">SelectAction</span><span class="p">(</span>
+</span><span class='line'>          <span class="n">odataPath</span><span class="p">,</span> <span class="n">controllerContext</span><span class="p">,</span> <span class="n">actionMap</span><span class="p">);</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>This is a basic decorator that renames a standard controller name with a desired
+target name.</p>
+
+<h2>Summary</h2>
+
+<p>At this point we have a WebApi endpoint that speaks OData. We can enumerate
+packages, filter, order and page. We&#8217;re still pretty far from something that
+a NuGet client can speak to though.</p>
+
+<p><nav>
+  <h3>Series Index</h3>
+  <ol>
+  <li><a href="http://chris.eldredge.io/blog/2014/04/22/NuGet-Feed-with-WebApi-OData/">Introduction</a></li>
+  <li><a href="http://chris.eldredge.io/blog/2014/04/23/Basic-WebApi-OData/">Basic WebApi OData</a></li>
+  </ol>
+</nav></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[NuGet Feed with WebApi OData]]></title>
@@ -63,6 +267,14 @@ Here&#8217;s a list of what we&#8217;ll need to support:</p>
 
 <p>Most of these capabilities are built into WebApi OData.
 The ones that aren&#8217;t will be covered in the following articles.</p>
+
+<p><nav>
+  <h3>Series Index</h3>
+  <ol>
+  <li><a href="http://chris.eldredge.io/blog/2014/04/22/NuGet-Feed-with-WebApi-OData/">Introduction</a></li>
+  <li><a href="http://chris.eldredge.io/blog/2014/04/23/Basic-WebApi-OData/">Basic WebApi OData</a></li>
+  </ol>
+</nav></p>
 ]]></content>
   </entry>
   

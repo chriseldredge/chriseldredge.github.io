@@ -4,7 +4,7 @@
   <title><![CDATA[Category: nuget, | Chris Eldredge]]></title>
   <link href="http://chris.eldredge.io/blog/categories/nuget-/atom.xml" rel="self"/>
   <link href="http://chris.eldredge.io/"/>
-  <updated>2014-04-22T17:26:48-04:00</updated>
+  <updated>2014-04-23T11:39:56-04:00</updated>
   <id>http://chris.eldredge.io/</id>
   <author>
     <name><![CDATA[Chris Eldredge]]></name>
@@ -12,6 +12,156 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Basic WebApi OData]]></title>
+    <link href="http://chris.eldredge.io/blog/2014/04/23/Basic-WebApi-OData/"/>
+    <updated>2014-04-23T11:28:00-04:00</updated>
+    <id>http://chris.eldredge.io/blog/2014/04/23/Basic-WebApi-OData</id>
+    <content type="html"><![CDATA[<p>Getting started on making a NuGet compatible OData feed with WebApi OData,
+we'll start with the simplest parts to get on our feet.</p>
+
+<h2>OData Controller</h2>
+
+<p>```c#
+public class PackagesODataController : ODataController
+{</p>
+
+<pre><code>public IMirroringPackageRepository Repository { get; set; }
+
+[Queryable(PageSize = 100, HandleNullPropagation = HandleNullPropagationOption.False)]
+public IQueryable&lt;ODataPackage&gt; Get()
+{
+    return Repository.GetPackages().Select(p =&gt; p.ToODataPackage()).AsQueryable();
+}
+</code></pre>
+
+<p>}
+```</p>
+
+<p>This controller exposes an entity set of package metadata. The underlying
+entity type <code>IPackage</code> has some complex types that OData doesn't play well
+with, so the types are decorated with <code>ToODataPackage</code> which flattens
+and simplifies the metadata into primitive types like strings, bools
+and ints.</p>
+
+<p>The <code>QueryableAttribute</code> exposes some very useful settings that allow us to
+enable or disable advanced querying options like <code>$select</code>, <code>$expand</code>,
+<code>$orderby</code> and others that can be used to lock down the endpoint to avoid
+overly expensive or invalid queries from being executed.</p>
+
+<p><code>HandleNullPropagation</code> is a much welcomed offering that wasn't easily
+tweakable before. It tells the engine whether or not the underlying query
+execution engine can handle null values in expressions. The default is
+to modify query expressions dynamically to put null-check conditions around
+all comparisons and operations like <code>ToLowerCase()</code>, <code>Contains()</code> and such.
+This is necessary for LINQ to Collections, but generally not necessary for
+other LINQ implementations.</p>
+
+<p>Null Propagation seems like a prudent default,
+but it can cause performance problems. David Ebbo <a href="http://blog.davidebbo.com/2011/08/how-odata-quirk-killed-nuget-server.html">wrote</a>
+about an issue the NuGet Gallery team encountered. If your LINQ provider
+doesn't need it, you should definitely turn it off.</p>
+
+<h2>Configuration</h2>
+
+<p>```c#
+public void MapDataServiceRoutes(HttpConfiguration config)
+{</p>
+
+<pre><code>var builder = new ODataConventionModelBuilder();
+
+var entity = builder.EntitySet&lt;ODataPackage&gt;("Packages");
+entity.EntityType.HasKey(pkg =&gt; pkg.Id);
+entity.EntityType.HasKey(pkg =&gt; pkg.Version);
+
+var conventions = ODataRoutingConventions.CreateDefault()
+    .Select(c =&gt; (IODataRoutingConvention)
+      new ControllerAliasingODataRoutingConvention(
+        c, "Packages", "PackagesOData"));
+
+config.Routes.MapODataRoute(
+    RouteNames.Packages.Feed,
+    ODataRoutePath,
+    builder.GetEdmModel(),
+    new DefaultODataPathHandler(),
+    conventions);
+</code></pre>
+
+<p>}
+```</p>
+
+<p>This is mostly a vanilla configuration but already there are two modifications.</p>
+
+<p>First, the <code>Packages</code> entity set has a composite key that uniquely identifies
+each entity instance, comprised of a package ID and version.</p>
+
+<p>The next tweak is that we're customizing the default list of OData routing
+conventions, wrapping each one with <code>ControllerAliasingODataRoutingConvention</code>.</p>
+
+<p>My project already has a <code>PackagesController</code> that inherits from <code>ApiController</code>.
+I wanted to put OData related methods in a separate controller and name it
+<code>PackagesODataController</code>, but still have my entity set be named <code>Packages</code>.</p>
+
+<p>```c#
+public class ControllerAliasingODataRoutingConvention : IODataRoutingConvention
+{</p>
+
+<pre><code>private readonly IODataRoutingConvention delegateRoutingConvention;
+private readonly string controllerAlias;
+private readonly string targetControllerName;
+
+public ControllerAliasingODataRoutingConvention(
+    IODataRoutingConvention delegateRoutingConvention,
+    string controllerAlias,
+    string targetControllerName)
+{
+    this.delegateRoutingConvention = delegateRoutingConvention;
+    this.controllerAlias = controllerAlias;
+    this.targetControllerName = targetControllerName;
+}
+
+public string SelectController(ODataPath odataPath, HttpRequestMessage request)
+{
+    var controller = delegateRoutingConvention.SelectController(odataPath, request);
+    return string.Equals(controller, controllerAlias,
+            StringComparison.OrdinalIgnoreCase)
+        ? targetControllerName
+        : controller;
+}
+
+public string SelectAction(
+    ODataPath odataPath,
+    HttpControllerContext controllerContext,
+    ILookup&lt;string, HttpActionDescriptor&gt; actionMap)
+{
+    return delegateRoutingConvention.SelectAction(
+      odataPath, controllerContext, actionMap);
+}
+</code></pre>
+
+<p>}
+```</p>
+
+<p>This is a basic decorator that renames a standard controller name with a desired
+target name.</p>
+
+<h2>Summary</h2>
+
+<p>At this point we have a WebApi endpoint that speaks OData. We can enumerate
+packages, filter, order and page. We're still pretty far from something that
+a NuGet client can speak to though.</p>
+
+<p><nav>
+  <h3>Series Index</h3>
+  <ol>
+  <li><a href="/blog/2014/04/22/NuGet-Feed-with-WebApi-OData/">Introduction</a></li>
+  <li><a href="/blog/2014/04/23/Basic-WebApi-OData/">Basic WebApi OData</a></li>
+  </ol>
+</nav>
+</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[NuGet Feed with WebApi OData]]></title>
@@ -63,6 +213,15 @@ Here's a list of what we'll need to support:</p>
 
 <p>Most of these capabilities are built into WebApi OData.
 The ones that aren't will be covered in the following articles.</p>
+
+<p><nav>
+  <h3>Series Index</h3>
+  <ol>
+  <li><a href="/blog/2014/04/22/NuGet-Feed-with-WebApi-OData/">Introduction</a></li>
+  <li><a href="/blog/2014/04/23/Basic-WebApi-OData/">Basic WebApi OData</a></li>
+  </ol>
+</nav>
+</p>
 ]]></content>
   </entry>
   
