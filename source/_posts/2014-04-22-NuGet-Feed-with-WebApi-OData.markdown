@@ -48,3 +48,5 @@ Here's a list of what we'll need to support:
 
 Most of these capabilities are built into WebApi OData.
 The ones that aren't will be covered in the following articles.
+
+{% include custom/nuget_webapi_odata_series_index.html %}
