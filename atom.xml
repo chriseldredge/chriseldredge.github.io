@@ -4,7 +4,7 @@
   <title><![CDATA[Chris Eldredge]]></title>
   <link href="http://chris.eldredge.io/atom.xml" rel="self"/>
   <link href="http://chris.eldredge.io/"/>
-  <updated>2014-04-23T11:39:56-04:00</updated>
+  <updated>2014-04-24T20:30:53-04:00</updated>
   <id>http://chris.eldredge.io/</id>
   <author>
     <name><![CDATA[Chris Eldredge]]></name>
@@ -12,6 +12,251 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Composite Keys with WebApi OData]]></title>
+    <link href="http://chris.eldredge.io/blog/2014/04/24/Composite-Keys/"/>
+    <updated>2014-04-24T11:28:00-04:00</updated>
+    <id>http://chris.eldredge.io/blog/2014/04/24/Composite-Keys</id>
+    <content type="html"><![CDATA[<p>In our basic configuration we told the model builder that
+our entity has a composite key comprised of an ID and a
+version:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='c#'><span class='line'><span class="k">public</span> <span class="k">void</span> <span class="nf">MapDataServiceRoutes</span><span class="p">(</span><span class="n">HttpConfiguration</span> <span class="n">config</span><span class="p">)</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>    <span class="kt">var</span> <span class="n">builder</span> <span class="p">=</span> <span class="k">new</span> <span class="n">ODataConventionModelBuilder</span><span class="p">();</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kt">var</span> <span class="n">entity</span> <span class="p">=</span> <span class="n">builder</span><span class="p">.</span><span class="n">EntitySet</span><span class="p">&lt;</span><span class="n">ODataPackage</span><span class="p">&gt;(</span><span class="s">&quot;Packages&quot;</span><span class="p">);</span>
+</span><span class='line'>    <span class="n">entity</span><span class="p">.</span><span class="n">EntityType</span><span class="p">.</span><span class="n">HasKey</span><span class="p">(</span><span class="n">pkg</span> <span class="p">=&gt;</span> <span class="n">pkg</span><span class="p">.</span><span class="n">Id</span><span class="p">);</span>
+</span><span class='line'>    <span class="n">entity</span><span class="p">.</span><span class="n">EntityType</span><span class="p">.</span><span class="n">HasKey</span><span class="p">(</span><span class="n">pkg</span> <span class="p">=&gt;</span> <span class="n">pkg</span><span class="p">.</span><span class="n">Version</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">// snip</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>This is enough for our OData feed to render <code>edit</code> and <code>self</code>
+links for each individual entity in a form like:</p>
+
+<pre><code>http://localhost/odata/Packages(Id='Sample',Version='1.0.0')
+</code></pre>
+
+<p>But if we navigate to this URL, instead of getting just this one
+entity by key, we get back the entire entity set.</p>
+
+<p>To get the correct behavior, first we need an override on our
+PackagesODataController that gets an individual entity instance
+by key:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+</pre></td><td class='code'><pre><code class='c#'><span class='line'><span class="k">public</span> <span class="k">class</span> <span class="nc">PackagesODataController</span> <span class="p">:</span> <span class="n">ODataController</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>    <span class="k">public</span> <span class="n">IMirroringPackageRepository</span> <span class="n">Repository</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="k">set</span><span class="p">;</span> <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">public</span> <span class="n">IQueryable</span><span class="p">&lt;</span><span class="n">ODataPackage</span><span class="p">&gt;</span> <span class="n">Get</span><span class="p">()</span>
+</span><span class='line'>    <span class="p">{</span>
+</span><span class='line'>        <span class="k">return</span> <span class="n">Repository</span><span class="p">.</span><span class="n">GetPackages</span><span class="p">().</span><span class="n">Select</span><span class="p">(</span><span class="n">p</span> <span class="p">=&gt;</span> <span class="n">p</span><span class="p">.</span><span class="n">ToODataPackage</span><span class="p">()).</span><span class="n">AsQueryable</span><span class="p">();</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">public</span> <span class="n">IHttpActionResult</span> <span class="nf">Get</span><span class="p">(</span>
+</span><span class='line'><span class="na">        [FromODataUri]</span> <span class="kt">string</span> <span class="n">id</span><span class="p">,</span>
+</span><span class='line'><span class="na">        [FromODataUri]</span> <span class="kt">string</span> <span class="n">version</span><span class="p">)</span>
+</span><span class='line'>    <span class="p">{</span>
+</span><span class='line'>        <span class="kt">var</span> <span class="n">package</span> <span class="p">=</span> <span class="n">Repository</span><span class="p">.</span><span class="n">FindPackage</span><span class="p">(</span><span class="n">id</span><span class="p">,</span> <span class="n">version</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="k">return</span> <span class="n">package</span> <span class="p">==</span> <span class="k">null</span>
+</span><span class='line'>          <span class="p">?</span> <span class="p">(</span><span class="n">IHttpActionResult</span><span class="p">)</span><span class="n">NotFound</span><span class="p">()</span>
+</span><span class='line'>          <span class="p">:</span> <span class="n">Ok</span><span class="p">(</span><span class="n">package</span><span class="p">.</span><span class="n">ToODataPackage</span><span class="p">());</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>However, out of the box WebApi OData doesn&#8217;t know how to bind
+composite key parameters to an action such as this, since
+the key is comprised of multiple values.</p>
+
+<p>We can fix this by creating a new routing convention that
+binds the stuff inside the parenthesis to our route data map:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+</pre></td><td class='code'><pre><code class='c#'><span class='line'><span class="k">public</span> <span class="k">class</span> <span class="nc">CompositeKeyRoutingConvention</span> <span class="p">:</span> <span class="n">IODataRoutingConvention</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>    <span class="k">private</span> <span class="k">readonly</span> <span class="n">EntityRoutingConvention</span> <span class="n">entityRoutingConvention</span> <span class="p">=</span>
+</span><span class='line'>        <span class="k">new</span> <span class="nf">EntityRoutingConvention</span><span class="p">();</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">public</span> <span class="k">virtual</span> <span class="kt">string</span> <span class="nf">SelectController</span><span class="p">(</span>
+</span><span class='line'>        <span class="n">ODataPath</span> <span class="n">odataPath</span><span class="p">,</span>
+</span><span class='line'>        <span class="n">HttpRequestMessage</span> <span class="n">request</span><span class="p">)</span>
+</span><span class='line'>    <span class="p">{</span>
+</span><span class='line'>        <span class="k">return</span> <span class="n">entityRoutingConvention</span>
+</span><span class='line'>          <span class="p">.</span><span class="n">SelectController</span><span class="p">(</span><span class="n">odataPath</span><span class="p">,</span> <span class="n">request</span><span class="p">);</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">public</span> <span class="k">virtual</span> <span class="kt">string</span> <span class="nf">SelectAction</span><span class="p">(</span>
+</span><span class='line'>        <span class="n">ODataPath</span> <span class="n">odataPath</span><span class="p">,</span>
+</span><span class='line'>        <span class="n">HttpControllerContext</span> <span class="n">controllerContext</span><span class="p">,</span>
+</span><span class='line'>        <span class="n">ILookup</span><span class="p">&lt;</span><span class="kt">string</span><span class="p">,</span> <span class="n">HttpActionDescriptor</span><span class="p">&gt;</span> <span class="n">actionMap</span><span class="p">)</span>
+</span><span class='line'>    <span class="p">{</span>
+</span><span class='line'>        <span class="kt">var</span> <span class="n">action</span> <span class="p">=</span> <span class="n">entityRoutingConvention</span>
+</span><span class='line'>            <span class="p">.</span><span class="n">SelectAction</span><span class="p">(</span><span class="n">odataPath</span><span class="p">,</span> <span class="n">controllerContext</span><span class="p">,</span> <span class="n">actionMap</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="k">if</span> <span class="p">(</span><span class="n">action</span> <span class="p">==</span> <span class="k">null</span><span class="p">)</span>
+</span><span class='line'>        <span class="p">{</span>
+</span><span class='line'>            <span class="k">return</span> <span class="k">null</span><span class="p">;</span>
+</span><span class='line'>        <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="kt">var</span> <span class="n">routeValues</span> <span class="p">=</span> <span class="n">controllerContext</span><span class="p">.</span><span class="n">RouteData</span><span class="p">.</span><span class="n">Values</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="kt">object</span> <span class="k">value</span><span class="p">;</span>
+</span><span class='line'>        <span class="k">if</span> <span class="p">(!</span><span class="n">routeValues</span><span class="p">.</span><span class="n">TryGetValue</span><span class="p">(</span><span class="n">ODataRouteConstants</span><span class="p">.</span><span class="n">Key</span><span class="p">,</span>
+</span><span class='line'>          <span class="k">out</span> <span class="k">value</span><span class="p">))</span>
+</span><span class='line'>            <span class="p">{</span>
+</span><span class='line'>              <span class="k">return</span> <span class="n">action</span><span class="p">;</span>
+</span><span class='line'>            <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="kt">var</span> <span class="n">compoundKeyPairs</span> <span class="p">=</span> <span class="p">((</span><span class="kt">string</span><span class="p">)</span><span class="k">value</span><span class="p">).</span><span class="n">Split</span><span class="p">(</span><span class="sc">&#39;,&#39;</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="k">if</span> <span class="p">(!</span><span class="n">compoundKeyPairs</span><span class="p">.</span><span class="n">Any</span><span class="p">())</span>
+</span><span class='line'>        <span class="p">{</span>
+</span><span class='line'>            <span class="k">return</span> <span class="k">null</span><span class="p">;</span>
+</span><span class='line'>        <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="kt">var</span> <span class="n">keyValues</span> <span class="p">=</span> <span class="n">compoundKeyPairs</span>
+</span><span class='line'>            <span class="p">.</span><span class="n">Select</span><span class="p">(</span><span class="n">kv</span> <span class="p">=&gt;</span> <span class="n">kv</span><span class="p">.</span><span class="n">Split</span><span class="p">(</span><span class="sc">&#39;=&#39;</span><span class="p">))</span>
+</span><span class='line'>            <span class="p">.</span><span class="n">Select</span><span class="p">(</span><span class="n">kv</span> <span class="p">=&gt;</span>
+</span><span class='line'>              <span class="k">new</span> <span class="n">KeyValuePair</span><span class="p">&lt;</span><span class="kt">string</span><span class="p">,</span> <span class="kt">object</span><span class="p">&gt;(</span><span class="n">kv</span><span class="p">[</span><span class="m">0</span><span class="p">],</span> <span class="n">kv</span><span class="p">[</span><span class="m">1</span><span class="p">]));</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="n">routeValues</span><span class="p">.</span><span class="n">AddRange</span><span class="p">(</span><span class="n">keyValues</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="k">return</span> <span class="n">action</span><span class="p">;</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>This class decorates a standard <code>EntityRoutingConvention</code>
+and splits the raw key portion of the URI into key/value pairs
+and adds them all to the routeValues dictionary.</p>
+
+<p>Once this is done the standard action resolution kicks in
+and finds the correct action overload to invoke.</p>
+
+<p>This routing convention was adapted from the WebApi
+<a href="http://aspnet.codeplex.com/SourceControl/changeset/view/9cb7243bd9fe3b2df484bf2409af943f39533588#Samples/WebApi/ODataCompositeKeySample/ODataCompositeKeySample/Extensions/CompositeKeyRoutingConvention.cs">ODataCompositeKeySample</a>
+project.</p>
+
+<p>Here we see another difference between WebApi OData and WCF
+Data Services. In WCF Data Services, the framework handles
+generating a query that selects a single instance from
+an <code>IQueryable</code>. This limits our ability to customize
+how finding an instance by key is done. In WebApi OData,
+we have to explicitly define an overload that gets an
+entity instance by key, giving us more control over
+how the query is executed.</p>
+
+<p>This distinction might not matter for most projects, but
+in the case of <a href="https://github.com/themotleyfool/NuGet.Lucene/tree/master/source/NuGet.Lucene.Web">NuGet.Lucene.Web</a>,
+it enables a mirror-on-demand
+capability where a local feed can fetch a package from another
+server on the fly, add it to the local repository, then
+send it back to the client as if it was always there in the
+first place.</p>
+
+<p>To customize this in WCF Data Services required
+significant <a href="https://github.com/themotleyfool/NuGet.Lucene/blob/v2.9.4/source/NuGet.Lucene.Web/DataServices/PackageDataSource.cs#L17">back</a>
+<a href="https://github.com/themotleyfool/NuGet.Lucene/blob/v2.9.4/source/NuGet.Lucene.Web/DataServices/PackageDataService.cs#L171">flips</a>.</p>
+
+<p><nav>
+  <h3>Series Index</h3>
+  <ol>
+  <li><a href="http://chris.eldredge.io/blog/2014/04/22/NuGet-Feed-with-WebApi-OData/">Introduction</a></li>
+  <li><a href="http://chris.eldredge.io/blog/2014/04/23/Basic-WebApi-OData/">Basic WebApi OData</a></li>
+  <li><a href="http://chris.eldredge.io/blog/2014/04/24/Composite-Keys/">Composite Keys</a></li>
+  </ol>
+</nav></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Basic WebApi OData]]></title>
@@ -212,6 +457,7 @@ a NuGet client can speak to though.</p>
   <ol>
   <li><a href="http://chris.eldredge.io/blog/2014/04/22/NuGet-Feed-with-WebApi-OData/">Introduction</a></li>
   <li><a href="http://chris.eldredge.io/blog/2014/04/23/Basic-WebApi-OData/">Basic WebApi OData</a></li>
+  <li><a href="http://chris.eldredge.io/blog/2014/04/24/Composite-Keys/">Composite Keys</a></li>
   </ol>
 </nav></p>
 ]]></content>
@@ -273,6 +519,7 @@ The ones that aren&#8217;t will be covered in the following articles.</p>
   <ol>
   <li><a href="http://chris.eldredge.io/blog/2014/04/22/NuGet-Feed-with-WebApi-OData/">Introduction</a></li>
   <li><a href="http://chris.eldredge.io/blog/2014/04/23/Basic-WebApi-OData/">Basic WebApi OData</a></li>
+  <li><a href="http://chris.eldredge.io/blog/2014/04/24/Composite-Keys/">Composite Keys</a></li>
   </ol>
 </nav></p>
 ]]></content>
