@@ -4,7 +4,7 @@
   <title><![CDATA[Chris Eldredge]]></title>
   <link href="http://chris.eldredge.io/atom.xml" rel="self"/>
   <link href="http://chris.eldredge.io/"/>
-  <updated>2014-04-24T20:30:53-04:00</updated>
+  <updated>2014-04-29T16:02:19-04:00</updated>
   <id>http://chris.eldredge.io/</id>
   <author>
     <name><![CDATA[Chris Eldredge]]></name>
@@ -2424,7 +2424,7 @@ appear atomically. Knowing the details of when staged changes become visible wil
     <link href="http://chris.eldredge.io/blog/2012/07/03/Speeding-Up-NuGet-Server/"/>
     <updated>2012-07-03T00:00:00-04:00</updated>
     <id>http://chris.eldredge.io/blog/2012/07/03/Speeding-Up-NuGet-Server</id>
-    <content type="html"><![CDATA[<p><em>(Get the source code at <a href="https://github.com/themotleyfool/NuGet">https://github.com/themotleyfool/NuGet</a>)</em></p>
+    <content type="html"><![CDATA[<p><em>(Get the source code at <a href="https://github.com/themotleyfool/Klondike">https://github.com/themotleyfool/Klondike</a>)</em></p>
 
 <p>Last time I wrote about creating a LINQ provider for Lucene.Net, and today I&#8217;ll talk about integrating that provider
 with NuGet. The existing server part of the NuGet codebase is a drop-in replacement for using local file-system based
@@ -2505,7 +2505,7 @@ have proven to be worth the investment.</p>
 <p>Lucene.Net.Linq has become a fairly mature, though still nascent, project now available on <a href="http://nuget.org/packages/Lucene.Net.Linq">nuget.org</a>. There are a few other
 OSS projects that attempt to do what it does, but I think it is already one of the best.</p>
 
-<p>Binaries of NuGet.Server + Lucene can be downloaded from <a href="https://github.com/themotleyfool/NuGet/downloads">https://github.com/themotleyfool/NuGet/downloads</a>.</p>
+<p>Binaries of NuGet.Server + Lucene can be downloaded from <a href="https://github.com/themotleyfool/Klondike/releases">https://github.com/themotleyfool/Klondike/releases</a>.</p>
 ]]></content>
   </entry>
   
