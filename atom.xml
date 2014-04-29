@@ -4,7 +4,7 @@
   <title><![CDATA[Chris Eldredge]]></title>
   <link href="http://chris.eldredge.io/atom.xml" rel="self"/>
   <link href="http://chris.eldredge.io/"/>
-  <updated>2014-04-29T16:02:19-04:00</updated>
+  <updated>2014-04-29T16:42:03-04:00</updated>
   <id>http://chris.eldredge.io/</id>
   <author>
     <name><![CDATA[Chris Eldredge]]></name>
@@ -12,6 +12,323 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Default Streams with WebApi OData]]></title>
+    <link href="http://chris.eldredge.io/blog/2014/04/29/Default-Streams/"/>
+    <updated>2014-04-29T16:07:00-04:00</updated>
+    <id>http://chris.eldredge.io/blog/2014/04/29/Default-Streams</id>
+    <content type="html"><![CDATA[<p>NuGet package feeds provide metadata about packages, but after searching
+for new packages to use or updates to existing ones, we also have to
+be able to download the actual package.</p>
+
+<p>The NuGet OData implementation provides links to download a package
+by using the <code>default stream</code> concept.</p>
+
+<p>In WCF Data Services, an entity indicates that it has a stream using the
+aptly named <code>HasStreamAttribute</code>.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='c#'><span class='line'><span class="na">[DataServiceKey(&quot;Id&quot;, &quot;Version&quot;)]</span>
+</span><span class='line'><span class="na">[HasStream]</span>
+</span><span class='line'><span class="k">public</span> <span class="k">class</span> <span class="nc">DataServicePackage</span> <span class="p">:</span> <span class="n">IEquatable</span><span class="p">&lt;</span><span class="n">DataServicePackage</span><span class="p">&gt;</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>    <span class="c1">//snip</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>To build a URI for each instance, a custom implementation of
+<code>IDataServiceStreamProvider</code> is wired into our <code>DataService</code>.</p>
+
+<p>This is done differently in WebApi which does not include the
+<code>HasStreamAttribute</code> at all.</p>
+
+<p>Over a year ago, I asked on twitter:</p>
+
+<div class='embed tweet'><blockquote class="twitter-tweet"><p><a href="https://twitter.com/adjames">@adjames</a> Is there a webapi/odata equivalent of HasStreamAttribute and IDataServiceStreamProvider?</p>&mdash; Chris Eldredge (@creldredge) <a href="https://twitter.com/creldredge/statuses/289384233141669888">January 10, 2013</a></blockquote>
+<script async src="http://chris.eldredge.io//platform.twitter.com/widgets.js" charset="utf-8"></script></div>
+
+
+<p>At the time, the answer was no. However, I&#8217;m happy to report that
+recent versions of WebApi do support this feature.</p>
+
+<p>First, we need to tell our EDM model builder that the entity has
+a default stream:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+</pre></td><td class='code'><pre><code class='c#'><span class='line'><span class="k">public</span> <span class="k">void</span> <span class="nf">MapODataRoutes</span><span class="p">(</span><span class="n">HttpConfiguration</span> <span class="n">config</span><span class="p">)</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>    <span class="kt">var</span> <span class="n">builder</span> <span class="p">=</span> <span class="k">new</span> <span class="n">ODataConventionModelBuilder</span><span class="p">();</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kt">var</span> <span class="n">entity</span> <span class="p">=</span> <span class="n">builder</span><span class="p">.</span><span class="n">EntitySet</span><span class="p">&lt;</span><span class="n">ODataPackage</span><span class="p">&gt;(</span><span class="s">&quot;Packages&quot;</span><span class="p">);</span>
+</span><span class='line'>    <span class="n">entity</span><span class="p">.</span><span class="n">EntityType</span><span class="p">.</span><span class="n">HasKey</span><span class="p">(</span><span class="n">pkg</span> <span class="p">=&gt;</span> <span class="n">pkg</span><span class="p">.</span><span class="n">Id</span><span class="p">);</span>
+</span><span class='line'>    <span class="n">entity</span><span class="p">.</span><span class="n">EntityType</span><span class="p">.</span><span class="n">HasKey</span><span class="p">(</span><span class="n">pkg</span> <span class="p">=&gt;</span> <span class="n">pkg</span><span class="p">.</span><span class="n">Version</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kt">var</span> <span class="n">entityType</span> <span class="p">=</span> <span class="n">model</span>
+</span><span class='line'>      <span class="p">.</span><span class="n">FindDeclaredType</span><span class="p">(</span><span class="k">typeof</span><span class="p">(</span><span class="n">ODataPackage</span><span class="p">).</span><span class="n">FullName</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">model</span> <span class="p">=</span> <span class="n">builder</span><span class="p">.</span><span class="n">GetEdmModel</span><span class="p">();</span>
+</span><span class='line'>    <span class="n">model</span><span class="p">.</span><span class="n">SetHasDefaultStream</span><span class="p">(</span>
+</span><span class='line'>       <span class="n">entityType</span> <span class="k">as</span> <span class="n">IEdmEntityType</span><span class="p">,</span> <span class="n">hasStream</span><span class="p">:</span> <span class="k">true</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">// snip</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Next we&#8217;ll need to implement a custom <code>ODataSerializerProvider</code>
+and <code>ODataEdmTypeSerializer</code> to provide a default stream URL for
+entity instances:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+<span class='line-number'>58</span>
+<span class='line-number'>59</span>
+<span class='line-number'>60</span>
+<span class='line-number'>61</span>
+<span class='line-number'>62</span>
+<span class='line-number'>63</span>
+<span class='line-number'>64</span>
+<span class='line-number'>65</span>
+<span class='line-number'>66</span>
+<span class='line-number'>67</span>
+<span class='line-number'>68</span>
+<span class='line-number'>69</span>
+<span class='line-number'>70</span>
+<span class='line-number'>71</span>
+<span class='line-number'>72</span>
+<span class='line-number'>73</span>
+<span class='line-number'>74</span>
+<span class='line-number'>75</span>
+<span class='line-number'>76</span>
+<span class='line-number'>77</span>
+<span class='line-number'>78</span>
+<span class='line-number'>79</span>
+<span class='line-number'>80</span>
+<span class='line-number'>81</span>
+<span class='line-number'>82</span>
+<span class='line-number'>83</span>
+<span class='line-number'>84</span>
+<span class='line-number'>85</span>
+<span class='line-number'>86</span>
+<span class='line-number'>87</span>
+</pre></td><td class='code'><pre><code class='c#'><span class='line'><span class="k">public</span> <span class="k">class</span> <span class="nc">ODataPackageDefaultStreamAwareSerializerProvider</span>
+</span><span class='line'>    <span class="p">:</span> <span class="n">DefaultODataSerializerProvider</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>    <span class="k">private</span> <span class="k">readonly</span> <span class="n">ODataEdmTypeSerializer</span> <span class="n">entitySerializer</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">public</span> <span class="nf">ODataPackageDefaultStreamAwareSerializerProvider</span><span class="p">()</span>
+</span><span class='line'>    <span class="p">{</span>
+</span><span class='line'>        <span class="k">this</span><span class="p">.</span><span class="n">entitySerializer</span> <span class="p">=</span>
+</span><span class='line'>          <span class="k">new</span> <span class="nf">ODataPackageDefaultStreamAwareEntityTypeSerializer</span><span class="p">(</span><span class="k">this</span><span class="p">);</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">public</span> <span class="k">override</span> <span class="n">ODataEdmTypeSerializer</span> <span class="nf">GetEdmTypeSerializer</span><span class="p">(</span>
+</span><span class='line'>      <span class="n">IEdmTypeReference</span> <span class="n">edmType</span><span class="p">)</span>
+</span><span class='line'>    <span class="p">{</span>
+</span><span class='line'>        <span class="k">if</span> <span class="p">(</span><span class="n">edmType</span><span class="p">.</span><span class="n">IsEntity</span><span class="p">())</span>
+</span><span class='line'>        <span class="p">{</span>
+</span><span class='line'>            <span class="k">return</span> <span class="n">entitySerializer</span><span class="p">;</span>
+</span><span class='line'>        <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="k">return</span> <span class="k">base</span><span class="p">.</span><span class="n">GetEdmTypeSerializer</span><span class="p">(</span><span class="n">edmType</span><span class="p">);</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">public</span> <span class="k">abstract</span> <span class="k">class</span> <span class="nc">DefaultStreamAwareEntityTypeSerializer</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;</span>
+</span><span class='line'>    <span class="p">:</span> <span class="n">ODataEntityTypeSerializer</span> <span class="k">where</span> <span class="n">T</span> <span class="p">:</span> <span class="k">class</span>
+</span><span class='line'><span class="err">{</span>
+</span><span class='line'>    <span class="k">protected</span> <span class="nf">DefaultStreamAwareEntityTypeSerializer</span><span class="p">(</span>
+</span><span class='line'>      <span class="n">ODataSerializerProvider</span> <span class="n">serializerProvider</span><span class="p">)</span>
+</span><span class='line'>        <span class="p">:</span> <span class="k">base</span><span class="p">(</span><span class="n">serializerProvider</span><span class="p">)</span>
+</span><span class='line'>    <span class="p">{</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">public</span> <span class="k">override</span> <span class="n">ODataEntry</span> <span class="nf">CreateEntry</span><span class="p">(</span>
+</span><span class='line'>      <span class="n">SelectExpandNode</span> <span class="n">selectExpandNode</span><span class="p">,</span>
+</span><span class='line'>      <span class="n">EntityInstanceContext</span> <span class="n">entityInstanceContext</span><span class="p">)</span>
+</span><span class='line'>    <span class="p">{</span>
+</span><span class='line'>        <span class="kt">var</span> <span class="n">entry</span> <span class="p">=</span> <span class="k">base</span><span class="p">.</span><span class="n">CreateEntry</span><span class="p">(</span><span class="n">selectExpandNode</span><span class="p">,</span>
+</span><span class='line'>          <span class="n">entityInstanceContext</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="kt">var</span> <span class="n">instance</span> <span class="p">=</span> <span class="n">entityInstanceContext</span><span class="p">.</span><span class="n">EntityInstance</span> <span class="k">as</span> <span class="n">T</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="k">if</span> <span class="p">(</span><span class="n">instance</span> <span class="p">!=</span> <span class="k">null</span><span class="p">)</span>
+</span><span class='line'>        <span class="p">{</span>
+</span><span class='line'>            <span class="kt">var</span> <span class="n">link</span> <span class="p">=</span> <span class="n">BuildLinkForStreamProperty</span><span class="p">(</span>
+</span><span class='line'>              <span class="n">instance</span><span class="p">,</span> <span class="n">entityInstanceContext</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>            <span class="n">entry</span><span class="p">.</span><span class="n">MediaResource</span> <span class="p">=</span> <span class="k">new</span> <span class="n">ODataStreamReferenceValue</span>
+</span><span class='line'>            <span class="p">{</span>
+</span><span class='line'>                <span class="n">ContentType</span> <span class="p">=</span> <span class="n">ContentType</span><span class="p">,</span>
+</span><span class='line'>                <span class="n">ReadLink</span> <span class="p">=</span> <span class="k">new</span> <span class="n">Uri</span><span class="p">(</span><span class="n">link</span><span class="p">)</span>
+</span><span class='line'>            <span class="p">};</span>
+</span><span class='line'>        <span class="p">}</span>
+</span><span class='line'>        <span class="k">return</span> <span class="n">entry</span><span class="p">;</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">protected</span> <span class="k">virtual</span> <span class="kt">string</span> <span class="n">ContentType</span>
+</span><span class='line'>    <span class="p">{</span>
+</span><span class='line'>        <span class="k">get</span> <span class="p">{</span> <span class="k">return</span> <span class="s">&quot;application/octet-stream&quot;</span><span class="p">;</span> <span class="p">}</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">protected</span> <span class="k">abstract</span> <span class="kt">string</span> <span class="nf">BuildLinkForStreamProperty</span><span class="p">(</span>
+</span><span class='line'>      <span class="n">T</span> <span class="n">entity</span><span class="p">,</span>
+</span><span class='line'>      <span class="n">EntityInstanceContext</span> <span class="n">entityInstanceContext</span><span class="p">);</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">public</span> <span class="k">class</span> <span class="nc">ODataPackageDefaultStreamAwareEntityTypeSerializer</span> <span class="p">:</span> <span class="n">DefaultStreamAwareEntityTypeSerializer</span><span class="p">&lt;</span><span class="n">ODataPackage</span><span class="p">&gt;</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>    <span class="k">public</span> <span class="nf">ODataPackageDefaultStreamAwareEntityTypeSerializer</span><span class="p">(</span>
+</span><span class='line'>      <span class="n">ODataSerializerProvider</span> <span class="n">serializerProvider</span><span class="p">)</span>
+</span><span class='line'>      <span class="p">:</span> <span class="k">base</span><span class="p">(</span><span class="n">serializerProvider</span><span class="p">)</span>
+</span><span class='line'>    <span class="p">{</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">protected</span> <span class="k">override</span> <span class="kt">string</span> <span class="nf">BuildLinkForStreamProperty</span><span class="p">(</span>
+</span><span class='line'>      <span class="n">ODataPackage</span> <span class="n">package</span><span class="p">,</span>
+</span><span class='line'>      <span class="n">EntityInstanceContext</span> <span class="n">context</span><span class="p">)</span>
+</span><span class='line'>    <span class="p">{</span>
+</span><span class='line'>        <span class="kt">var</span> <span class="n">url</span> <span class="p">=</span> <span class="k">new</span> <span class="n">UrlHelper</span><span class="p">(</span><span class="n">context</span><span class="p">.</span><span class="n">Request</span><span class="p">);</span>
+</span><span class='line'>        <span class="kt">var</span> <span class="n">routeParams</span> <span class="p">=</span> <span class="k">new</span> <span class="p">{</span> <span class="n">package</span><span class="p">.</span><span class="n">Id</span><span class="p">,</span> <span class="n">package</span><span class="p">.</span><span class="n">Version</span> <span class="p">};</span>
+</span><span class='line'>        <span class="k">return</span> <span class="n">url</span><span class="p">.</span><span class="n">Link</span><span class="p">(</span><span class="n">RouteNames</span><span class="p">.</span><span class="n">Packages</span><span class="p">.</span><span class="n">Download</span><span class="p">,</span> <span class="n">routeParams</span><span class="p">);</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">protected</span> <span class="k">override</span> <span class="kt">string</span> <span class="n">ContentType</span>
+</span><span class='line'>    <span class="p">{</span>
+</span><span class='line'>        <span class="k">get</span> <span class="p">{</span> <span class="k">return</span> <span class="s">&quot;application/zip&quot;</span><span class="p">;</span> <span class="p">}</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>The most relevant part above is the override of <code>CreateEntry</code>
+(line 33) which sets the <code>MediaResource</code> property on the
+serialized <code>ODataEntry</code>.</p>
+
+<p>Finally the custom serializer is wired into the configuration:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='c#'><span class='line'><span class="n">config</span><span class="p">.</span><span class="n">Formatters</span><span class="p">.</span><span class="n">InsertRange</span><span class="p">(</span><span class="m">0</span><span class="p">,</span>
+</span><span class='line'>    <span class="n">ODataMediaTypeFormatters</span><span class="p">.</span><span class="n">Create</span><span class="p">(</span>
+</span><span class='line'>        <span class="k">new</span> <span class="nf">ODataPackageDefaultStreamAwareSerializerProvider</span><span class="p">(),</span>
+</span><span class='line'>        <span class="k">new</span> <span class="nf">DefaultODataDeserializerProvider</span><span class="p">()));</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>This whole mess of code nets us a modest customization in the Atom
+output from WebApi OData:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='xml'><span class='line'><span class="nt">&lt;entry&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;id&gt;</span>http://example/api/odata/Packages(Id=&#39;Lucene.Net.Linq&#39;,Version=&#39;3.2.55&#39;)<span class="nt">&lt;/id&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;content</span>
+</span><span class='line'>    <span class="na">type=</span><span class="s">&quot;application/zip&quot;</span>
+</span><span class='line'>    <span class="na">src=</span><span class="s">&quot;http://example/api/packages/Lucene.Net.Linq/3.2.55/content&quot;</span><span class="nt">/&gt;</span>
+</span><span class='line'>  <span class="c">&lt;!-- snip --&gt;</span>
+</span><span class='line'><span class="nt">&lt;/entry&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>This enables the NuGet client to download packages.</p>
+
+<p><nav>
+  <h3>Series Index</h3>
+  <ol>
+  <li><a href="http://chris.eldredge.io/blog/2014/04/22/NuGet-Feed-with-WebApi-OData/">Introduction</a></li>
+  <li><a href="http://chris.eldredge.io/blog/2014/04/23/Basic-WebApi-OData/">Basic WebApi OData</a></li>
+  <li><a href="http://chris.eldredge.io/blog/2014/04/24/Composite-Keys/">Composite Keys</a></li>
+  <li><a href="http://chris.eldredge.io/blog/2014/04/29/Default-Streams/">Default Streams</a></li>
+  </ol>
+</nav></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Composite Keys with WebApi OData]]></title>
@@ -253,6 +570,7 @@ significant <a href="https://github.com/themotleyfool/NuGet.Lucene/blob/v2.9.4/s
   <li><a href="http://chris.eldredge.io/blog/2014/04/22/NuGet-Feed-with-WebApi-OData/">Introduction</a></li>
   <li><a href="http://chris.eldredge.io/blog/2014/04/23/Basic-WebApi-OData/">Basic WebApi OData</a></li>
   <li><a href="http://chris.eldredge.io/blog/2014/04/24/Composite-Keys/">Composite Keys</a></li>
+  <li><a href="http://chris.eldredge.io/blog/2014/04/29/Default-Streams/">Default Streams</a></li>
   </ol>
 </nav></p>
 ]]></content>
@@ -458,6 +776,7 @@ a NuGet client can speak to though.</p>
   <li><a href="http://chris.eldredge.io/blog/2014/04/22/NuGet-Feed-with-WebApi-OData/">Introduction</a></li>
   <li><a href="http://chris.eldredge.io/blog/2014/04/23/Basic-WebApi-OData/">Basic WebApi OData</a></li>
   <li><a href="http://chris.eldredge.io/blog/2014/04/24/Composite-Keys/">Composite Keys</a></li>
+  <li><a href="http://chris.eldredge.io/blog/2014/04/29/Default-Streams/">Default Streams</a></li>
   </ol>
 </nav></p>
 ]]></content>
@@ -520,6 +839,7 @@ The ones that aren&#8217;t will be covered in the following articles.</p>
   <li><a href="http://chris.eldredge.io/blog/2014/04/22/NuGet-Feed-with-WebApi-OData/">Introduction</a></li>
   <li><a href="http://chris.eldredge.io/blog/2014/04/23/Basic-WebApi-OData/">Basic WebApi OData</a></li>
   <li><a href="http://chris.eldredge.io/blog/2014/04/24/Composite-Keys/">Composite Keys</a></li>
+  <li><a href="http://chris.eldredge.io/blog/2014/04/29/Default-Streams/">Default Streams</a></li>
   </ol>
 </nav></p>
 ]]></content>

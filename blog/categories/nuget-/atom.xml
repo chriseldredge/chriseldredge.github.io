@@ -4,7 +4,7 @@
   <title><![CDATA[Category: nuget, | Chris Eldredge]]></title>
   <link href="http://chris.eldredge.io/blog/categories/nuget-/atom.xml" rel="self"/>
   <link href="http://chris.eldredge.io/"/>
-  <updated>2014-04-29T16:02:19-04:00</updated>
+  <updated>2014-04-29T16:42:03-04:00</updated>
   <id>http://chris.eldredge.io/</id>
   <author>
     <name><![CDATA[Chris Eldredge]]></name>
@@ -12,6 +12,229 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Default Streams with WebApi OData]]></title>
+    <link href="http://chris.eldredge.io/blog/2014/04/29/Default-Streams/"/>
+    <updated>2014-04-29T16:07:00-04:00</updated>
+    <id>http://chris.eldredge.io/blog/2014/04/29/Default-Streams</id>
+    <content type="html"><![CDATA[<p>NuGet package feeds provide metadata about packages, but after searching
+for new packages to use or updates to existing ones, we also have to
+be able to download the actual package.</p>
+
+<p>The NuGet OData implementation provides links to download a package
+by using the <code>default stream</code> concept.</p>
+
+<p>In WCF Data Services, an entity indicates that it has a stream using the
+aptly named <code>HasStreamAttribute</code>.</p>
+
+<p>```c#
+[DataServiceKey("Id", "Version")]
+[HasStream]
+public class DataServicePackage : IEquatable<DataServicePackage>
+{</p>
+
+<pre><code>//snip
+</code></pre>
+
+<p>}
+```</p>
+
+<p>To build a URI for each instance, a custom implementation of
+<code>IDataServiceStreamProvider</code> is wired into our <code>DataService</code>.</p>
+
+<p>This is done differently in WebApi which does not include the
+<code>HasStreamAttribute</code> at all.</p>
+
+<p>Over a year ago, I asked on twitter:</p>
+
+<p><div class='embed tweet'><blockquote class="twitter-tweet"><p><a href="https://twitter.com/adjames">@adjames</a> Is there a webapi/odata equivalent of HasStreamAttribute and IDataServiceStreamProvider?</p>&mdash; Chris Eldredge (@creldredge) <a href="https://twitter.com/creldredge/statuses/289384233141669888">January 10, 2013</a></blockquote>
+<script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script></div></p>
+
+<p>At the time, the answer was no. However, I'm happy to report that
+recent versions of WebApi do support this feature.</p>
+
+<p>First, we need to tell our EDM model builder that the entity has
+a default stream:</p>
+
+<p>```c#
+public void MapODataRoutes(HttpConfiguration config)
+{</p>
+
+<pre><code>var builder = new ODataConventionModelBuilder();
+
+var entity = builder.EntitySet&lt;ODataPackage&gt;("Packages");
+entity.EntityType.HasKey(pkg =&gt; pkg.Id);
+entity.EntityType.HasKey(pkg =&gt; pkg.Version);
+
+var entityType = model
+  .FindDeclaredType(typeof(ODataPackage).FullName);
+
+model = builder.GetEdmModel();
+model.SetHasDefaultStream(
+   entityType as IEdmEntityType, hasStream: true);
+
+// snip
+</code></pre>
+
+<p>}
+```</p>
+
+<p>Next we'll need to implement a custom <code>ODataSerializerProvider</code>
+and <code>ODataEdmTypeSerializer</code> to provide a default stream URL for
+entity instances:</p>
+
+<p>```c#
+public class ODataPackageDefaultStreamAwareSerializerProvider</p>
+
+<pre><code>: DefaultODataSerializerProvider
+</code></pre>
+
+<p>{</p>
+
+<pre><code>private readonly ODataEdmTypeSerializer entitySerializer;
+
+public ODataPackageDefaultStreamAwareSerializerProvider()
+{
+    this.entitySerializer =
+      new ODataPackageDefaultStreamAwareEntityTypeSerializer(this);
+}
+
+public override ODataEdmTypeSerializer GetEdmTypeSerializer(
+  IEdmTypeReference edmType)
+{
+    if (edmType.IsEntity())
+    {
+        return entitySerializer;
+    }
+
+    return base.GetEdmTypeSerializer(edmType);
+}
+</code></pre>
+
+<p>}</p>
+
+<p>public abstract class DefaultStreamAwareEntityTypeSerializer<T></p>
+
+<pre><code>: ODataEntityTypeSerializer where T : class
+</code></pre>
+
+<p>{</p>
+
+<pre><code>protected DefaultStreamAwareEntityTypeSerializer(
+  ODataSerializerProvider serializerProvider)
+    : base(serializerProvider)
+{
+}
+
+public override ODataEntry CreateEntry(
+  SelectExpandNode selectExpandNode,
+  EntityInstanceContext entityInstanceContext)
+{
+    var entry = base.CreateEntry(selectExpandNode,
+      entityInstanceContext);
+
+    var instance = entityInstanceContext.EntityInstance as T;
+
+    if (instance != null)
+    {
+        var link = BuildLinkForStreamProperty(
+          instance, entityInstanceContext);
+
+        entry.MediaResource = new ODataStreamReferenceValue
+        {
+            ContentType = ContentType,
+            ReadLink = new Uri(link)
+        };
+    }
+    return entry;
+}
+
+protected virtual string ContentType
+{
+    get { return "application/octet-stream"; }
+}
+
+protected abstract string BuildLinkForStreamProperty(
+  T entity,
+  EntityInstanceContext entityInstanceContext);
+</code></pre>
+
+<p>}</p>
+
+<p>public class ODataPackageDefaultStreamAwareEntityTypeSerializer : DefaultStreamAwareEntityTypeSerializer<ODataPackage>
+{</p>
+
+<pre><code>public ODataPackageDefaultStreamAwareEntityTypeSerializer(
+  ODataSerializerProvider serializerProvider)
+  : base(serializerProvider)
+{
+}
+
+protected override string BuildLinkForStreamProperty(
+  ODataPackage package,
+  EntityInstanceContext context)
+{
+    var url = new UrlHelper(context.Request);
+    var routeParams = new { package.Id, package.Version };
+    return url.Link(RouteNames.Packages.Download, routeParams);
+}
+
+protected override string ContentType
+{
+    get { return "application/zip"; }
+}
+</code></pre>
+
+<p>}
+```</p>
+
+<p>The most relevant part above is the override of <code>CreateEntry</code>
+(line 33) which sets the <code>MediaResource</code> property on the
+serialized <code>ODataEntry</code>.</p>
+
+<p>Finally the custom serializer is wired into the configuration:</p>
+
+<p>```c#
+config.Formatters.InsertRange(0,</p>
+
+<pre><code>ODataMediaTypeFormatters.Create(
+    new ODataPackageDefaultStreamAwareSerializerProvider(),
+    new DefaultODataDeserializerProvider()));
+</code></pre>
+
+<p>```</p>
+
+<p>This whole mess of code nets us a modest customization in the Atom
+output from WebApi OData:</p>
+
+<p>```xml
+<entry>
+  <id>http://example/api/odata/Packages(Id='Lucene.Net.Linq',Version='3.2.55')</id>
+  &lt;content</p>
+
+<pre><code>type="application/zip"
+src="http://example/api/packages/Lucene.Net.Linq/3.2.55/content"/&gt;
+</code></pre>
+
+<p>  <!-- snip -->
+</entry>
+```</p>
+
+<p>This enables the NuGet client to download packages.</p>
+
+<p><nav>
+  <h3>Series Index</h3>
+  <ol>
+  <li><a href="/blog/2014/04/22/NuGet-Feed-with-WebApi-OData/">Introduction</a></li>
+  <li><a href="/blog/2014/04/23/Basic-WebApi-OData/">Basic WebApi OData</a></li>
+  <li><a href="/blog/2014/04/24/Composite-Keys/">Composite Keys</a></li>
+  <li><a href="/blog/2014/04/29/Default-Streams/">Default Streams</a></li>
+  </ol>
+</nav>
+</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Composite Keys with WebApi OData]]></title>
@@ -180,6 +403,7 @@ significant <a href="https://github.com/themotleyfool/NuGet.Lucene/blob/v2.9.4/s
   <li><a href="/blog/2014/04/22/NuGet-Feed-with-WebApi-OData/">Introduction</a></li>
   <li><a href="/blog/2014/04/23/Basic-WebApi-OData/">Basic WebApi OData</a></li>
   <li><a href="/blog/2014/04/24/Composite-Keys/">Composite Keys</a></li>
+  <li><a href="/blog/2014/04/29/Default-Streams/">Default Streams</a></li>
   </ol>
 </nav>
 </p>
@@ -331,6 +555,7 @@ a NuGet client can speak to though.</p>
   <li><a href="/blog/2014/04/22/NuGet-Feed-with-WebApi-OData/">Introduction</a></li>
   <li><a href="/blog/2014/04/23/Basic-WebApi-OData/">Basic WebApi OData</a></li>
   <li><a href="/blog/2014/04/24/Composite-Keys/">Composite Keys</a></li>
+  <li><a href="/blog/2014/04/29/Default-Streams/">Default Streams</a></li>
   </ol>
 </nav>
 </p>
@@ -394,6 +619,7 @@ The ones that aren't will be covered in the following articles.</p>
   <li><a href="/blog/2014/04/22/NuGet-Feed-with-WebApi-OData/">Introduction</a></li>
   <li><a href="/blog/2014/04/23/Basic-WebApi-OData/">Basic WebApi OData</a></li>
   <li><a href="/blog/2014/04/24/Composite-Keys/">Composite Keys</a></li>
+  <li><a href="/blog/2014/04/29/Default-Streams/">Default Streams</a></li>
   </ol>
 </nav>
 </p>
