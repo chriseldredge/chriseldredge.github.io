@@ -2,10 +2,10 @@
 layout: post
 title: Speeding Up NuGet.Server
 comments: true
-categories: 
+categories:
 ---
 
-_(Get the source code at [https://github.com/themotleyfool/NuGet](https://github.com/themotleyfool/NuGet))_
+_(Get the source code at [https://github.com/themotleyfool/Klondike](https://github.com/themotleyfool/Klondike))_
 
 Last time I wrote about creating a LINQ provider for Lucene.Net, and today I'll talk about integrating that provider
 with NuGet. The existing server part of the NuGet codebase is a drop-in replacement for using local file-system based
@@ -31,11 +31,11 @@ The real improvements are appreciated after the initial index is built.
 
     [celdredge@localhost]$ appcmd recycle apppool nuget
 	"nuget" successfully recycled
-	
+
     [celdredge@localhost]$ time wget -O /dev/null http://localhost/api/v2/Packages
-	
+
 	(snip)
-	
+
     real    0m3.230s
     user    0m0.062s
     sys     0m0.125s
@@ -61,9 +61,9 @@ construct various test queries, like this one that finds packages whose id conta
     where p.IsLatestVersion
     orderby p.Id descending
     select p
-	
+
 	Query successful (00:00.136)
-	
+
 136ms is pretty respectable, IMO.
 
 Another advantage to using Lucene is how queries are analyzed. Term queries will match various word forms, so a query like <tt>build</tt> will
@@ -84,4 +84,4 @@ have proven to be worth the investment.
 Lucene.Net.Linq has become a fairly mature, though still nascent, project now available on [nuget.org](http://nuget.org/packages/Lucene.Net.Linq). There are a few other
 OSS projects that attempt to do what it does, but I think it is already one of the best.
 
-Binaries of NuGet.Server + Lucene can be downloaded from [https://github.com/themotleyfool/NuGet/downloads](https://github.com/themotleyfool/NuGet/downloads).
+Binaries of NuGet.Server + Lucene can be downloaded from [https://github.com/themotleyfool/Klondike/releases](https://github.com/themotleyfool/Klondike/releases).
