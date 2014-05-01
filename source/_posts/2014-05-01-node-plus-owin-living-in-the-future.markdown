@@ -51,7 +51,7 @@ I realized quickly that when my assembly is loaded from Node, my config file
 was being ignored.
 
 I asked a [question](https://github.com/tjanczuk/edge/issues/131) on the Edge
-Github project to confirm, but inspecting source code is appears to be the case
+Github project to confirm, but inspecting source code it appears to be the case
 that when Edge loads a managed assembly, it isn't creating a full AppDomain
 and specifying a config file to go with it.
 
@@ -59,7 +59,7 @@ To "trick" my configuration into being loaded, I copied node.exe from it's home
 in Program Files to my bin/Debug directory, and then copied my config file to
 `node.exe.config` in the same local directory.
 
-Sure enough, running `.bin\Debug\node.exe server.js` happily pulled in my config settings
+Sure enough, running `.\bin\Debug\node.exe server.js` happily pulled in my config settings
 and binding redirects.
 
 It would be nice if Issue 131 gets first-class support, but in the mean time
