@@ -4,7 +4,7 @@
   <title><![CDATA[Chris Eldredge]]></title>
   <link href="http://chris.eldredge.io/atom.xml" rel="self"/>
   <link href="http://chris.eldredge.io/"/>
-  <updated>2014-05-01T18:01:29-04:00</updated>
+  <updated>2014-05-01T18:08:53-04:00</updated>
   <id>http://chris.eldredge.io/</id>
   <author>
     <name><![CDATA[Chris Eldredge]]></name>
@@ -70,7 +70,7 @@ same version of DLL dependencies.</p>
 was being ignored.</p>
 
 <p>I asked a <a href="https://github.com/tjanczuk/edge/issues/131">question</a> on the Edge
-Github project to confirm, but inspecting source code is appears to be the case
+Github project to confirm, but inspecting source code it appears to be the case
 that when Edge loads a managed assembly, it isn&#8217;t creating a full AppDomain
 and specifying a config file to go with it.</p>
 
@@ -78,7 +78,7 @@ and specifying a config file to go with it.</p>
 in Program Files to my bin/Debug directory, and then copied my config file to
 <code>node.exe.config</code> in the same local directory.</p>
 
-<p>Sure enough, running <code>.bin\Debug\node.exe server.js</code> happily pulled in my config settings
+<p>Sure enough, running <code>.\bin\Debug\node.exe server.js</code> happily pulled in my config settings
 and binding redirects.</p>
 
 <p>It would be nice if Issue 131 gets first-class support, but in the mean time
