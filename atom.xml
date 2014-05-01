@@ -4,7 +4,7 @@
   <title><![CDATA[Chris Eldredge]]></title>
   <link href="http://chris.eldredge.io/atom.xml" rel="self"/>
   <link href="http://chris.eldredge.io/"/>
-  <updated>2014-04-29T16:42:03-04:00</updated>
+  <updated>2014-05-01T18:01:29-04:00</updated>
   <id>http://chris.eldredge.io/</id>
   <author>
     <name><![CDATA[Chris Eldredge]]></name>
@@ -12,6 +12,114 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Node + Owin: Living in the Future]]></title>
+    <link href="http://chris.eldredge.io/blog/2014/05/01/node-plus-owin-living-in-the-future/"/>
+    <updated>2014-05-01T17:04:00-04:00</updated>
+    <id>http://chris.eldredge.io/blog/2014/05/01/node-plus-owin-living-in-the-future</id>
+    <content type="html"><![CDATA[<p>Scott Hanselman recently blogged <a href="http://www.hanselman.com/blog/ItsJustASoftwareIssueEdgejsBringsNodeAndNETTogetherOnThreePlatforms.aspx">&#8220;It&#8217;s just a software issue&#8221;- Edge.js brings Node and .NET together on three platforms</a>
+and to say the least I am intrigued.</p>
+
+<p>I&#8217;ve been using Grunt (and therefore Node) to develop <a href="https://github.com/themotleyfool/Klondike/">Klondike</a>
+for about 6 months and it never occurred to me that hosting managed .net code
+from Node was an option.</p>
+
+<p>After reading Scott&#8217;s post, my immediate question was if I could host an OWIN
+application from Node. Some quick googling revealed <a href="https://github.com/bbaia/connect-owin">connect-owin</a>
+is well on its way.</p>
+
+<p>It took a little elbow grease to get from the toy app samples to being able
+to initialize Klondike and serve requests.</p>
+
+<h2>Proof of Concept</h2>
+
+<p>On my Windows VM, I ran:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>npm install connect-owin express</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Then created this barebones Node program:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="kd">var</span> <span class="nx">owin</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;connect-owin&#39;</span><span class="p">),</span>
+</span><span class='line'>    <span class="nx">express</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;express&#39;</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">var</span> <span class="nx">app</span> <span class="o">=</span> <span class="nx">express</span><span class="p">();</span>
+</span><span class='line'><span class="nx">app</span><span class="p">.</span><span class="nx">all</span><span class="p">(</span><span class="s1">&#39;/api/*&#39;</span><span class="p">,</span> <span class="nx">owin</span><span class="p">(</span><span class="s1">&#39;bin/debug/NuGet.Lucene.Web.OwinHost.Sample.exe&#39;</span><span class="p">));</span>
+</span><span class='line'>
+</span><span class='line'><span class="nx">app</span><span class="p">.</span><span class="nx">listen</span><span class="p">(</span><span class="mi">3000</span><span class="p">);</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>AppDomains and Configuration</h2>
+
+<p>Klondike uses appSettings to configure where files are kept and which options
+are enabled. It also has a fair amount of binding redirects that make sure
+all the various assemblies pulled in from NuGet packages agree to use the
+same version of DLL dependencies.</p>
+
+<p>I realized quickly that when my assembly is loaded from Node, my config file
+was being ignored.</p>
+
+<p>I asked a <a href="https://github.com/tjanczuk/edge/issues/131">question</a> on the Edge
+Github project to confirm, but inspecting source code is appears to be the case
+that when Edge loads a managed assembly, it isn&#8217;t creating a full AppDomain
+and specifying a config file to go with it.</p>
+
+<p>To &#8220;trick&#8221; my configuration into being loaded, I copied node.exe from it&#8217;s home
+in Program Files to my bin/Debug directory, and then copied my config file to
+<code>node.exe.config</code> in the same local directory.</p>
+
+<p>Sure enough, running <code>.bin\Debug\node.exe server.js</code> happily pulled in my config settings
+and binding redirects.</p>
+
+<p>It would be nice if Issue 131 gets first-class support, but in the mean time
+at least I know there&#8217;s a way to load complex applications into Edge.</p>
+
+<h2>Whither Mono?</h2>
+
+<p>Edge (and therefore connect-owin) have first-class support for the Mono Framework,
+although unfortunately I was unable to get beyond an issue with Ninject. As it
+turns out, Ninject has a separate build configuration to support Mono and the
+packages on nuget.org won&#8217;t work when you try to use them with Mono.</p>
+
+<p>This is pretty unfortunate and I&#8217;ll be looking for a new IoC container to replace
+Ninject with. One that has built in integration with WebApi and SignalR would
+be nice.</p>
+
+<h2>The Future</h2>
+
+<p>The Future is now. Being able to use Bower, Grunt and Node with integrated .NET
+request processing means teams can use the same great front-end tools that
+are sweeping the community by storm while still building rich server-side
+components powered by .NET.</p>
+
+<p>I&#8217;m a huge fan of c# and .NET, but love that this enables front-end developers
+who aren&#8217;t to be able to contribute to these projects without forcing them to
+stop using Grunt, Bower and whatever other favorite tools they bring from their
+toolboxes.</p>
+
+<p>Are Edge and connect-owin production ready? I don&#8217;t know, but I also don&#8217;t really
+care. To me, these are ideal tools for development and testing, but once
+<code>grunt build</code> gives me an app tree in <code>./dist</code> I&#8217;d rather just push my app to
+the cloud and let someone else worry about hosting.</p>
+
+<h2>Source</h2>
+
+<p>My efforts to convert Klondike to support OWIN self hosting are a
+work-in-progress, but you can see the source code on the <a href="https://github.com/themotleyfool/NuGet.Lucene/tree/webapi-odata/source/NuGet.Lucene.Web.OwinHost.Sample">webapi-oata</a>
+branch of <a href="https://github.com/themotleyfool/NuGet.Lucene/">NuGet.Lucene</a>
+on Github.</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Default Streams with WebApi OData]]></title>
@@ -2979,65 +3087,6 @@ others alone, any unmodified field that was previously a NumericField reverts to
 
 <p>Long story short, if your documents are going to take round trips and get re-indexed, you must re-encode
 any NumericFields before adding the document back to the index, even if they did not change.</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Getting Started with Re-linq]]></title>
-    <link href="http://chris.eldredge.io/blog/2012/03/29/Getting-Started-With-Relinq/"/>
-    <updated>2012-03-29T00:00:00-04:00</updated>
-    <id>http://chris.eldredge.io/blog/2012/03/29/Getting-Started-With-Relinq</id>
-    <content type="html"><![CDATA[<h2>The IQueryable Conundrum</h2>
-
-<p>So, you have a datasource you can access from .net and you thought, hey wouldn&#8217;t it be
-cool if I could wire this up with LINQ?</p>
-
-<p>Maybe you&#8217;ve read about how <a href="http://blog.ploeh.dk/2012/03/26/IQueryableIsTightCoupling.aspx">IQueryable is Tight Coupling</a>,
-but you figure that you&#8217;re connecting up a low-level datasource and you&#8217;ll probably encapsulate the messy IQueryable stuff
-in your domain. So you forge ahead.</p>
-
-<p>You create a class that implements IQueryable, maybe using
-<a href="http://msdn.microsoft.com/en-us/library/bb546158.aspx">Walkthrough: Creating an IQueryable LINQ Provider</a>
-as a starting point.</p>
-
-<p>Now you&#8217;re left with an Expression object and you get to figure out what to do with it. Sure, you
-can use reflection like the MSDN example demonstrates, but some lingering doubt enters in when you
-realize how complex even the most basic statements will be to parse.</p>
-
-<p>Then maybe you find a new resource: <a href="http://blogs.msdn.com/b/mattwar/archive/2008/11/18/linq-links.aspx">LINQ: Building an IQueryable provider series</a>
-and you think, hey, only 17 massive posts to trudge through.</p>
-
-<p>Ok, so this is no work for the weary. No wonder we don&#8217;t have scads of LINQ providers floating around on codeplex.com and codeproject.com.</p>
-
-<h2>Enter re-linq</h2>
-
-<p><a href="http://relinq.codeplex.com/">re-linq</a> is an open source project that attempts to ease the burden of implementing IQueryable.</p>
-
-<p>It seems like a great project that should help you write less code, but there&#8217;s just one problem: re-linq has zero documentation.</p>
-
-<p>Their project page links to the tantalizingly friendly example <a href="http://www.codeproject.com/Articles/42059/re-linq-ishing-the-Pain-Using-re-linq-to-Implement">re-linq|ishing the Pain: Using re-linq to Implement a Powerful LINQ Provider on the Example of NHibernate</a>,
-but after you download the code you realize soon enough that the project is outdated and doesn&#8217;t even compile against re-linq 1.13.</p>
-
-<p>Alas, you have one demo project to go on as supplied in the re-linq source bundle: Linq.LinqToSqlAppender. Needlesstosay,
-this project is arguably more complex than the actual support library it builds on. For someone trying to get started, looking
-at a provider that generates SQL queries is probably a little too complex of a starting point.</p>
-
-<h2>The Bare Bones</h2>
-
-<p>Submitted for your entertainment, here lies the recipe for the most basic shell you can use to build upon re-linq.</p>
-
-<p>First, create a new c# project.  Then using Nuget or going on your own, grab a copy of Remotion.Linq
-(In the Package Manager Coneole, type <tt>Install-Package Remotion.Linq</tt>)</p>
-
-<p>One you have your project ready, here&#8217;s your code:</p>
-
-<script src="https://gist.github.com/2246429.js"> </script>
-
-
-<p>This implementation completely ignores the &#8220;where&#8221; clause, &#8220;order&#8221; clause, and any other clause you can
-name besides &#8220;select&#8221;.  It just returns the entire collection of items in the data source.</p>
-
-<p>Up next, translating the where clause.</p>
 ]]></content>
   </entry>
   
