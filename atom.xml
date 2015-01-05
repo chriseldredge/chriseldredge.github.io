@@ -4,7 +4,7 @@
   <title><![CDATA[Chris Eldredge]]></title>
   <link href="http://chris.eldredge.io/atom.xml" rel="self"/>
   <link href="http://chris.eldredge.io/"/>
-  <updated>2014-05-01T18:08:53-04:00</updated>
+  <updated>2015-01-05T15:21:48-05:00</updated>
   <id>http://chris.eldredge.io/</id>
   <author>
     <name><![CDATA[Chris Eldredge]]></name>
@@ -12,6 +12,161 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[NuGet Symbols and Aspnet vNext]]></title>
+    <link href="http://chris.eldredge.io/blog/2015/01/05/nuget-symbols-and-aspnet-vnext/"/>
+    <updated>2015-01-05T14:52:00-05:00</updated>
+    <id>http://chris.eldredge.io/blog/2015/01/05/nuget-symbols-and-aspnet-vnext</id>
+    <content type="html"><![CDATA[<p>I&#8217;ve been working on a new release of Klondike for quite a while now.
+My last release was <a href="https://github.com/themotleyfool/Klondike/releases">published</a>
+on March 27th, 2014.</p>
+
+<p>There&#8217;s been quite a bit of work off and on over the months, but I&#8217;ve kept
+postponing a new version to add Just One More Feature. Scope creep, anyone?</p>
+
+<p>One remaining issue I&#8217;m now working through is dealing with normal NuGet packages,
+NuGet symbol packages, and looking ahead at Microsoft.NET 5 (aka .NET vNext).</p>
+
+<p>Ignoring vNext, the <code>nuget pack</code> command takes an optional <code>-symbols</code> argument
+which asks it to build two separate zip files: one that contains the DLLs,
+documentation, content, scripts and other artifacts that a project would consume
+from your package, and another one that contains the DLLs, PDBs (debugging symbols),
+and source code for your package.</p>
+
+<p>The symbol packages are intended to be uploaded somewhere like <a href="http://www.symbolsource.org/">SymbolSource.org</a>
+where they will be processed for consumption by debuggers like Visual Studio and WinDbg.</p>
+
+<p>Klondike allows both normal packages and symbol packages to be uploaded to a single
+end point. This enables Klondike users to use NuGet for private libraries without
+losing useful source level integration with Visual Studio.</p>
+
+<p>On the surface, there is little to tell a symbol package from a normal one. Both packages
+will have virtually identical manifests and metadata. The metadata will have a package
+ID and version. Apart from the name of the package file (MyThing.1.0.nupkg vs MyThing.1.0.symbols.nupkg),
+we have to fall back to heuristics to suss out one from the other.</p>
+
+<p>This is what Klondike does: look at the files in the package and if there&#8217;s at least one
+file in the <code>src</code> directory, and at least one <code>pdb</code> file in the <code>lib</code> directory, then
+the package is deemed to be a symbol package.</p>
+
+<p>With vNext, the waters are muddied. Commands like <code>kpm pack</code> produce a single package
+that contains consumable contents but also includes PDBs and source. This sounds
+great. Two use cases in a single payload.</p>
+
+<p>The trouble is in how we distinguish between a normal package and a symbol package.
+Klondike needs to treat them differently so when a client asks to download a
+package, it gets the full normal package and not just the symbols and source.</p>
+
+<p>At present, Klondike wrongly concludes that a vNext package is a symbol package.
+My heuristic is wrong when dealing with such packages.</p>
+
+<h2>It&#8217;s the file name stupid</h2>
+
+<p>My first thought was, it is obvious from a file name like <code>MyThing.1.0.symbols.nupkg</code>
+that a package should be treated as symbols-only. When files are uploaded using
+multipart/mime, a helpful Content-Disposition header should tell me the name of the
+file being uploaded.</p>
+
+<p>Well, as it turns out, regardless of what the file is named on disk, the <code>nuget push</code>
+command always lies to the server and says it&#8217;s uploading a file named <code>package</code>.</p>
+
+<p>Push <code>MyThing.1.0.nupkg</code> and the server sees <code>package</code>. Push <code>MyThing.1.0.symbols.nupkg</code>
+and the server sees <code>package</code>. Push a file that isn&#8217;t a package and the server sees&#8230;
+you get it.</p>
+
+<h2>It&#8217;s the endpoint stupid</h2>
+
+<p>The client knows if a package is symbols or not. Maybe the client should use a different
+endpoint to upload symbol packages from normal ones. Perhaps trying to handle both package
+types from the same URL was a bad decision in the first place.</p>
+
+<p>Changing it now would break any automated scripts that currently push packages to Klondike.
+Maybe there&#8217;s not a ton of clients out there today, but it still rubs me the wrong way.</p>
+
+<h2>It&#8217;s something else?</h2>
+
+<p>Apart from requiring the client to use a different URL to push symbols, I&#8217;m at a loss of
+how else to reliably tell the difference between symbols and normal packages. Since
+the problem only affects vNext, I could add more complicated heuristics to see if
+<code>aspnet50</code> or <code>aspnetcore50</code> are supported by the package. This does not sounds like
+an approach that won&#8217;t need constant attention as new frameworks and versions are
+introduced.</p>
+
+<h2>What do</h2>
+
+<p>It&#8217;s a bummer that symbol packages don&#8217;t have a simple flag in their manifests that proclaim
+what they are. It&#8217;s a bummer that <code>nuget push</code> uses a hard-coded file name no matter what
+type of package is being uploaded. It&#8217;s a bummer that vNext appears to be changing
+the rules of what a normal package may contain.</p>
+
+<p>Unless I&#8217;ve overlooked something, the right choice seems to be to require clients
+to push symbol packages to an alternate URL.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[QueueUserWorkItem, OWIN and you]]></title>
+    <link href="http://chris.eldredge.io/blog/2014/09/07/queueuserworkitem/"/>
+    <updated>2014-09-07T13:13:00-04:00</updated>
+    <id>http://chris.eldredge.io/blog/2014/09/07/queueuserworkitem</id>
+    <content type="html"><![CDATA[<p>There have been around elevnty billion posts on how to queue background work
+from an asp.net app, why you shouldn&#8217;t do it, and what to do if you&#8217;re going
+to do it despite being warned not to.</p>
+
+<h2>Problems with Fire and Forget from ASP.NET</h2>
+
+<p>Before ASP.NET 4.5.2, if a method with an <code>async void</code> signature is invoked
+from a request-processing worker thread, or if an <code>async Task</code> method is invoked
+and the resulting Task is not awaited, you get a big scary error in your
+logs that looks like:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>TODO</span></code></pre></td></tr></table></div></figure>
+
+
+<p>But you may have a legitimate reason to fire and forget a task. For example,
+you may want to record something in your analytics, log something, send an email
+and you don&#8217;t want the client request to block while these things are being done.</p>
+
+<p>In the case of Klondike, whenever a package is downloaded, some counters need
+to be incremented, and making the request block until this metric is recorded
+and committed to disk only serves to slow down the client. The request still
+succeeds if something goes wrong with incrementing the download counter.</p>
+
+<p>Typically in asp.net architecture here&#8217;s where someone would suggest introducing
+a background service, message bus, message queue, database to externalize
+the record keeping so asp.net doesn&#8217;t have to deal with it.</p>
+
+<p>However, making a simple app to distribute as a zip file conflicts with these
+overly complex architectures. All because the asp.net application pool might
+get recycled sometimes.</p>
+
+<h2>QueueBackgroundWorkItem</h2>
+
+<p>ASP.NET 4.5.2 introduced <a href="http://msdn.microsoft.com/en-us/library/system.web.hosting.hostingenvironment.queuebackgroundworkitem.aspx">HostingEnvironment.QueueBackgroundWorkItem</a> as an official way of queing
+work from ASP.NET with some minimal guarantees that the process model will
+be aware of and wait for the task to complete when the process is being
+recycled or stopped.</p>
+
+<p>The callbacks give you a cancellation token that gets triggered when the process
+is being shut down (or recycled) and waits for some amount of time for tasks
+to complete.</p>
+
+<h2>Wither OWIN</h2>
+
+<p>QueueBackgroundWorkItem is great if you&#8217;re only writing apps that will run
+in asp.net. But for developers creating OWIN apps that support asp.net or
+self-hosting, it isn&#8217;t obvious what should be done.</p>
+
+<p>Another problem is that QueueBackgroundWorkItem is still so new that using
+it directly means you probably won&#8217;t be compiling and running on mono any time
+soon.</p>
+
+<p>Both of these issues are problems for Klondike which aims to build and run
+on mono and deploy as a self-hosted executable.</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Node + Owin: Living in the Future]]></title>
@@ -950,6 +1105,92 @@ The ones that aren&#8217;t will be covered in the following articles.</p>
   <li><a href="http://chris.eldredge.io/blog/2014/04/29/Default-Streams/">Default Streams</a></li>
   </ol>
 </nav></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Binary Releases with Github]]></title>
+    <link href="http://chris.eldredge.io/blog/2014/04/15/binary-releases-with-github/"/>
+    <updated>2014-04-15T15:35:00-04:00</updated>
+    <id>http://chris.eldredge.io/blog/2014/04/15/binary-releases-with-github</id>
+    <content type="html"><![CDATA[<p>For those of us who work in compiled languages, build and deployment
+means more than just git push.</p>
+
+<h2>Everywhere a git repo</h2>
+
+<p>To deploy a .net site in the past, usually a build script would create
+a zip file or other package of the compiled assets and static resources
+and you would deploy it using msdeploy, OctopusDeploy or some manual process
+that involves sacrificial rites and prayer.</p>
+
+<p>Recently, more and more web stacks and PaaS vendors allow you to
+push your repo to a deployment endpoint and the site would be updated automatically.
+The simplicity here is undeniable, and outsourcing all the messy scripts that
+update your site content while keeping your site online is a huge win
+for busy developers who would rather focus on other tasks.</p>
+
+<p>We&#8217;ve seen this first with static hosting vendors like Github Pages, then with
+evaluated languages like Python, Node and Ruby. Now with vendors that support
+JEE and .net, we can do the same thing with compiled languages.</p>
+
+<h2>Setup</h2>
+
+<p>Running an open source product, I wanted to give users several options for
+downloading a release and deploying it to their own infrastucture. I ended up
+with a workflow that ships releases as (1) a zip file that can be downloaded, (2)
+a git repository that can be cloned/tracked and (3) a source repo that can be
+built with a completely automated build process.</p>
+
+<p>I particularly love distributing a release repo with git because it allows
+users to track the repo and maintain local customizations to configuration
+and markup while maintaining the ease of merging and updating with git.</p>
+
+<h2>Grunt and Submodules</h2>
+
+<p>Many build tools like Grunt and Jekyll will stage a site into a directory like
+<code>dist/</code> or <code>_output/</code> and when they clean the output directory, they smartly
+leave alone any .git directories underneath. This allows us to treat our build
+directory as a separate git repo and commit changes to it after building a new
+release.</p>
+
+<p>In Klondike I opted to set up the <code>dist/</code> directory as a submodule. I have mixed
+feelings about how well this works. On the one hand I like how the birds-eye view
+shows the submodule on the Klondike project page to give users a hint that a
+repo exists for releases, but it can get messy committing on the source repo
+simply to update the revision that the submodule should be tracking.</p>
+
+<h2>Release Workflow</h2>
+
+<ol>
+<li>Do stuff, test stuff, commit stuff</li>
+<li>Stage a release (e.g. <code>grunt build</code>) into <code>dist/</code></li>
+<li>Commit, tag and push <code>dist/</code></li>
+<li>Commit, tag and push source repo</li>
+</ol>
+
+
+<p>At this point anyone tracking the release repo can pull to get the new version. Some
+manual steps are required to publish a release and provide a zip file that mirrors
+HEAD on the release repo.</p>
+
+<ol>
+<li>Grab a zip of the latest tag on the release repo from the <a href="https://github.com/themotleyfool/Klondike-Release/releases">releases</a> view</li>
+<li>Draft a new release on the source repo</li>
+<li>Add release notes that describe what&#8217;s new</li>
+<li>Upload the zip file from step 1</li>
+<li>Tweet about it</li>
+</ol>
+
+
+<h2>Some Nice-to-Haves</h2>
+
+<p>I know Github has a <a href="https://developer.github.com/v3/repos/releases/">Releases API</a> but I haven&#8217;t taken
+the time to automate the manual tasks above.</p>
+
+<p>It would be nice if, when drafting release notes, the UI could show a summary of changesets that
+were commited between the last release and the current draft. As it stand I open the changelog somewhere
+else, and the issues tab and manually draft release notes from these. It would be awesome if Github
+could generate this information automagically.</p>
 ]]></content>
   </entry>
   
@@ -2844,249 +3085,6 @@ impossible to allow a client to see the effects of adding, deleting or modifying
 session. However, this problem can be side-stepped by simply calling <code>Commit</code> between making changes and subsequent queries.
 Calling <code>Commit</code> explicitly may have drawbacks if the client will make further changes and wishes for those changes to
 appear atomically. Knowing the details of when staged changes become visible will help clients to make changes smartly.</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Speeding Up NuGet.Server]]></title>
-    <link href="http://chris.eldredge.io/blog/2012/07/03/Speeding-Up-NuGet-Server/"/>
-    <updated>2012-07-03T00:00:00-04:00</updated>
-    <id>http://chris.eldredge.io/blog/2012/07/03/Speeding-Up-NuGet-Server</id>
-    <content type="html"><![CDATA[<p><em>(Get the source code at <a href="https://github.com/themotleyfool/Klondike">https://github.com/themotleyfool/Klondike</a>)</em></p>
-
-<p>Last time I wrote about creating a LINQ provider for Lucene.Net, and today I&#8217;ll talk about integrating that provider
-with NuGet. The existing server part of the NuGet codebase is a drop-in replacement for using local file-system based
-feeds. I wanted to try to preserve that turnkey advantage but improve the performance of various queries.</p>
-
-<p>In order to make sure that my improvements were up to snuff, I set up a private mirror of all packages on <a href="http://nuget.org/">nuget.org</a>,
-which turned out to be 44,193 packages at the time, for a total size of over 20 gigs.</p>
-
-<p>If you try hitting ~/api/v2/Packages on stock NuGet.Server, you&#8217;ll find that your request just spins and spins. And spins. In fact
-it took so long that I gave up waiting for the application to initialize. In the background, the server is finding all <code>*.nupkg</code>
-files in ~/Packages and calculating a hash of the contents. Needless to say, it can take a while to run a checksum algorithm on 20gb
-of data.</p>
-
-<p>Switching over to my custom lucene branch, the first time the site is started, it scans the Packages folder and finds all packages
-that haven&#8217;t been indexed by Lucene. The site homepage helpfully tells you the current status, such as &#8220;Indexing 2113 of 44193 new packages.&#8221;
-An ajax timer refreshes the info every few seconds so progress can be easily tracked.</p>
-
-<p>The packages don&#8217;t begin to appear in the feed until they&#8217;ve all been indexed. So this isn&#8217;t much better than stock NuGet.Server.</p>
-
-<h2>Incremental Indexing</h2>
-
-<p>The real improvements are appreciated after the initial index is built.</p>
-
-<pre><code>[celdredge@localhost]$ appcmd recycle apppool nuget
-"nuget" successfully recycled
-
-[celdredge@localhost]$ time wget -O /dev/null http://localhost/api/v2/Packages
-
-(snip)
-
-real    0m3.230s
-user    0m0.062s
-sys     0m0.125s
-</code></pre>
-
-<p>This means that you don&#8217;t have to worry much about IIS shutting down the application during idle times. The index gets loaded and ready to go
-in a matter of seconds. Vast improvement over stock NuGet.Server.</p>
-
-<p>While that happens, a background thread scans the Packages folder to see what might have changed while the application was stopped. New, modified
-and deleted packages are synchronized with the Lucene index. The sycnhronization process takes about 25 seconds to scan 44,193 package files
-split into 6,180 folders and calculate the differences with the Lucene index. That&#8217;s pretty fast.</p>
-
-<p>After the application finishes this initial scan, a FileSystemWatcher monitors the Packages folder to synchronize any changes in real time.
-This allows the index to stay in sync when new packages appear, even if they are copied into the folder instead of using <code>nuget push</code>.</p>
-
-<h2>Superfast Search</h2>
-
-<p>All sorts of complex queries are possible, and they execute in very reasonable time. I used <a href="http://www.linqpad.net/">LINQPad</a> to
-construct various test queries, like this one that finds packages whose id contain lucene but do not start with lucene:</p>
-
-<pre><code>from p in Packages
-where p.Id.Contains("Lucene")
-where !p.Id.StartsWith("Lucene")
-where p.IsLatestVersion
-orderby p.Id descending
-select p
-
-Query successful (00:00.136)
-</code></pre>
-
-<p>136ms is pretty respectable, IMO.</p>
-
-<p>Another advantage to using Lucene is how queries are analyzed. Term queries will match various word forms, so a query like <tt>build</tt> will
-match packages that use any words like build, builds, building, built, etc. It is also possible to search for phrase queries, such as
-<tt>&#8220;glue them back together&#8221;</tt>. That query matches only one package that contains the exact phrase, whereas on nuget.org you&#8217;ll get
-all kinds of results.</p>
-
-<h2>Other Features</h2>
-
-<p>The <a href="https://github.com/NuGet/NuGetGallery/wiki/Tab-Completion-API-Endpoints">Tab Completion API Endpoints</a> introduced in NuGet 2.0 have
-been implemented, bringing fast results to users of the Package Manager Console.</p>
-
-<h2>Conclusion</h2>
-
-<p>It has taken a substantial amount of time and effort to implement Lucene.Net.Linq and integrate it with NuGet.Server, but the results
-have proven to be worth the investment.</p>
-
-<p>Lucene.Net.Linq has become a fairly mature, though still nascent, project now available on <a href="http://nuget.org/packages/Lucene.Net.Linq">nuget.org</a>. There are a few other
-OSS projects that attempt to do what it does, but I think it is already one of the best.</p>
-
-<p>Binaries of NuGet.Server + Lucene can be downloaded from <a href="https://github.com/themotleyfool/Klondike/releases">https://github.com/themotleyfool/Klondike/releases</a>.</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Introducing LINQ to Lucene]]></title>
-    <link href="http://chris.eldredge.io/blog/2012/05/08/Introducing-Linq-to-Lucene/"/>
-    <updated>2012-05-08T00:00:00-04:00</updated>
-    <id>http://chris.eldredge.io/blog/2012/05/08/Introducing-Linq-to-Lucene</id>
-    <content type="html"><![CDATA[<p><em>(Get the source code at <a href="https://github.com/themotleyfool/Lucene.Net.Linq">https://github.com/themotleyfool/Lucene.Net.Linq</a>)</em></p>
-
-<p>For the last several weeks I&#8217;ve been working with <a href="http://octopusdeploy.com/">OctopusDeploy</a>, a new one-click deployment
-system for .net applications and websites. The way you get your software into Octopus is by publishing packages to
-a <a href="http://nuget.org/">NuGet</a> feed. Octopus will monitor the feed, grab your package, send it out to the servers that will
-host your software, then instruct the servers to unzip the package and run your deployment scripts.</p>
-
-<p>We&#8217;re pretty happy with Octopus, but we ran into a problem with our NuGet feed. Since we use continuous integration, we
-produce 10 or 20 builds a day and each one of those successful builds becomes a release candidate that we want to be
-available in Octopus. We found that as we published more packages to our internal feed, the slower Octopus became when
-accessing it. It doesn&#8217;t help that some of our packages are 40mb websites.</p>
-
-<p>Thinking that the stateless nature of a file-based NuGet feed might be the culprit, we switched over to
-<a href="https://nuget.org/packages/NuGet.Server">NuGet.Server</a>, an asp.net web app that provides access to NuGet packages over http.
-As it turns out, NuGet.Server isn&#8217;t significantly better at handling lots of packages or even a handful of rather large packages.</p>
-
-<p>The reason is because NuGet.Server doesn&#8217;t actually cache much information about packages, so each time a client executes a query,
-the server has to:</p>
-
-<ul>
-<li>Enumerate all <code>*.nupkg</code> files on the file system</li>
-<li>Open the zip file and
-
-<ul>
-<li>Seek to the nuspec metadata entry</li>
-<li>Parse the entry</li>
-</ul>
-</li>
-<li>Obtain file metadata (last modified date, size)</li>
-<li>Calculate a checksum hash of the file contents (bigger package, slower hash time)</li>
-</ul>
-
-
-<p>One thing NuGet.Server does that a file-based feed does not is cache some of this metadata (like the hash code), but this
-is an in-memory cache, meaning that when the web app restarts or is shutdown after an idle period, the entire cache goes away.</p>
-
-<p>Even with the cache, operations like finding the latest version of a package or sorting packages by name are much slower than
-they could be. Not to mention, the &#8220;search&#8221; functionality leaves something to be desired.</p>
-
-<h2>Hooray for Open Source</h2>
-
-<p>I set out to make NuGet.Server faster and I wanted to do it with something light weight. Something that can index and search,
-but doesn&#8217;t require a database and all the complexity that comes with it. If I wanted all that I could have just used
-<a href="https://github.com/NuGet/NuGetGallery">NuGet Gallery</a>.</p>
-
-<p>I decided to use <a href="http://incubator.apache.org/lucene.net/">Lucene.Net</a> as my data source, but looking at the existing NuGet code,
-I realized that NuGet uses <a href="http://www.odata.org">OData</a> to expose a queryable data source over the web. That sounds nice and all,
-but in the server side in asp.net, that basically means you need an implementation of <code>IQueryable&lt;T&gt;</code>. Those can
-be hard to come by.</p>
-
-<h2>Boo for OData, LINQ and IQueryable</h2>
-
-<p>Exposing a search/query interface over the web powered by Lucene is not hard to do. Exposing an OData compatible endpoint powered
-by Lucene is so insanely complicated that I have to conclude that OData is a cruel joke for anyone not using Entity Framework (and
-if you are using EF, the joke was already on you).</p>
-
-<p>OData sounds great in that the types of queries a client can construct are limitless. But in practice, NuGet does not need this
-insane amount of power. Really all that is needed is a simple interface that lets you enumerate packages in some pre-defined
-ways.</p>
-
-<p>But since NuGet has a large install base that is using OData, it was time to try to connect <code>IQueryable&lt;T&gt;</code> with Lucene.</p>
-
-<p>There is already a <a href="http://linqtolucene.codeplex.com/">LINQ to Lucene</a> project on CodePlex, but after working with it I found that
-it does not support enough of the LINQ expressions to work seamlessly with OData.</p>
-
-<p>So I decided to try and write my own.</p>
-
-<h2>Introducing Lucene.Net.Linq</h2>
-
-<p><a href="https://github.com/themotleyfool/Lucene.Net.Linq">Lucene.Net.Linq</a> is the result of my quest to make NuGet.Server faster.
-The library is incomplete and the features it does support were motivated by making it compatible enough with OData in general
-and NuGet.Server in particular.</p>
-
-<p>This project turned out to be even more needlessly complex due to the way Microsoft&#8217;s WCF Data Services <a href="http://msdn.microsoft.com/en-us/library/dd723653.aspx">Reflection Provider</a>
-tries to avoid <code>NullReferenceException</code> by turning simple queries into completely insane ones. This is a problem that the
-NuGet Gallery folks also <a href="http://blog.davidebbo.com/2011/08/how-odata-quirk-killed-nuget-server.html">ran into</a>.</p>
-
-<p>So a large part of Lucene.Net.Linq jumps through hoops because the Reflection Provider takes a simple OData query like:</p>
-
-<pre>
-Packages()?$filter=startswith(Id,'foo')
-</pre>
-
-
-<p>And turns it into a complex query like:</p>
-
-<pre>
-IIF(
-  (IIF(([package].Id == null), null, Convert([package].Id.StartsWith("r"))) == null),
-   False,
-   Convert(IIF(([package].Id == null), null, Convert([package].Id.StartsWith("foo")))))
-</pre>
-
-
-<p>And hands that off to the poor IQueryable implementor to make sense of. At the end of the
-day this query ends up being converted to a Lucene PrefixQuery such as:</p>
-
-<pre>
-Id:foo*
-</pre>
-
-
-<p>All of this could have been avoided if the WCF Data Services <a href="http://msdn.microsoft.com/en-us/library/dd723653.aspx">Reflection Provider</a>
-would let clients set <a href="http://msdn.microsoft.com/en-us/library/system.data.services.providers.idataservicequeryprovider.isnullpropagationrequired.aspx">IsNullPropagationRequired</a>
-to <code>false</code>.</p>
-
-<h2>Conclusion</h2>
-
-<p><a href="https://github.com/themotleyfool/Lucene.Net.Linq">Lucene.Net.Linq</a> was written for a very specific purpose,
-but it could be generally useful for plugging Lucene into
-places that already use LINQ to execute queries and to expose Lucene indexes over OData (but don&#8217;t use OData; you&#8217;re better than that).</p>
-
-<p>We hope you find it useful!</p>
-
-<p>To comply with the different licenses of Lucene.Net and <a href="http://relinq.codeplex.com/">re-linq</a>, the library is co-licensed under the
-terms of the <a href="http://www.gnu.org/licenses/lgpl-2.1-standalone.html">LGPL</a>
-and <a href="http://www.apache.org/licenses/LICENSE-2.0">Apache License</a>.</p>
-
-<p>Look for this library at NuGet.org soon!</p>
-
-<p>Get the source code at <a href="https://github.com/themotleyfool/Lucene.Net.Linq">https://github.com/themotleyfool/Lucene.Net.Linq</a>.</p>
-
-<p>Up next: releasing a blazingly fast NuGet feed.</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Lucene NumericField Gotcha]]></title>
-    <link href="http://chris.eldredge.io/blog/2012/04/19/Lucene-NumericField-Gotcha/"/>
-    <updated>2012-04-19T00:00:00-04:00</updated>
-    <id>http://chris.eldredge.io/blog/2012/04/19/Lucene-NumericField-Gotcha</id>
-    <content type="html"><![CDATA[<p>Today I ran into an interesting problem using
-<a href="https://svn.apache.org/repos/asf/incubator/lucene.net/trunk/src/core/Document/NumericField.cs">NumericField</a>.</p>
-
-<p>The issue is that when a document is retrieved, fields encoded using NumericField come back as plain old
-strings.  This isn&#8217;t a problem by itself, but if you retrieve a document, modify some fields and leave
-others alone, any unmodified field that was previously a NumericField reverts to a basic string value.</p>
-
-<p>The issue is demonstrated by this sample NUnit test fixture:</p>
-
-<script src="https://gist.github.com/2425347.js"> </script>
-
-
-<p>Long story short, if your documents are going to take round trips and get re-indexed, you must re-encode
-any NumericFields before adding the document back to the index, even if they did not change.</p>
 ]]></content>
   </entry>
   
