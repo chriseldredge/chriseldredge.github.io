@@ -4,7 +4,7 @@
   <title><![CDATA[Chris Eldredge]]></title>
   <link href="http://chris.eldredge.io/atom.xml" rel="self"/>
   <link href="http://chris.eldredge.io/"/>
-  <updated>2015-01-05T15:21:48-05:00</updated>
+  <updated>2015-04-02T10:59:59-04:00</updated>
   <id>http://chris.eldredge.io/</id>
   <author>
     <name><![CDATA[Chris Eldredge]]></name>
@@ -12,6 +12,82 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Solr, Jetty and CORS]]></title>
+    <link href="http://chris.eldredge.io/blog/2015/04/02/solr-jetty-cors/"/>
+    <updated>2015-04-02T10:29:00-04:00</updated>
+    <id>http://chris.eldredge.io/blog/2015/04/02/solr-jetty-cors</id>
+    <content type="html"><![CDATA[<p>Recently my pet project has been working on an <a href="https://github.com/emberjs/data">Ember Data</a> adapter that connects to Solr. This work combines two of my favorite technologies and I think has a lot of potential value for creating applications
+quickly and easily in Ember that leverage the full power of Solr as a persistence
+and retrieval engine. My fledgling project lives at <a href="https://github.com/chriseldredge/ember-solr">github.com/chriseldredge/ember-solr</a>. It&#8217;s heavily based on EmberFire.</p>
+
+<p>One issue I ran into, of course, is dealing with cross-origin requests in the browser.
+For my tests, my Ember app is running on localhost:4200 and my Solr server is running
+on localhost:8983. The browser, rightly, will refuse to let requests from my Ember app
+execute on Solr, unless the Solr server enables <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Access_control_CORS">Cross-Origin Resource Sharing</a> headers.</p>
+
+<p>Solr 5 ships with Jetty, and it turns out there&#8217;s already a servlet filter that
+can do this for us. All we have to do is download it and configure it.</p>
+
+<p>First, figure out which version of Jetty your Solr shipped with. Solr 5.0 comes with
+Jetty 8.1.10. Now head over to the <a href="http://repo1.maven.org/maven2/org/eclipse/jetty/jetty-servlets/">jetty-servlets</a> folder on the maven.org repository, drill down into
+the corresponding version, and download jetty-servlets-<em>version</em>.jar. Save the jar
+into <code>$SOLR_HOME/server/lib</code>.</p>
+
+<p>Next, open <code>$SOLR_HOME/server/etc/webdefault.xml</code> in a text editor.
+Insert the following at bottom of the file, right before the closing <code>&lt;/web-app&gt;</code>
+tag:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class='xml'><span class='line'>  <span class="nt">&lt;filter&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;filter-name&gt;</span>cross-origin<span class="nt">&lt;/filter-name&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;filter-class&gt;</span>org.eclipse.jetty.servlets.CrossOriginFilter<span class="nt">&lt;/filter-class&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;init-param&gt;</span>
+</span><span class='line'>      <span class="nt">&lt;param-name&gt;</span>chainPreflight<span class="nt">&lt;/param-name&gt;</span>
+</span><span class='line'>      <span class="nt">&lt;param-value&gt;</span>false<span class="nt">&lt;/param-value&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;/init-param&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;/filter&gt;</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="nt">&lt;filter-mapping&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;filter-name&gt;</span>cross-origin<span class="nt">&lt;/filter-name&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;url-pattern&gt;</span>/*<span class="nt">&lt;/url-pattern&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;/filter-mapping&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>The third and final step is to start (or restart) your Solr server.</p>
+
+<p>This example enables CORS requests for all origins. If you are going to do something
+like this on your production server, you probably want to lock this down using the
+<code>allowedOrigins</code> parameter.</p>
+
+<p>The <code>chainPreflight</code> parameter is set to false so the
+filter will short-circuit when a browser sends a pre-flight OPTIONS request.
+This is necessary for Solr because the Solr update handler would respond with
+a <code>400 Bad Request</code> since it doesn&#8217;t know what to do with an OPTIONS request.</p>
+
+<p>You can find the other configuration parameters for the filter at <a href="https://wiki.eclipse.org/Jetty/Feature/Cross_Origin_Filter">wiki.eclipse.org</a>.</p>
+
+<h2>Alternatives</h2>
+
+<p>If you can&#8217;t or don&#8217;t want to use CORS, there are a couple other options available
+to you. You could have your Ember app proxy requests to Solr, you could deploy your
+Ember app on the same origin as your Solr server, or you could try to use JSON-P.</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[NuGet Symbols and Aspnet vNext]]></title>
@@ -102,69 +178,6 @@ the rules of what a normal package may contain.</p>
 
 <p>Unless I&#8217;ve overlooked something, the right choice seems to be to require clients
 to push symbol packages to an alternate URL.</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[QueueUserWorkItem, OWIN and you]]></title>
-    <link href="http://chris.eldredge.io/blog/2014/09/07/queueuserworkitem/"/>
-    <updated>2014-09-07T13:13:00-04:00</updated>
-    <id>http://chris.eldredge.io/blog/2014/09/07/queueuserworkitem</id>
-    <content type="html"><![CDATA[<p>There have been around elevnty billion posts on how to queue background work
-from an asp.net app, why you shouldn&#8217;t do it, and what to do if you&#8217;re going
-to do it despite being warned not to.</p>
-
-<h2>Problems with Fire and Forget from ASP.NET</h2>
-
-<p>Before ASP.NET 4.5.2, if a method with an <code>async void</code> signature is invoked
-from a request-processing worker thread, or if an <code>async Task</code> method is invoked
-and the resulting Task is not awaited, you get a big scary error in your
-logs that looks like:</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>TODO</span></code></pre></td></tr></table></div></figure>
-
-
-<p>But you may have a legitimate reason to fire and forget a task. For example,
-you may want to record something in your analytics, log something, send an email
-and you don&#8217;t want the client request to block while these things are being done.</p>
-
-<p>In the case of Klondike, whenever a package is downloaded, some counters need
-to be incremented, and making the request block until this metric is recorded
-and committed to disk only serves to slow down the client. The request still
-succeeds if something goes wrong with incrementing the download counter.</p>
-
-<p>Typically in asp.net architecture here&#8217;s where someone would suggest introducing
-a background service, message bus, message queue, database to externalize
-the record keeping so asp.net doesn&#8217;t have to deal with it.</p>
-
-<p>However, making a simple app to distribute as a zip file conflicts with these
-overly complex architectures. All because the asp.net application pool might
-get recycled sometimes.</p>
-
-<h2>QueueBackgroundWorkItem</h2>
-
-<p>ASP.NET 4.5.2 introduced <a href="http://msdn.microsoft.com/en-us/library/system.web.hosting.hostingenvironment.queuebackgroundworkitem.aspx">HostingEnvironment.QueueBackgroundWorkItem</a> as an official way of queing
-work from ASP.NET with some minimal guarantees that the process model will
-be aware of and wait for the task to complete when the process is being
-recycled or stopped.</p>
-
-<p>The callbacks give you a cancellation token that gets triggered when the process
-is being shut down (or recycled) and waits for some amount of time for tasks
-to complete.</p>
-
-<h2>Wither OWIN</h2>
-
-<p>QueueBackgroundWorkItem is great if you&#8217;re only writing apps that will run
-in asp.net. But for developers creating OWIN apps that support asp.net or
-self-hosting, it isn&#8217;t obvious what should be done.</p>
-
-<p>Another problem is that QueueBackgroundWorkItem is still so new that using
-it directly means you probably won&#8217;t be compiling and running on mono any time
-soon.</p>
-
-<p>Both of these issues are problems for Klondike which aims to build and run
-on mono and deploy as a self-hosted executable.</p>
 ]]></content>
   </entry>
   
@@ -1105,92 +1118,6 @@ The ones that aren&#8217;t will be covered in the following articles.</p>
   <li><a href="http://chris.eldredge.io/blog/2014/04/29/Default-Streams/">Default Streams</a></li>
   </ol>
 </nav></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Binary Releases with Github]]></title>
-    <link href="http://chris.eldredge.io/blog/2014/04/15/binary-releases-with-github/"/>
-    <updated>2014-04-15T15:35:00-04:00</updated>
-    <id>http://chris.eldredge.io/blog/2014/04/15/binary-releases-with-github</id>
-    <content type="html"><![CDATA[<p>For those of us who work in compiled languages, build and deployment
-means more than just git push.</p>
-
-<h2>Everywhere a git repo</h2>
-
-<p>To deploy a .net site in the past, usually a build script would create
-a zip file or other package of the compiled assets and static resources
-and you would deploy it using msdeploy, OctopusDeploy or some manual process
-that involves sacrificial rites and prayer.</p>
-
-<p>Recently, more and more web stacks and PaaS vendors allow you to
-push your repo to a deployment endpoint and the site would be updated automatically.
-The simplicity here is undeniable, and outsourcing all the messy scripts that
-update your site content while keeping your site online is a huge win
-for busy developers who would rather focus on other tasks.</p>
-
-<p>We&#8217;ve seen this first with static hosting vendors like Github Pages, then with
-evaluated languages like Python, Node and Ruby. Now with vendors that support
-JEE and .net, we can do the same thing with compiled languages.</p>
-
-<h2>Setup</h2>
-
-<p>Running an open source product, I wanted to give users several options for
-downloading a release and deploying it to their own infrastucture. I ended up
-with a workflow that ships releases as (1) a zip file that can be downloaded, (2)
-a git repository that can be cloned/tracked and (3) a source repo that can be
-built with a completely automated build process.</p>
-
-<p>I particularly love distributing a release repo with git because it allows
-users to track the repo and maintain local customizations to configuration
-and markup while maintaining the ease of merging and updating with git.</p>
-
-<h2>Grunt and Submodules</h2>
-
-<p>Many build tools like Grunt and Jekyll will stage a site into a directory like
-<code>dist/</code> or <code>_output/</code> and when they clean the output directory, they smartly
-leave alone any .git directories underneath. This allows us to treat our build
-directory as a separate git repo and commit changes to it after building a new
-release.</p>
-
-<p>In Klondike I opted to set up the <code>dist/</code> directory as a submodule. I have mixed
-feelings about how well this works. On the one hand I like how the birds-eye view
-shows the submodule on the Klondike project page to give users a hint that a
-repo exists for releases, but it can get messy committing on the source repo
-simply to update the revision that the submodule should be tracking.</p>
-
-<h2>Release Workflow</h2>
-
-<ol>
-<li>Do stuff, test stuff, commit stuff</li>
-<li>Stage a release (e.g. <code>grunt build</code>) into <code>dist/</code></li>
-<li>Commit, tag and push <code>dist/</code></li>
-<li>Commit, tag and push source repo</li>
-</ol>
-
-
-<p>At this point anyone tracking the release repo can pull to get the new version. Some
-manual steps are required to publish a release and provide a zip file that mirrors
-HEAD on the release repo.</p>
-
-<ol>
-<li>Grab a zip of the latest tag on the release repo from the <a href="https://github.com/themotleyfool/Klondike-Release/releases">releases</a> view</li>
-<li>Draft a new release on the source repo</li>
-<li>Add release notes that describe what&#8217;s new</li>
-<li>Upload the zip file from step 1</li>
-<li>Tweet about it</li>
-</ol>
-
-
-<h2>Some Nice-to-Haves</h2>
-
-<p>I know Github has a <a href="https://developer.github.com/v3/repos/releases/">Releases API</a> but I haven&#8217;t taken
-the time to automate the manual tasks above.</p>
-
-<p>It would be nice if, when drafting release notes, the UI could show a summary of changesets that
-were commited between the last release and the current draft. As it stand I open the changelog somewhere
-else, and the issues tab and manually draft release notes from these. It would be awesome if Github
-could generate this information automagically.</p>
 ]]></content>
   </entry>
   
@@ -3085,6 +3012,96 @@ impossible to allow a client to see the effects of adding, deleting or modifying
 session. However, this problem can be side-stepped by simply calling <code>Commit</code> between making changes and subsequent queries.
 Calling <code>Commit</code> explicitly may have drawbacks if the client will make further changes and wishes for those changes to
 appear atomically. Knowing the details of when staged changes become visible will help clients to make changes smartly.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Speeding Up NuGet.Server]]></title>
+    <link href="http://chris.eldredge.io/blog/2012/07/03/Speeding-Up-NuGet-Server/"/>
+    <updated>2012-07-03T00:00:00-04:00</updated>
+    <id>http://chris.eldredge.io/blog/2012/07/03/Speeding-Up-NuGet-Server</id>
+    <content type="html"><![CDATA[<p><em>(Get the source code at <a href="https://github.com/themotleyfool/Klondike">https://github.com/themotleyfool/Klondike</a>)</em></p>
+
+<p>Last time I wrote about creating a LINQ provider for Lucene.Net, and today I&#8217;ll talk about integrating that provider
+with NuGet. The existing server part of the NuGet codebase is a drop-in replacement for using local file-system based
+feeds. I wanted to try to preserve that turnkey advantage but improve the performance of various queries.</p>
+
+<p>In order to make sure that my improvements were up to snuff, I set up a private mirror of all packages on <a href="http://nuget.org/">nuget.org</a>,
+which turned out to be 44,193 packages at the time, for a total size of over 20 gigs.</p>
+
+<p>If you try hitting ~/api/v2/Packages on stock NuGet.Server, you&#8217;ll find that your request just spins and spins. And spins. In fact
+it took so long that I gave up waiting for the application to initialize. In the background, the server is finding all <code>*.nupkg</code>
+files in ~/Packages and calculating a hash of the contents. Needless to say, it can take a while to run a checksum algorithm on 20gb
+of data.</p>
+
+<p>Switching over to my custom lucene branch, the first time the site is started, it scans the Packages folder and finds all packages
+that haven&#8217;t been indexed by Lucene. The site homepage helpfully tells you the current status, such as &#8220;Indexing 2113 of 44193 new packages.&#8221;
+An ajax timer refreshes the info every few seconds so progress can be easily tracked.</p>
+
+<p>The packages don&#8217;t begin to appear in the feed until they&#8217;ve all been indexed. So this isn&#8217;t much better than stock NuGet.Server.</p>
+
+<h2>Incremental Indexing</h2>
+
+<p>The real improvements are appreciated after the initial index is built.</p>
+
+<pre><code>[celdredge@localhost]$ appcmd recycle apppool nuget
+"nuget" successfully recycled
+
+[celdredge@localhost]$ time wget -O /dev/null http://localhost/api/v2/Packages
+
+(snip)
+
+real    0m3.230s
+user    0m0.062s
+sys     0m0.125s
+</code></pre>
+
+<p>This means that you don&#8217;t have to worry much about IIS shutting down the application during idle times. The index gets loaded and ready to go
+in a matter of seconds. Vast improvement over stock NuGet.Server.</p>
+
+<p>While that happens, a background thread scans the Packages folder to see what might have changed while the application was stopped. New, modified
+and deleted packages are synchronized with the Lucene index. The sycnhronization process takes about 25 seconds to scan 44,193 package files
+split into 6,180 folders and calculate the differences with the Lucene index. That&#8217;s pretty fast.</p>
+
+<p>After the application finishes this initial scan, a FileSystemWatcher monitors the Packages folder to synchronize any changes in real time.
+This allows the index to stay in sync when new packages appear, even if they are copied into the folder instead of using <code>nuget push</code>.</p>
+
+<h2>Superfast Search</h2>
+
+<p>All sorts of complex queries are possible, and they execute in very reasonable time. I used <a href="http://www.linqpad.net/">LINQPad</a> to
+construct various test queries, like this one that finds packages whose id contain lucene but do not start with lucene:</p>
+
+<pre><code>from p in Packages
+where p.Id.Contains("Lucene")
+where !p.Id.StartsWith("Lucene")
+where p.IsLatestVersion
+orderby p.Id descending
+select p
+
+Query successful (00:00.136)
+</code></pre>
+
+<p>136ms is pretty respectable, IMO.</p>
+
+<p>Another advantage to using Lucene is how queries are analyzed. Term queries will match various word forms, so a query like <tt>build</tt> will
+match packages that use any words like build, builds, building, built, etc. It is also possible to search for phrase queries, such as
+<tt>&#8220;glue them back together&#8221;</tt>. That query matches only one package that contains the exact phrase, whereas on nuget.org you&#8217;ll get
+all kinds of results.</p>
+
+<h2>Other Features</h2>
+
+<p>The <a href="https://github.com/NuGet/NuGetGallery/wiki/Tab-Completion-API-Endpoints">Tab Completion API Endpoints</a> introduced in NuGet 2.0 have
+been implemented, bringing fast results to users of the Package Manager Console.</p>
+
+<h2>Conclusion</h2>
+
+<p>It has taken a substantial amount of time and effort to implement Lucene.Net.Linq and integrate it with NuGet.Server, but the results
+have proven to be worth the investment.</p>
+
+<p>Lucene.Net.Linq has become a fairly mature, though still nascent, project now available on <a href="http://nuget.org/packages/Lucene.Net.Linq">nuget.org</a>. There are a few other
+OSS projects that attempt to do what it does, but I think it is already one of the best.</p>
+
+<p>Binaries of NuGet.Server + Lucene can be downloaded from <a href="https://github.com/themotleyfool/Klondike/releases">https://github.com/themotleyfool/Klondike/releases</a>.</p>
 ]]></content>
   </entry>
   
