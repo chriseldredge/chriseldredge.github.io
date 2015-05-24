@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: sysadmin | Chris Eldredge]]></title>
+  <link href="http://chris.eldredge.io/blog/categories/sysadmin/atom.xml" rel="self"/>
+  <link href="http://chris.eldredge.io/"/>
+  <updated>2015-05-24T17:03:02-04:00</updated>
+  <id>http://chris.eldredge.io/</id>
+  <author>
+    <name><![CDATA[Chris Eldredge]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Synology VPN Server Route Advertising]]></title>
+    <link href="http://chris.eldredge.io/blog/2015/05/24/synology-vpn-server-route-advertising/"/>
+    <updated>2015-05-24T16:43:00-04:00</updated>
+    <id>http://chris.eldredge.io/blog/2015/05/24/synology-vpn-server-route-advertising</id>
+    <content type="html"><![CDATA[<p>I have a Synology at home and it's a great product. I recently installed
+the VPN Server package and enabled L2TP/IPSec so I can get on my home
+network when I'm roaming about.</p>
+
+<p>The default options work fine if all you want to access is the Synology
+system itself, but I noticed that after connecting my OS X client,
+I couldn't reach any other computers on my home network.</p>
+
+<p>After much googling and head scratching, I figured out that L2TP does
+not have a built in mechanism for configuring classless static routes and that
+VPN Server does not go out of its way to make this work out of the box.</p>
+
+<p>After establishing a connection over L2TP, a client will typically issue
+a DHCP Inform broadcast message over the connection requesting such routes.
+I let my WiFi router do DHCP so my Synology DHCP service is disabled. I don't
+know if it would reply to these messages over VPN or not.</p>
+
+<p>Anyway, since the DHCP Inform message is sent on the L2TP virtual network,
+it isn't rebroadcast on the local LAN, so my WiFi router DHCP server never
+sees it and can't respond.</p>
+
+<p>I was able to solve this problem by installing the 3rd party (unsigned)
+<a href="http://syndnsmasq.the-ninth.com">SynDnsmasq</a> package on my Synology box.</p>
+
+<p>Once I had the package installed, I set the contents of
+<code>/volume1/@appstore/dnsmasq/etc/dnsmasq.conf</code> to:</p>
+
+<pre><code>except-interface=eth0
+except-interface=eth1
+except-interface=eth2
+except-interface=eth3
+
+domain=localnet
+
+dhcp-range=192.168.2.0,static
+dhcp-option=option:router
+dhcp-option=121,10.0.0.0/24,192.168.2.0
+dhcp-option=249,10.0.0.0/24,192.168.2.0
+dhcp-option=vendor:MSFT,2,1i
+</code></pre>
+
+<p>You'll need to adjust the subnets/masks and router IPs to match
+your home network and L2TP address range.</p>
+
+<p>What this does is respond to DHCP Inform requests with a classless
+static route for the home network (10.0.0.0/24) via the L2TP server
+IP address (192.168.2.0).</p>
+
+<p>I restarted SynDnsmasq, connected my OS X VPN client, and was off
+to the races.</p>
+]]></content>
+  </entry>
+  
+</feed>

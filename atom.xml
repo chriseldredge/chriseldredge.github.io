@@ -4,7 +4,7 @@
   <title><![CDATA[Chris Eldredge]]></title>
   <link href="http://chris.eldredge.io/atom.xml" rel="self"/>
   <link href="http://chris.eldredge.io/"/>
-  <updated>2015-04-02T10:59:59-04:00</updated>
+  <updated>2015-05-24T17:03:02-04:00</updated>
   <id>http://chris.eldredge.io/</id>
   <author>
     <name><![CDATA[Chris Eldredge]]></name>
@@ -12,6 +12,64 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Synology VPN Server Route Advertising]]></title>
+    <link href="http://chris.eldredge.io/blog/2015/05/24/synology-vpn-server-route-advertising/"/>
+    <updated>2015-05-24T16:43:00-04:00</updated>
+    <id>http://chris.eldredge.io/blog/2015/05/24/synology-vpn-server-route-advertising</id>
+    <content type="html"><![CDATA[<p>I have a Synology at home and it&#8217;s a great product. I recently installed
+the VPN Server package and enabled L2TP/IPSec so I can get on my home
+network when I&#8217;m roaming about.</p>
+
+<p>The default options work fine if all you want to access is the Synology
+system itself, but I noticed that after connecting my OS X client,
+I couldn&#8217;t reach any other computers on my home network.</p>
+
+<p>After much googling and head scratching, I figured out that L2TP does
+not have a built in mechanism for configuring classless static routes and that
+VPN Server does not go out of its way to make this work out of the box.</p>
+
+<p>After establishing a connection over L2TP, a client will typically issue
+a DHCP Inform broadcast message over the connection requesting such routes.
+I let my WiFi router do DHCP so my Synology DHCP service is disabled. I don&#8217;t
+know if it would reply to these messages over VPN or not.</p>
+
+<p>Anyway, since the DHCP Inform message is sent on the L2TP virtual network,
+it isn&#8217;t rebroadcast on the local LAN, so my WiFi router DHCP server never
+sees it and can&#8217;t respond.</p>
+
+<p>I was able to solve this problem by installing the 3rd party (unsigned)
+<a href="http://syndnsmasq.the-ninth.com">SynDnsmasq</a> package on my Synology box.</p>
+
+<p>Once I had the package installed, I set the contents of
+<code>/volume1/@appstore/dnsmasq/etc/dnsmasq.conf</code> to:</p>
+
+<pre><code>except-interface=eth0
+except-interface=eth1
+except-interface=eth2
+except-interface=eth3
+
+domain=localnet
+
+dhcp-range=192.168.2.0,static
+dhcp-option=option:router
+dhcp-option=121,10.0.0.0/24,192.168.2.0
+dhcp-option=249,10.0.0.0/24,192.168.2.0
+dhcp-option=vendor:MSFT,2,1i
+</code></pre>
+
+<p>You&#8217;ll need to adjust the subnets/masks and router IPs to match
+your home network and L2TP address range.</p>
+
+<p>What this does is respond to DHCP Inform requests with a classless
+static route for the home network (10.0.0.0/24) via the L2TP server
+IP address (192.168.2.0).</p>
+
+<p>I restarted SynDnsmasq, connected my OS X VPN client, and was off
+to the races.</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Solr, Jetty and CORS]]></title>
@@ -3012,96 +3070,6 @@ impossible to allow a client to see the effects of adding, deleting or modifying
 session. However, this problem can be side-stepped by simply calling <code>Commit</code> between making changes and subsequent queries.
 Calling <code>Commit</code> explicitly may have drawbacks if the client will make further changes and wishes for those changes to
 appear atomically. Knowing the details of when staged changes become visible will help clients to make changes smartly.</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Speeding Up NuGet.Server]]></title>
-    <link href="http://chris.eldredge.io/blog/2012/07/03/Speeding-Up-NuGet-Server/"/>
-    <updated>2012-07-03T00:00:00-04:00</updated>
-    <id>http://chris.eldredge.io/blog/2012/07/03/Speeding-Up-NuGet-Server</id>
-    <content type="html"><![CDATA[<p><em>(Get the source code at <a href="https://github.com/themotleyfool/Klondike">https://github.com/themotleyfool/Klondike</a>)</em></p>
-
-<p>Last time I wrote about creating a LINQ provider for Lucene.Net, and today I&#8217;ll talk about integrating that provider
-with NuGet. The existing server part of the NuGet codebase is a drop-in replacement for using local file-system based
-feeds. I wanted to try to preserve that turnkey advantage but improve the performance of various queries.</p>
-
-<p>In order to make sure that my improvements were up to snuff, I set up a private mirror of all packages on <a href="http://nuget.org/">nuget.org</a>,
-which turned out to be 44,193 packages at the time, for a total size of over 20 gigs.</p>
-
-<p>If you try hitting ~/api/v2/Packages on stock NuGet.Server, you&#8217;ll find that your request just spins and spins. And spins. In fact
-it took so long that I gave up waiting for the application to initialize. In the background, the server is finding all <code>*.nupkg</code>
-files in ~/Packages and calculating a hash of the contents. Needless to say, it can take a while to run a checksum algorithm on 20gb
-of data.</p>
-
-<p>Switching over to my custom lucene branch, the first time the site is started, it scans the Packages folder and finds all packages
-that haven&#8217;t been indexed by Lucene. The site homepage helpfully tells you the current status, such as &#8220;Indexing 2113 of 44193 new packages.&#8221;
-An ajax timer refreshes the info every few seconds so progress can be easily tracked.</p>
-
-<p>The packages don&#8217;t begin to appear in the feed until they&#8217;ve all been indexed. So this isn&#8217;t much better than stock NuGet.Server.</p>
-
-<h2>Incremental Indexing</h2>
-
-<p>The real improvements are appreciated after the initial index is built.</p>
-
-<pre><code>[celdredge@localhost]$ appcmd recycle apppool nuget
-"nuget" successfully recycled
-
-[celdredge@localhost]$ time wget -O /dev/null http://localhost/api/v2/Packages
-
-(snip)
-
-real    0m3.230s
-user    0m0.062s
-sys     0m0.125s
-</code></pre>
-
-<p>This means that you don&#8217;t have to worry much about IIS shutting down the application during idle times. The index gets loaded and ready to go
-in a matter of seconds. Vast improvement over stock NuGet.Server.</p>
-
-<p>While that happens, a background thread scans the Packages folder to see what might have changed while the application was stopped. New, modified
-and deleted packages are synchronized with the Lucene index. The sycnhronization process takes about 25 seconds to scan 44,193 package files
-split into 6,180 folders and calculate the differences with the Lucene index. That&#8217;s pretty fast.</p>
-
-<p>After the application finishes this initial scan, a FileSystemWatcher monitors the Packages folder to synchronize any changes in real time.
-This allows the index to stay in sync when new packages appear, even if they are copied into the folder instead of using <code>nuget push</code>.</p>
-
-<h2>Superfast Search</h2>
-
-<p>All sorts of complex queries are possible, and they execute in very reasonable time. I used <a href="http://www.linqpad.net/">LINQPad</a> to
-construct various test queries, like this one that finds packages whose id contain lucene but do not start with lucene:</p>
-
-<pre><code>from p in Packages
-where p.Id.Contains("Lucene")
-where !p.Id.StartsWith("Lucene")
-where p.IsLatestVersion
-orderby p.Id descending
-select p
-
-Query successful (00:00.136)
-</code></pre>
-
-<p>136ms is pretty respectable, IMO.</p>
-
-<p>Another advantage to using Lucene is how queries are analyzed. Term queries will match various word forms, so a query like <tt>build</tt> will
-match packages that use any words like build, builds, building, built, etc. It is also possible to search for phrase queries, such as
-<tt>&#8220;glue them back together&#8221;</tt>. That query matches only one package that contains the exact phrase, whereas on nuget.org you&#8217;ll get
-all kinds of results.</p>
-
-<h2>Other Features</h2>
-
-<p>The <a href="https://github.com/NuGet/NuGetGallery/wiki/Tab-Completion-API-Endpoints">Tab Completion API Endpoints</a> introduced in NuGet 2.0 have
-been implemented, bringing fast results to users of the Package Manager Console.</p>
-
-<h2>Conclusion</h2>
-
-<p>It has taken a substantial amount of time and effort to implement Lucene.Net.Linq and integrate it with NuGet.Server, but the results
-have proven to be worth the investment.</p>
-
-<p>Lucene.Net.Linq has become a fairly mature, though still nascent, project now available on <a href="http://nuget.org/packages/Lucene.Net.Linq">nuget.org</a>. There are a few other
-OSS projects that attempt to do what it does, but I think it is already one of the best.</p>
-
-<p>Binaries of NuGet.Server + Lucene can be downloaded from <a href="https://github.com/themotleyfool/Klondike/releases">https://github.com/themotleyfool/Klondike/releases</a>.</p>
 ]]></content>
   </entry>
   
