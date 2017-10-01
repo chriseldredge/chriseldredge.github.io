@@ -3,7 +3,7 @@ layout: post
 title: "Default Streams with WebApi OData"
 date: 2014-04-29 16:07
 comments: true
-categories: nuget, odata
+categories: nuget odata
 ---
 
 NuGet package feeds provide metadata about packages, but after searching

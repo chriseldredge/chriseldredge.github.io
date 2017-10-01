@@ -3,7 +3,7 @@ layout: post
 title: "NuGet Feed with WebApi OData"
 date: 2014-04-22 10:25
 comments: true
-categories: nuget, odata
+categories: nuget odata
 ---
 
 NuGet uses OData to provide package data to its clients. In

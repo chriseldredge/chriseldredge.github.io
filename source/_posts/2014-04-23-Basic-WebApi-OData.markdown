@@ -3,7 +3,7 @@ layout: post
 title: "Basic WebApi OData"
 date: 2014-04-23 11:28
 comments: true
-categories: nuget, odata
+categories: nuget odata
 ---
 
 Getting started on making a NuGet compatible OData feed with WebApi OData,

@@ -3,7 +3,7 @@ layout: post
 title: "Composite Keys with WebApi OData"
 date: 2014-04-24 11:28
 comments: true
-categories: nuget, odata
+categories: nuget odata
 ---
 
 In our basic configuration we told the model builder that
