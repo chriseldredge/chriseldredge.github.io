@@ -6,12 +6,12 @@ sharing: false
 footer: true
 ---
 
-Most recent activity can be found on my [GitHub page](https://www.github.com/chriseldredge)
+Most recent activity can be found on my [GitHub profile](https://www.github.com/chriseldredge)
 <h2>Creator</h2>
 <ul>
 	<li><a href="https://github.com/themotleyfool/Lucene.Net.Linq">Lucene.Net.Linq</a> LINQ provider to run native queries on a Lucene.Net index</li>
 	<li><a href="https://github.com/themotleyfool/Klondike">Klondike</a> a NuGet package server on Lucene steroids</li>
-	<li><a href="http://vulcan.googlecode.com/">Vulcan</a> Continuous Integration java web app</li>
+	<li><a href="https://github.com/chriseldredge/vulcan">Vulcan</a> Continuous Integration java web app</li>
 </ul>
 
 <h2>Contributions</h2>
