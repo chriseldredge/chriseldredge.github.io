@@ -4,7 +4,7 @@
   <title><![CDATA[Category: odata | Chris Eldredge]]></title>
   <link href="http://chris.eldredge.io/blog/categories/odata/atom.xml" rel="self"/>
   <link href="http://chris.eldredge.io/"/>
-  <updated>2016-11-15T15:55:54-05:00</updated>
+  <updated>2017-10-16T17:49:06-04:00</updated>
   <id>http://chris.eldredge.io/</id>
   <author>
     <name><![CDATA[Chris Eldredge]]></name>
@@ -48,7 +48,7 @@ public class DataServicePackage : IEquatable<DataServicePackage>
 
 <p>Over a year ago, I asked on twitter:</p>
 
-<p><div class='embed tweet'><blockquote class="twitter-tweet"><p><a href="https://twitter.com/adjames">@adjames</a> Is there a webapi/odata equivalent of HasStreamAttribute and IDataServiceStreamProvider?</p>&mdash; Chris Eldredge (@creldredge) <a href="https://twitter.com/creldredge/statuses/289384233141669888">January 10, 2013</a></blockquote>
+<p><div class='embed tweet'><blockquote class="twitter-tweet"><p lang="en" dir="ltr"><a href="https://twitter.com/adjames?ref_src=twsrc%5Etfw">@adjames</a> Is there a webapi/odata equivalent of HasStreamAttribute and IDataServiceStreamProvider?</p>&mdash; Chris Eldredge (@creldredge) <a href="https://twitter.com/creldredge/status/289384233141669888?ref_src=twsrc%5Etfw">January 10, 2013</a></blockquote>
 <script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script></div></p>
 
 <p>At the time, the answer was no. However, I'm happy to report that

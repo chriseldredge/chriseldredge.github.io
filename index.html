@@ -9,8 +9,7 @@
   <meta name="author" content="Chris Eldredge">
 
   
-  <meta name="description" content="Synology VPN Server Route Advertising May 24th, 2015 I have a Synology at home and it&#8217;s a great product. I recently installed
-the VPN Server &hellip;">
+  <meta name="description" content="Hello! I&#8217;m Chris Eldredge. I&#8217;m a software engineer based in Washingon, DC. I like working on all kinds of server-side goodies and &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -55,8 +54,6 @@ the VPN Server &hellip;">
   <header role="banner" id="page-header"><hgroup>
   <h1><a href="/">Chris Eldredge</a></h1>
   
-    <h2>software development with a splash of bitters</h2>
-  
 </hgroup>
 
 </header>
@@ -64,120 +61,42 @@ the VPN Server &hellip;">
     <div id="content">
       <div class="blog-index">
   
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/05/24/synology-vpn-server-route-advertising/">Synology VPN Server Route Advertising</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-05-24T16:43:00-04:00" pubdate data-updated="true" class="meta-date">May 24<span>th</span>, 2015</time>
-      </p>
-    
-  </header>
-
-
-
-  <div class="entry-content"><p>I have a Synology at home and it&#8217;s a great product. I recently installed
-the VPN Server package and enabled L2TP/IPSec so I can get on my home
-network when I&#8217;m roaming about.</p>
-
-<p>The default options work fine if all you want to access is the Synology
-system itself, but I noticed that after connecting my OS X client,
-I couldn&#8217;t reach any other computers on my home network.</p>
-
-<p>After much googling and head scratching, I figured out that L2TP does
-not have a built in mechanism for configuring classless static routes and that
-VPN Server does not go out of its way to make this work out of the box.</p>
-
-<p>After establishing a connection over L2TP, a client will typically issue
-a DHCP Inform broadcast message over the connection requesting such routes.
-I let my WiFi router do DHCP so my Synology DHCP service is disabled. I don&#8217;t
-know if it would reply to these messages over VPN or not.</p>
-
-<p>Anyway, since the DHCP Inform message is sent on the L2TP virtual network,
-it isn&#8217;t rebroadcast on the local LAN, so my WiFi router DHCP server never
-sees it and can&#8217;t respond.</p>
-
-<p>I was able to solve this problem by installing the 3rd party (unsigned)
-<a href="http://syndnsmasq.the-ninth.com">SynDnsmasq</a> package on my Synology box.</p>
-
-<p>Once I had the package installed, I set the contents of
-<code>/volume1/@appstore/dnsmasq/etc/dnsmasq.conf</code> to:</p>
-
-<pre><code>except-interface=eth0
-except-interface=eth1
-except-interface=eth2
-except-interface=eth3
-
-domain=localnet
-
-dhcp-range=192.168.2.0,static
-dhcp-option=option:router
-dhcp-option=121,10.0.0.0/24,192.168.2.0
-dhcp-option=249,10.0.0.0/24,192.168.2.0
-dhcp-option=vendor:MSFT,2,1i
-</code></pre>
-
-<p>You&#8217;ll need to adjust the subnets/masks and router IPs to match
-your home network and L2TP address range.</p>
-
-<p>What this does is respond to DHCP Inform requests with a classless
-static route for the home network (10.0.0.0/24) via the L2TP server
-IP address (192.168.2.0).</p>
-
-<p>I restarted SynDnsmasq, connected my OS X VPN client, and was off
-to the races.</p>
-</div>
-  
-  
-
-  <footer class="page-footer">
-    <a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS" class="ss-icon rss">RSS</a>
-
-
-  <form action="http://google.com/search" method="get">
-    <input type="hidden" name="q" value="site:chris.eldredge.io" />
-    <input class="search ss-search" type="text" name="q" results="0" />
-  </form>
-
-    
-    <a href="/blog/archives" class="see-more">archive</a>
-  </footer>
-
-
-    </article>
+  <h2>Hello! I&#8217;m Chris Eldredge.</h2>
+  <p>
+  	I&#8217;m a software engineer based in Washingon, DC. I like working on
+  	all kinds of server-side goodies and specialize in build tools and
+  	deployment orchestration in the pursuit of Developer Happiness.
+  </p>
+  <p>
+  	Currently I&#8217;m working for
+  	<a href="https://www.fool.com/">The Motley Fool</a>,
+  	consolidating more than 20 years of content into a new service that
+  	provides storage, retrieval, aggregation and search all powered by Solr.
+  </p>
+  <p>
+  	I&#8217;ve dabbled in <a href="/projects/">creating and contributing</a>
+  	to the open source ecosystem.
+  </p>
+  <p>
+  	Occasionally I <a href="/blog/archives">write</a> about
+  	software engineering.
+  </p>
+  <p>
+  	When I&#8217;m not working, I&#8217;m probably
+  	<a href="https://www.goodreads.com/user/show/21503370-chris-eldredge">
+  	reading</a>, cooking, drinking old-man drinks, studying Korean language 
+  	with <a href="http://talktomeinkorean.com">Talk To Me In Korean</a> or
+  	playing Nintendo games.
+  </p>
 </div>
 
     </div>
   </div>
-  <footer role="contentinfo" class="site-footer"><div class="bio">
-  <h3>Chris Eldredge</h3>
-  <p>I’m a software developer for <a href="http://www.fool.com/">The Motley Fool</a>. I tend to spend a lot of time on build and release tools. When I'm not hacking codes, I'm probably reading, cooking, drinking old-man drinks or studying Korean with <a href="http://www.talktomeinkorean.com/">TTMIK</a>.</p>
-</div>
-<ul class="social">
+  <footer role="contentinfo" class="site-footer"><ul class="social">
   <li><a href="https://www.github.com/chriseldredge" class="ss-icon">octocat</a></li>
   <li><a href="http://www.linkedin.com/pub/chris-eldredge/1/52b/520" class="ss-icon">linkedin</a></li>
   <li><a href="http://www.twitter.com/creldredge" class="ss-icon">twitter</a></li>
 </ul>
-<p class="copyright">
-  Copyright &copy; 2016 - Chris Eldredge
-</p>
 
 </footer>
   
