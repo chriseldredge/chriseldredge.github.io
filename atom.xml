@@ -4,7 +4,7 @@
   <title><![CDATA[Chris Eldredge]]></title>
   <link href="http://chris.eldredge.io/atom.xml" rel="self"/>
   <link href="http://chris.eldredge.io/"/>
-  <updated>2018-02-01T09:12:16-05:00</updated>
+  <updated>2018-05-03T12:01:48+00:00</updated>
   <id>http://chris.eldredge.io/</id>
   <author>
     <name><![CDATA[Chris Eldredge]]></name>
@@ -16,7 +16,7 @@
   <entry>
     <title type="html"><![CDATA[Synology VPN Server Route Advertising]]></title>
     <link href="http://chris.eldredge.io/blog/2015/05/24/synology-vpn-server-route-advertising/"/>
-    <updated>2015-05-24T16:43:00-04:00</updated>
+    <updated>2015-05-24T16:43:00+00:00</updated>
     <id>http://chris.eldredge.io/blog/2015/05/24/synology-vpn-server-route-advertising</id>
     <content type="html"><![CDATA[<p>I have a Synology at home and it&#8217;s a great product. I recently installed
 the VPN Server package and enabled L2TP/IPSec so I can get on my home
@@ -74,7 +74,7 @@ to the races.</p>
   <entry>
     <title type="html"><![CDATA[Solr, Jetty and CORS]]></title>
     <link href="http://chris.eldredge.io/blog/2015/04/02/solr-jetty-cors/"/>
-    <updated>2015-04-02T10:29:00-04:00</updated>
+    <updated>2015-04-02T10:29:00+00:00</updated>
     <id>http://chris.eldredge.io/blog/2015/04/02/solr-jetty-cors</id>
     <content type="html"><![CDATA[<p>Recently my pet project has been working on an <a href="https://github.com/emberjs/data">Ember Data</a> adapter that connects to Solr. This work combines two of my favorite technologies and I think has a lot of potential value for creating applications
 quickly and easily in Ember that leverage the full power of Solr as a persistence
@@ -150,7 +150,7 @@ Ember app on the same origin as your Solr server, or you could try to use JSON-P
   <entry>
     <title type="html"><![CDATA[NuGet Symbols and Aspnet vNext]]></title>
     <link href="http://chris.eldredge.io/blog/2015/01/05/nuget-symbols-and-aspnet-vnext/"/>
-    <updated>2015-01-05T14:52:00-05:00</updated>
+    <updated>2015-01-05T14:52:00+00:00</updated>
     <id>http://chris.eldredge.io/blog/2015/01/05/nuget-symbols-and-aspnet-vnext</id>
     <content type="html"><![CDATA[<p>I&#8217;ve been working on a new release of Klondike for quite a while now.
 My last release was <a href="https://github.com/themotleyfool/Klondike/releases">published</a>
@@ -242,7 +242,7 @@ to push symbol packages to an alternate URL.</p>
   <entry>
     <title type="html"><![CDATA[Node + Owin: Living in the Future]]></title>
     <link href="http://chris.eldredge.io/blog/2014/05/01/node-plus-owin-living-in-the-future/"/>
-    <updated>2014-05-01T17:04:00-04:00</updated>
+    <updated>2014-05-01T17:04:00+00:00</updated>
     <id>http://chris.eldredge.io/blog/2014/05/01/node-plus-owin-living-in-the-future</id>
     <content type="html"><![CDATA[<p>Scott Hanselman recently blogged <a href="http://www.hanselman.com/blog/ItsJustASoftwareIssueEdgejsBringsNodeAndNETTogetherOnThreePlatforms.aspx">&#8220;It&#8217;s just a software issue&#8221;- Edge.js brings Node and .NET together on three platforms</a>
 and to say the least I am intrigued.</p>
@@ -350,7 +350,7 @@ on Github.</p>
   <entry>
     <title type="html"><![CDATA[Default Streams with WebApi OData]]></title>
     <link href="http://chris.eldredge.io/blog/2014/04/29/Default-Streams/"/>
-    <updated>2014-04-29T16:07:00-04:00</updated>
+    <updated>2014-04-29T16:07:00+00:00</updated>
     <id>http://chris.eldredge.io/blog/2014/04/29/Default-Streams</id>
     <content type="html"><![CDATA[<p>NuGet package feeds provide metadata about packages, but after searching
 for new packages to use or updates to existing ones, we also have to
@@ -667,7 +667,7 @@ output from WebApi OData:</p>
   <entry>
     <title type="html"><![CDATA[Composite Keys with WebApi OData]]></title>
     <link href="http://chris.eldredge.io/blog/2014/04/24/Composite-Keys/"/>
-    <updated>2014-04-24T11:28:00-04:00</updated>
+    <updated>2014-04-24T11:28:00+00:00</updated>
     <id>http://chris.eldredge.io/blog/2014/04/24/Composite-Keys</id>
     <content type="html"><![CDATA[<p>In our basic configuration we told the model builder that
 our entity has a composite key comprised of an ID and a
@@ -913,7 +913,7 @@ significant <a href="https://github.com/themotleyfool/NuGet.Lucene/blob/v2.9.4/s
   <entry>
     <title type="html"><![CDATA[Basic WebApi OData]]></title>
     <link href="http://chris.eldredge.io/blog/2014/04/23/Basic-WebApi-OData/"/>
-    <updated>2014-04-23T11:28:00-04:00</updated>
+    <updated>2014-04-23T11:28:00+00:00</updated>
     <id>http://chris.eldredge.io/blog/2014/04/23/Basic-WebApi-OData</id>
     <content type="html"><![CDATA[<p>Getting started on making a NuGet compatible OData feed with WebApi OData,
 we&#8217;ll start with the simplest parts to get on our feet.</p>
@@ -1119,7 +1119,7 @@ a NuGet client can speak to though.</p>
   <entry>
     <title type="html"><![CDATA[NuGet Feed with WebApi OData]]></title>
     <link href="http://chris.eldredge.io/blog/2014/04/22/NuGet-Feed-with-WebApi-OData/"/>
-    <updated>2014-04-22T10:25:00-04:00</updated>
+    <updated>2014-04-22T10:25:00+00:00</updated>
     <id>http://chris.eldredge.io/blog/2014/04/22/NuGet-Feed-with-WebApi-OData</id>
     <content type="html"><![CDATA[<p>NuGet uses OData to provide package data to its clients. In
 <a href="http://chris.eldredge.io/blog/2012/03/29/Getting-Started-With-Relinq/">previous posts</a>
@@ -1182,7 +1182,7 @@ The ones that aren&#8217;t will be covered in the following articles.</p>
   <entry>
     <title type="html"><![CDATA[WinDbg: Dump entries in array]]></title>
     <link href="http://chris.eldredge.io/blog/2014/03/05/windbg-dump-entries-in-array/"/>
-    <updated>2014-03-05T11:47:00-05:00</updated>
+    <updated>2014-03-05T11:47:00+00:00</updated>
     <id>http://chris.eldredge.io/blog/2014/03/05/windbg-dump-entries-in-array</id>
     <content type="html"><![CDATA[<p>I was debugging a stack overflow exception in some c# code
 today and used this recipe to dump the request headers
@@ -1223,7 +1223,7 @@ then dump the fields at offsets 8 and 16 (0x10 in hex).</p>
   <entry>
     <title type="html"><![CDATA[The newer new NuGet Package Restore]]></title>
     <link href="http://chris.eldredge.io/blog/2014/01/29/the-newer-new-nuget-package-restore/"/>
-    <updated>2014-01-29T13:01:00-05:00</updated>
+    <updated>2014-01-29T13:01:00+00:00</updated>
     <id>http://chris.eldredge.io/blog/2014/01/29/the-newer-new-nuget-package-restore</id>
     <content type="html"><![CDATA[<p>When NuGet 2.7 was released, the topic of how to manage packages in your source
 repository was <a href="http://docs.nuget.org/docs/reference/package-restore">revisited</a> and the waters were muddied.</p>
@@ -1469,7 +1469,7 @@ language, that effectively does</p>
   <entry>
     <title type="html"><![CDATA[Cross-NuGet Development With Slimjim]]></title>
     <link href="http://chris.eldredge.io/blog/2014/01/12/cross-nuget-development-with-slimjim/"/>
-    <updated>2014-01-12T16:00:00-05:00</updated>
+    <updated>2014-01-12T16:00:00+00:00</updated>
     <id>http://chris.eldredge.io/blog/2014/01/12/cross-nuget-development-with-slimjim</id>
     <content type="html"><![CDATA[<p>Last week Phil Haack observed:</p>
 
@@ -1697,7 +1697,7 @@ that want to work using a shared pattern.</p>
   <entry>
     <title type="html"><![CDATA[Putting the web into WebApi]]></title>
     <link href="http://chris.eldredge.io/blog/2013/07/30/putting-the-web-into-webapi/"/>
-    <updated>2013-07-30T00:00:00-04:00</updated>
+    <updated>2013-07-30T00:00:00+00:00</updated>
     <id>http://chris.eldredge.io/blog/2013/07/30/putting-the-web-into-webapi</id>
     <content type="html"><![CDATA[<p>For .net api developers, the WebApi framework offers a compelling alternative
 to asp.net mvc for slinging json or (gasp) xml over http. One great feature
@@ -1845,7 +1845,7 @@ client which I hope to share soon.</p>
   <entry>
     <title type="html"><![CDATA[Fun with NuGet Web Api]]></title>
     <link href="http://chris.eldredge.io/blog/2013/02/25/fun-with-nuget-rest-api/"/>
-    <updated>2013-02-25T10:57:00-05:00</updated>
+    <updated>2013-02-25T10:57:00+00:00</updated>
     <id>http://chris.eldredge.io/blog/2013/02/25/fun-with-nuget-rest-api</id>
     <content type="html"><![CDATA[<p>NuGet is a package management system for .net. Like most things these days, NuGet uses HTTP
 for client/server communication to enable search, download, upload and other operations.</p>
@@ -2126,7 +2126,7 @@ how eager I&#8217;ll be in trying to bring about this change.</p>
   <entry>
     <title type="html"><![CDATA[Sitting at Your Desk is Killing You]]></title>
     <link href="http://chris.eldredge.io/blog/2013/01/04/sitting-at-your-desk-is-killing-you/"/>
-    <updated>2013-01-04T10:44:00-05:00</updated>
+    <updated>2013-01-04T10:44:00+00:00</updated>
     <id>http://chris.eldredge.io/blog/2013/01/04/sitting-at-your-desk-is-killing-you</id>
     <content type="html"><![CDATA[<p>Since we&#8217;re starting a new year and health &amp; fitness are on the mind, here&#8217;s how I attempt
 to combat the negative affects of the sedentary lifestyle of the professional programmer.</p>
@@ -2205,7 +2205,7 @@ Twice an hour, get up and move around. It&#8217;s good for your health and produ
   <entry>
     <title type="html"><![CDATA[RavenDB NuGet Review]]></title>
     <link href="http://chris.eldredge.io/blog/2012/09/21/ravendb-nuget-review/"/>
-    <updated>2012-09-21T15:25:00-04:00</updated>
+    <updated>2012-09-21T15:25:00+00:00</updated>
     <id>http://chris.eldredge.io/blog/2012/09/21/ravendb-nuget-review</id>
     <content type="html"><![CDATA[<p><a href="http://ayende.com/blog">Ayende</a> has been doing a series of posts about how simple and fast RavenDB is, using NuGet
 as an example and pointing out some <a href="http://blog.nuget.org/20120824/nuget-feed-performance-update.html">complex, poorly performing queries</a>
@@ -2329,7 +2329,7 @@ and maybe do a load test of my own of our <a href="https://github.com/themotleyf
   <entry>
     <title type="html"><![CDATA[How The Motley Fool Uses Octopus Deploy]]></title>
     <link href="http://chris.eldredge.io/blog/2012/09/06/how-the-motley-fool-uses-octopus-deploy/"/>
-    <updated>2012-09-06T11:23:00-04:00</updated>
+    <updated>2012-09-06T11:23:00+00:00</updated>
     <id>http://chris.eldredge.io/blog/2012/09/06/how-the-motley-fool-uses-octopus-deploy</id>
     <content type="html"><![CDATA[<p>I&#8217;ve mentioned a few times that my team has been using <a href="http://octopusdeploy.com/">Octopus Deploy</a> in a few of my posts.
 Now I&#8217;ll describe in more detail some of the ways we&#8217;ve integrated with Octopus that may help others.</p>
@@ -2508,7 +2508,7 @@ iteratively and predictably.</p>
   <entry>
     <title type="html"><![CDATA[How The Motley Fool Uses NuGet (Part 2)]]></title>
     <link href="http://chris.eldredge.io/blog/2012/08/20/how-the-motley-fool-uses-nuget-part-2/"/>
-    <updated>2012-08-20T13:56:00-04:00</updated>
+    <updated>2012-08-20T13:56:00+00:00</updated>
     <id>http://chris.eldredge.io/blog/2012/08/20/how-the-motley-fool-uses-nuget-part-2</id>
     <content type="html"><![CDATA[<p><a href="http://chris.eldredge.io/blog/2012/08/07/how-the-motley-fool-uses-nuget/">Last time</a>
 I talked about how my development team progressed from having all
@@ -2653,7 +2653,7 @@ develop them.</p>
   <entry>
     <title type="html"><![CDATA[How The Motley Fool uses NuGet (part 1)]]></title>
     <link href="http://chris.eldredge.io/blog/2012/08/07/how-the-motley-fool-uses-nuget/"/>
-    <updated>2012-08-07T14:25:00-04:00</updated>
+    <updated>2012-08-07T14:25:00+00:00</updated>
     <id>http://chris.eldredge.io/blog/2012/08/07/how-the-motley-fool-uses-nuget</id>
     <content type="html"><![CDATA[<p>This post describes how we came to using binary package management. In the next part I&#8217;ll get into NuGet.</p>
 
@@ -2749,7 +2749,7 @@ at this point we started to look at binary package management.</p>
   <entry>
     <title type="html"><![CDATA[MSBuild, Visual Studio & NuGet Hackery]]></title>
     <link href="http://chris.eldredge.io/blog/2012/07/26/MSBuild-NuGet-Visual-Studio-Hackery/"/>
-    <updated>2012-07-26T00:00:00-04:00</updated>
+    <updated>2012-07-26T00:00:00+00:00</updated>
     <id>http://chris.eldredge.io/blog/2012/07/26/MSBuild-NuGet-Visual-Studio-Hackery</id>
     <content type="html"><![CDATA[<p>My team at work recently switched to using NuGet. We have a fair amount of shared code that used to be in a
 monolithic code base with all the problems that came with it. Slow builds, no concept of versions, tight coupling, etc.
@@ -2935,7 +2935,7 @@ and SpecificVersion.</p>
   <entry>
     <title type="html"><![CDATA[Unit of Work & Eventual Consistency]]></title>
     <link href="http://chris.eldredge.io/blog/2012/07/24/Unit-of-Work-and-Eventual-Consistency/"/>
-    <updated>2012-07-24T00:00:00-04:00</updated>
+    <updated>2012-07-24T00:00:00+00:00</updated>
     <id>http://chris.eldredge.io/blog/2012/07/24/Unit-of-Work-and-Eventual-Consistency</id>
     <content type="html"><![CDATA[<p><em>Lucene.Net.Linq is available on the NuGet Gallery at <a href="http://nuget.org/packages/Lucene.Net.Linq">http://nuget.org/packages/Lucene.Net.Linq</a>.</em></p>
 

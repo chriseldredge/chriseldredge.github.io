@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Synology | Chris Eldredge]]></title>
   <link href="http://chris.eldredge.io/blog/categories/synology/atom.xml" rel="self"/>
   <link href="http://chris.eldredge.io/"/>
-  <updated>2018-02-01T09:12:16-05:00</updated>
+  <updated>2018-05-03T12:01:48+00:00</updated>
   <id>http://chris.eldredge.io/</id>
   <author>
     <name><![CDATA[Chris Eldredge]]></name>
@@ -16,7 +16,7 @@
   <entry>
     <title type="html"><![CDATA[Synology VPN Server Route Advertising]]></title>
     <link href="http://chris.eldredge.io/blog/2015/05/24/synology-vpn-server-route-advertising/"/>
-    <updated>2015-05-24T16:43:00-04:00</updated>
+    <updated>2015-05-24T16:43:00+00:00</updated>
     <id>http://chris.eldredge.io/blog/2015/05/24/synology-vpn-server-route-advertising</id>
     <content type="html"><![CDATA[<p>I have a Synology at home and it's a great product. I recently installed
 the VPN Server package and enabled L2TP/IPSec so I can get on my home

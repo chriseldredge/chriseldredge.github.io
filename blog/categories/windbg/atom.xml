@@ -4,7 +4,7 @@
   <title><![CDATA[Category: windbg | Chris Eldredge]]></title>
   <link href="http://chris.eldredge.io/blog/categories/windbg/atom.xml" rel="self"/>
   <link href="http://chris.eldredge.io/"/>
-  <updated>2018-02-01T09:12:16-05:00</updated>
+  <updated>2018-05-03T12:01:48+00:00</updated>
   <id>http://chris.eldredge.io/</id>
   <author>
     <name><![CDATA[Chris Eldredge]]></name>
@@ -16,7 +16,7 @@
   <entry>
     <title type="html"><![CDATA[WinDbg: Dump entries in array]]></title>
     <link href="http://chris.eldredge.io/blog/2014/03/05/windbg-dump-entries-in-array/"/>
-    <updated>2014-03-05T11:47:00-05:00</updated>
+    <updated>2014-03-05T11:47:00+00:00</updated>
     <id>http://chris.eldredge.io/blog/2014/03/05/windbg-dump-entries-in-array</id>
     <content type="html"><![CDATA[<p>I was debugging a stack overflow exception in some c# code
 today and used this recipe to dump the request headers

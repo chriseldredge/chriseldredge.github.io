@@ -4,7 +4,7 @@
   <title><![CDATA[Category: odata | Chris Eldredge]]></title>
   <link href="http://chris.eldredge.io/blog/categories/odata/atom.xml" rel="self"/>
   <link href="http://chris.eldredge.io/"/>
-  <updated>2018-02-01T09:12:16-05:00</updated>
+  <updated>2018-05-03T12:01:48+00:00</updated>
   <id>http://chris.eldredge.io/</id>
   <author>
     <name><![CDATA[Chris Eldredge]]></name>
@@ -16,7 +16,7 @@
   <entry>
     <title type="html"><![CDATA[Default Streams with WebApi OData]]></title>
     <link href="http://chris.eldredge.io/blog/2014/04/29/Default-Streams/"/>
-    <updated>2014-04-29T16:07:00-04:00</updated>
+    <updated>2014-04-29T16:07:00+00:00</updated>
     <id>http://chris.eldredge.io/blog/2014/04/29/Default-Streams</id>
     <content type="html"><![CDATA[<p>NuGet package feeds provide metadata about packages, but after searching
 for new packages to use or updates to existing ones, we also have to
@@ -239,7 +239,7 @@ src="http://example/api/packages/Lucene.Net.Linq/3.2.55/content"/&gt;
   <entry>
     <title type="html"><![CDATA[Composite Keys with WebApi OData]]></title>
     <link href="http://chris.eldredge.io/blog/2014/04/24/Composite-Keys/"/>
-    <updated>2014-04-24T11:28:00-04:00</updated>
+    <updated>2014-04-24T11:28:00+00:00</updated>
     <id>http://chris.eldredge.io/blog/2014/04/24/Composite-Keys</id>
     <content type="html"><![CDATA[<p>In our basic configuration we told the model builder that
 our entity has a composite key comprised of an ID and a
@@ -413,7 +413,7 @@ significant <a href="https://github.com/themotleyfool/NuGet.Lucene/blob/v2.9.4/s
   <entry>
     <title type="html"><![CDATA[Basic WebApi OData]]></title>
     <link href="http://chris.eldredge.io/blog/2014/04/23/Basic-WebApi-OData/"/>
-    <updated>2014-04-23T11:28:00-04:00</updated>
+    <updated>2014-04-23T11:28:00+00:00</updated>
     <id>http://chris.eldredge.io/blog/2014/04/23/Basic-WebApi-OData</id>
     <content type="html"><![CDATA[<p>Getting started on making a NuGet compatible OData feed with WebApi OData,
 we'll start with the simplest parts to get on our feet.</p>
@@ -565,7 +565,7 @@ a NuGet client can speak to though.</p>
   <entry>
     <title type="html"><![CDATA[NuGet Feed with WebApi OData]]></title>
     <link href="http://chris.eldredge.io/blog/2014/04/22/NuGet-Feed-with-WebApi-OData/"/>
-    <updated>2014-04-22T10:25:00-04:00</updated>
+    <updated>2014-04-22T10:25:00+00:00</updated>
     <id>http://chris.eldredge.io/blog/2014/04/22/NuGet-Feed-with-WebApi-OData</id>
     <content type="html"><![CDATA[<p>NuGet uses OData to provide package data to its clients. In
 <a href="/blog/2012/03/29/Getting-Started-With-Relinq/">previous posts</a>
