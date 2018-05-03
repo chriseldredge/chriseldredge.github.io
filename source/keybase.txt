@@ -1,0 +1,88 @@
+==================================================================
+https://keybase.io/eldredge
+--------------------------------------------------------------------
+
+I hereby claim:
+
+  * I am an admin of https://chris.eldredge.io
+  * I am eldredge (https://keybase.io/eldredge) on keybase.
+  * I have a public key with fingerprint B5C5 AEAF F4FB F976 FCB6  5899 11BF C959 D395 1766
+
+To do so, I am signing this object:
+
+{
+  "body": {
+    "key": {
+      "eldest_kid": "01203f32276607fe262c33aedf448cb3ac62da95902ee416d64f49efc3975aff86e20a",
+      "fingerprint": "b5c5aeaff4fbf976fcb6589911bfc959d3951766",
+      "host": "keybase.io",
+      "key_id": "11bfc959d3951766",
+      "kid": "01012959e07c207e52223aaf79b69cff69efc42cecb80bb54b5b4f5781717a97978e0a",
+      "uid": "887d5a0c477bd3b42c008ce53e6a9819",
+      "username": "eldredge"
+    },
+    "merkle_root": {
+      "ctime": 1525346546,
+      "hash_meta": "a6eac3b3e75d2e9648cf6270b3e2e7052e9256cc9a499654e1967323ffa6e7bc",
+      "seqno": 2474951
+    },
+    "revoke": {
+      "sig_ids": [
+        "e7077d56bbf6216871abb57685c888d8536bbd76e3688c9fd70275265a8333930f"
+      ]
+    },
+    "service": {
+      "hostname": "chris.eldredge.io",
+      "protocol": "https:"
+    },
+    "type": "web_service_binding",
+    "version": 1
+  },
+  "ctime": 1525346551,
+  "expire_in": 157680000,
+  "prev": "8793aa37a800f1cb682b0f74deededaa6c6063c6f8ac25b08aea460bc6622a43",
+  "seqno": 18,
+  "tag": "signature"
+}
+
+which yields the signature:
+
+-----BEGIN PGP MESSAGE-----
+Version: Keybase OpenPGP v2.0.76
+Comment: https://keybase.io/crypto
+
+yMQBAnicbVN7UBVVHAZDRzAfhcnIpNaKDhLC7jm75+xebEIlawyfIw4ocj179uy9
+t6t3r7uXl4SPsQdjFo5CNr5KutGIPSxnonFyTMHKEkuMfIwzWgQEWKmDI2ZqZ0mn
+mab9Z2d/v+/7ft/5fmebhz8QkxD70OHjBadrk8zYb49WFMcs6blyo0LQLaNc8FQI
+QTbwYisM5kS8wYAheARRAiI0IQAYIRGbDCBAISTMMGVZpTokFAGDaIomAsZkCRlI
+NmWNmRRqWCGmqSIGRCKkC2Yg5GN22A6EIlxWV6hCGO/Lpm5qGJlUR4qqaZKkm5Sr
+GVBTJD6SE/2W4zK4OZ04LCNg8Rr/8A7Y+x/8fd/cOW8wEVMgYqYAACAhJtZ0pFHT
+RK5HGVBGdVXUdUXWFV02FaxKWMJEwxpW2YDv4gE5VcWGQkQqY6wbUOdEUVQpUyBD
+RFMlzQU6zA6RlYyjeYI2M3xMqEwXVjI7uIJ5bcuKuOHSSMCFSApQoIwUGfEDEsfv
+XckihDMJYoRCHTKsGIBpiGdsIoBFXgEMiwqvAQVRqhFZ0zidSRrCEEDT5EysU+7D
+YatCluABMpZ5JtyBzUqsIHOHOwEfj80RPEsFLob5kZCuc30JqVgiPAWMVIWqqmqo
+CuQtAyMGkapSzTSwCLACkEJUCKEGRVNYVukOs0sCdEDc3dO981O/HXAy7qfwz8rC
+thWxqLWCt/2RSNjxuOFEysMuvpTp3ntKXj0QMvhV4YwSZjsBK8TD4sj/5KZI6QIr
+Cwds5g24CNe5yB93DitxF4Y1vm6ICS+bEr9dKtBFE8sGYwYzCEEUiQhSZKqEAkUX
+VX4bZSTqFCEAiAz/DVJSuU/i45o8vhCJFNt8r0ePFMbFxCbEDBk8yP2HYhLiR93/
+s1LHjrybW3No8tBTyy/eik+9VFqT8kLfmK6Xdqac7w4lfbEzN3HO2mVJvs3bTlQ8
+/uH84dHG4lenpa7fntATzHq457fer/PLnab8vzLbk0/3ncx4NPrkl9GO6e933NkR
+at/VWBZ37O7e8QVkyoVho/M97zzdOiK6+8rxYdOt/im7wp++9lkb+iHx+KXMIjj4
+Ldjes6WrYIO19Iif7r8waXUGTl6es6ezKvj9uvR90VkesDFSPydv6r702MLWNN+2
+PV2br4w607e7ffGvdeOaYdyhb2Zkj81/pQFt/+r60MYJdwNZj9yq0+uO3e6Ptr35
+wSwbZA5b9XJncnj7jXE1GzbMe2NES25azo9VJ/9Iq32ONPe0TCps8s27Vt8vDck9
+1ZB29OASY8i8VuT/paPvcP+7f/qciel5o7d6WpODXcHq61J/3ejlvaXLRi6sOTN5
+wVywf/2dwpSmuQcXP7Heaiz4uCyvd/X43c/Mblt6PrHWuVzUvzZub3xzoxS8ufPB
+BqG9Olp0ac2Ey0+93mG1zb+dk5TV2VndImUtzp5df665PPZI5Y7WdW2lzqYDgzbR
+LYl9CS92f5RdpdYfuDPt86tx1+JzZo6smLEv70RX5/xSff+aMU1nxy1ccHbRzOcr
+b164PuisL+Pc1MGZi4reu7pg29SuwureYz8/m1L23daJ1p63szdfnFsKPune24B+
+f2zETy0Hck+lLqnt9vj/BnNfCW8=
+=5MBx
+-----END PGP MESSAGE-----
+
+And finally, I am proving ownership of this host by posting or
+appending to this document.
+
+View my publicly-auditable identity here: https://keybase.io/eldredge
+
+==================================================================
